@@ -19,6 +19,8 @@
 /tetris/ /tetris 301
 /tic-tac-toe /games/tic-tac-toe/ 200
 /tic-tac-toe/ /tic-tac-toe 301
+/jump /games/jump/ 200
+/jump/ /jump 301
 
 # 旧拼音 / 旧文件入口：永久跳转到新地址
 /HBQS /board-club 301

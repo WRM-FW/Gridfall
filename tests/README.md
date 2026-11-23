@@ -19,9 +19,9 @@ node live-online.mjs       # 线上整局，4 项
 node route-test.mjs        # /board-club 路由、刷新、查询、尾斜杠、前进后退、旧入口，9 项
 node xiangqi-route.mjs     # /chinese-chess 路由、刷新、尾斜杠、首页卡片，4 项
 node xiangqi-online.mjs    # 象棋联机、换方、认输、再来一局、音效已移除，7 项
-node minigames-smoke.mjs   # 跳棋/2048/军棋/扫雷/贪吃蛇/推箱子/俄罗斯方块/井字棋本地交互冒烟
-node minigames-route.mjs   # /chinese-checkers /2048 /army-chess /minesweeper /snake /sokoban /tetris /tic-tac-toe 路由、刷新、尾斜杠、首页卡片，17 项
-node hall-buttons.mjs      # 10 个游戏返回大厅按钮（桌面 + 390px），20 项
+node minigames-smoke.mjs   # 跳棋/2048/军棋/扫雷/贪吃蛇/推箱子/俄罗斯方块/井字棋/跳一跳本地冒烟
+node minigames-route.mjs   # /chinese-checkers /2048 /army-chess /minesweeper /snake /sokoban /tetris /tic-tac-toe /jump 路由、刷新、尾斜杠、首页卡片，19 项
+node hall-buttons.mjs      # 11 个游戏返回大厅按钮（桌面 + 390px），22 项
 node go-bench.mjs --size=9 --low=4 --high=5 --games=20  # 围棋相邻档对抗
 node go-smoke.mjs          # 19 路五档 30 手冒烟与耗时
 ```

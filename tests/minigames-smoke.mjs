@@ -82,4 +82,8 @@ try {
   await b.evaluate(`document.querySelectorAll('.cell')[4].click()`); await sleep(600);
   console.log('ttt after', JSON.stringify(await b.evaluate(`({ mark:board[4], over:gameOver, turn:current, sx:document.getElementById('sx').textContent })`)));
   await b.screenshot(path.join(SHOTS, 'tic-tac-toe-page.png'));
+
+  await goto(page('games/jump/index.html'));
+  console.log('jump', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), canvas:document.querySelectorAll('canvas').length, three:typeof THREE !== 'undefined' })`)));
+  await b.screenshot(path.join(SHOTS, 'jump-page.png'));
 } finally { await b.close(); }

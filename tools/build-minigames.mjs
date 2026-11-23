@@ -10,7 +10,8 @@ const games = [
   { ref: 'snake-reference.html', dir: 'snake', route: '../../snake', label: '贪吃蛇', hall: 'fixed', style: 'background:#63E63A;color:#0B1220;border:2px solid #000;border-radius:10px;padding:8px 12px;box-shadow:3px 3px 0 #000;font-weight:800;' },
   { ref: 'sokoban-reference.html', dir: 'sokoban', route: '../../sokoban', label: '推箱子', hall: 'fixed', style: 'background:#FFF9EA;color:#0B1220;border:2px solid #000;border-radius:10px;padding:8px 12px;box-shadow:4px 4px 0 #4A3220;font-weight:800;' },
   { ref: 'tetris-reference.html', dir: 'tetris', route: '../../tetris', label: '俄罗斯方块', hall: 'fixed', style: 'background:#FFF9EA;color:#0B1220;border:2px solid #000;border-radius:10px;padding:8px 12px;box-shadow:3px 3px 0 #000;font-weight:800;' },
-  { ref: 'tic-tac-toe-reference.html', dir: 'tic-tac-toe', route: '../../tic-tac-toe', label: '井字棋', hall: 'fixed', style: 'background:#63E63A;color:#0B1220;border:2px solid #000;border-radius:10px;padding:8px 12px;box-shadow:3px 3px 0 #000;font-weight:800;' }
+  { ref: 'tic-tac-toe-reference.html', dir: 'tic-tac-toe', route: '../../tic-tac-toe', label: '井字棋', hall: 'fixed', style: 'background:#63E63A;color:#0B1220;border:2px solid #000;border-radius:10px;padding:8px 12px;box-shadow:3px 3px 0 #000;font-weight:800;' },
+  { ref: 'jump-reference.html', dir: 'jump', route: '../../jump', label: '跳一跳', hall: 'toolbar', style: '' }
 ];
 
 const HALL_CSS = `<style>
@@ -19,6 +20,7 @@ const HALL_CSS = `<style>
 .gf-hall:active{transform:translateY(1px);}
 .gf-hall-fixed{position:fixed;right:16px;top:16px;z-index:2147483647;}
 .gf-hallbar{display:flex;justify-content:flex-end;align-items:center;}
+.hall-btn{text-decoration:none;}
 @media (max-width:560px){.gf-hall-fixed{right:8px;top:8px;padding:6px 9px;font-size:12px;min-height:30px;}}
 </style>`;
 
@@ -44,6 +46,11 @@ for (const g of games) {
   } else if (g.hall === 'mineMain') {
     const bar = `<div class="gf-hallbar" style="margin:0 0 10px;">${hallLink(g, g.style)}</div>`;
     html = html.replace('<main class="wrap">', '<main class="wrap">\n      ' + bar);
+  } else if (g.hall === 'toolbar') {
+    const link = `<a class="icon-btn hall-btn" href="../../index.html" title="返回 Gridfall 游戏大厅" aria-label="返回 Gridfall 游戏大厅"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span class="btn-text">大厅</span></a>`;
+    html = html.replace('<div class="toolbar">', '<div class="toolbar">\n        ' + link);
+    html = html.replace('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', '../../shared/vendor/three.min.js');
+    html = html.replace('</head>', '<style>.hud{z-index:60;}body:has(.overlay.visible) .score-panel,body:has(.overlay.visible) .hud-bottom{visibility:hidden;}</style>\n</head>');
   }
 
   fs.mkdirSync(path.join(ROOT, 'games', g.dir), { recursive: true });

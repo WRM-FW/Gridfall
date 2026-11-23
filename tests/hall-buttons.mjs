@@ -17,7 +17,8 @@ const pages = [
   ['snake', 'games/snake/index.html'],
   ['sokoban', 'games/sokoban/index.html'],
   ['tetris', 'games/tetris/index.html'],
-  ['tic-tac-toe', 'games/tic-tac-toe/index.html']
+  ['tic-tac-toe', 'games/tic-tac-toe/index.html'],
+  ['jump', 'games/jump/index.html']
 ];
 const b = await launch(home, { port: 9466 });
 const R = [];
@@ -53,6 +54,7 @@ try {
   await b.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   for (const [name, rel] of pages) {
     await b.send('Page.navigate', { url: pathToFileURL(path.join(ROOT, rel)).href });
+    await waitFor(`!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]')`, 10000);
     const r = await b.evaluate(`(() => { const a=document.querySelector('a[title="返回 Gridfall 游戏大厅"]'); if(!a) return null; const x=a.getBoundingClientRect(); return { x:x.x, y:x.y, right:x.right, bottom:x.bottom, sw:document.documentElement.scrollWidth, cw:document.documentElement.clientWidth }; })()`);
     const bad = !r || r.sw > r.cw + 2 || r.x < 0 || r.right > 391 || r.bottom > 845;
     R.push({ id: 'hall.mobile.' + name, pass: !bad, detail: bad ? JSON.stringify(r) : '' });
