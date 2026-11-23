@@ -255,5 +255,150 @@ must(`  if (/(^|\.)github\.io$/.test(location.hostname)) {
     });
   }`);
 
+
+/* ---------- 跳棋 / 军棋 / 2048 / 扫雷 ---------- */
+function replaceCard(name, card) {
+  var marker = 'data-name="' + name + '"';
+  var i = html.indexOf(marker);
+  if (i < 0) throw new Error('card missing: ' + name);
+  var start = html.lastIndexOf('<article class="game-card"', i);
+  var end = html.indexOf('</article>', i) + '</article>'.length;
+  html = html.slice(0, start) + card + html.slice(end);
+}
+const card2048 = `        <article class="game-card" data-status="live" data-name="2048 数字 益智 合成 puzzle">
+          <div class="game-visual gv-2048">
+            <span class="gv-badge">已上线</span>
+            <span class="gv-q" aria-hidden="true">2048</span>
+          </div>
+          <div class="game-body">
+            <h3>2048<span class="en">PUZZLE</span></h3>
+            <p>滑动合并相同数字，一路合到 2048；每走一步多一块新砖，支持撤销与最高分。</p>
+            <div class="tags"><span>单人</span><span>数字合并</span><span>最高分</span></div>
+            <div class="game-foot">
+              <span class="meta">入口 /2048 · 单人</span>
+              <a class="play-link" href="./2048" data-local="./game2048.html">开始游戏 →</a>
+            </div>
+          </div>
+        </article>`;
+const cardMine = `        <article class="game-card" data-status="live" data-name="扫雷 minesweeper 推理">
+          <div class="game-visual gv-mine">
+            <span class="gv-badge">已上线</span>
+            <span class="gv-q" aria-hidden="true">雷</span>
+          </div>
+          <div class="game-body">
+            <h3>扫雷<span class="en">MINESWEEPER</span></h3>
+            <p>看数字推理排雷，初级 / 中级 / 高级与自定义棋盘；第一击安全，支持插旗与计时。</p>
+            <div class="tags"><span>单人</span><span>三档难度</span><span>自定义</span></div>
+            <div class="game-foot">
+              <span class="meta">入口 /SL · 单人</span>
+              <a class="play-link" href="./SL" data-local="./saolei.html">开始游戏 →</a>
+            </div>
+          </div>
+        </article>`;
+const cardTq = `        <article class="game-card" data-status="live" data-name="跳棋 棋类 tiaoqi checkers">
+          <div class="game-visual gv-tiaoqi">
+            <span class="gv-badge">已上线</span>
+            <span class="gv-q" aria-hidden="true">跳</span>
+          </div>
+          <div class="game-body">
+            <h3>跳棋<span class="en">CHECKERS</span></h3>
+            <p>六角星棋盘，先把 10 枚棋子全部跳进对面营地；人机三档难度或本地双人对战。</p>
+            <div class="tags"><span>人机 / 双人</span><span>三档难度</span></div>
+            <div class="game-foot">
+              <span class="meta">入口 /TQ · 本地对弈</span>
+              <a class="play-link" href="./TQ" data-local="./tiaoqi.html">进入对弈 →</a>
+            </div>
+          </div>
+        </article>`;
+const cardJq = `        <article class="game-card" data-status="live" data-name="军棋 棋类 junqi">
+          <div class="game-visual gv-junqi">
+            <span class="gv-badge">已上线</span>
+            <span class="gv-q" aria-hidden="true">军</span>
+          </div>
+          <div class="game-body">
+            <h3>军棋<span class="en">JUNQI</span></h3>
+            <p>暗棋陆战棋：铁路疾行、行营护身、工兵排雷，夺取军旗者胜；人机或双人布阵对弈。</p>
+            <div class="tags"><span>人机 / 双人</span><span>暗棋</span><span>夺旗</span></div>
+            <div class="game-foot">
+              <span class="meta">入口 /JQ · 本地对弈</span>
+              <a class="play-link" href="./JQ" data-local="./junqi.html">进入对弈 →</a>
+            </div>
+          </div>
+        </article>`;
+replaceCard('2048 数字 益智 合成 puzzle', card2048);
+replaceCard('扫雷 minesweeper 推理', cardMine);
+replaceCard('跳棋 棋类 tiaoqi checkers', cardTq);
+replaceCard('军棋 棋类 junqi', cardJq);
+
+/* live cards first */
+var gridOpen = html.indexOf('<div class="games" id="gameGrid">');
+var gridClose = html.indexOf('</div>\n      <p class="empty-msg"', gridOpen);
+if (gridOpen < 0 || gridClose < 0) throw new Error('game grid not found');
+var gridStart = gridOpen + '<div class="games" id="gameGrid">'.length;
+var gridContent = html.slice(gridStart, gridClose);
+var cardRe = /<article class="game-card[^"]*"[\s\S]*?<\/article>/g;
+var cards = [], m;
+while ((m = cardRe.exec(gridContent))) cards.push(m[0]);
+var liveCards = cards.filter(function(c){ return c.indexOf('data-status="live"') >= 0; });
+var soonCards = cards.filter(function(c){ return c.indexOf('data-status="soon"') >= 0; });
+html = html.slice(0, gridStart) + '\n\n' + liveCards.join('\n\n') + '\n\n' + soonCards.join('\n\n') + '\n      ' + html.slice(gridClose);
+
+/* soon row: 国际象棋 / 四子棋 / 卡牌 / 更多 */
+must('<div class="soon-card"><div class="glyph" style="font-size:14px;letter-spacing:.02em">2048</div><h4>2048</h4><p>滑动合并数字方块的益智经典，大厅的第一款非棋盘游戏。</p><span class="st">规划中</span></div>',
+'<div class="soon-card"><div class="glyph">♞</div><h4>国际象棋</h4><p>64 格战场，开局库与对弈体验打磨中。</p><span class="st">规划中</span></div>');
+must('<div class="soon-card"><div class="glyph">雷</div><h4>扫雷</h4><p>看数字推理排雷，经典 Windows 小游戏原味回归。</p><span class="st">规划中</span></div>',
+'<div class="soon-card"><div class="glyph">四</div><h4>四子棋</h4><p>竖着落子、横竖斜连成四子，正在排队进场。</p><span class="st">规划中</span></div>');
+must('<div class="soon-card"><div class="glyph">跳</div><h4>跳棋</h4><p>隔着棋子连跳的经典棋类，正在排队进场。</p><span class="st">规划中</span></div>',
+'<div class="soon-card"><div class="glyph">+ ?</div><h4>下一款游戏</h4><p>新游戏的桌子会一直加下去，不限品类。</p><span class="st">规划中</span></div>');
+
+/* copy and feature list */
+must('名字叫 Gridfall，装的却不只是棋盘。五子棋、连珠、围棋已经合并为「黑白棋社」一个入口，三张棋盘都能开房联机；中国象棋也已上线，同样支持人机、双人与联机。2048、扫雷、卡牌这些完全不同的游戏也会陆续搬进来——不用下载、不用注册，点开任意一局就开玩。',
+'名字叫 Gridfall，装的却不只是棋盘。黑白棋社、中国象棋、跳棋、军棋、2048、扫雷都已经入驻；前三张棋盘还能开房联机，卡牌与其他游戏也会陆续搬进来——不用下载、不用注册，点开任意一局就开玩。');
+must('黑白棋社与中国象棋已就绪 · 联机房间已开放 · 益智与卡牌在路上 · <b>5 档难度</b>任选 · 打开即玩',
+'六款游戏已就绪 · 联机房间已开放 · 卡牌与其他新游戏在路上 · <b>5 档难度</b>任选 · 打开即玩');
+must('<span>黑白棋社 <i>●</i></span><span>中国象棋 <i>●</i></span>', '<span>黑白棋社 <i>●</i></span><span>中国象棋 <i>●</i></span><span>跳棋 <i>●</i></span><span>军棋 <i>●</i></span><span>2048 <i>●</i></span><span>扫雷 <i>●</i></span>');
+must('「黑白棋社」把五子棋、连珠、围棋收进同一个入口；中国象棋也带着人机、双人和联机进场。下面还留着规划中的位置——益智、卡牌这些不同品类的游戏，上线后会直接摆进这张货架。',
+'「黑白棋社」把五子棋、连珠、围棋收进同一个入口；中国象棋、跳棋、军棋、2048、扫雷也都已进场。下面还留着规划中的位置——卡牌与其他游戏上线后，会直接摆进这张货架。');
+must('下面每一项都是正式棋盘里真实可用的玩法，进门就能摸到；等 2048、扫雷、卡牌上线，这里会继续按品类往下加。',
+'下面每一项都是大厅里真实可用的玩法，进门就能摸到；卡牌与其他游戏上线后，这里会继续按品类往下加。');
+must('Gridfall 游戏大厅：黑白棋社（五子棋 / 国际连珠 / 围棋）与中国象棋已上线，均支持单机、双人与联机；2048、扫雷、卡牌类、国际象棋等为后续扩建规划，标注「规划中」者尚未开放游玩。',
+'Gridfall 游戏大厅：黑白棋社、中国象棋、跳棋、军棋、2048、扫雷已上线；黑白棋社与中国象棋支持联机，其余为本地/单人对弈。卡牌类、国际象棋等为后续扩建规划，标注「规划中」者尚未开放游玩。');
+
+/* feature cards */
+must('<div class="feat"><h4>掉线重连 <span class="arr">→</span></h4><p>对手离开时房间保留，把房间码再发一次即可重连；房主离开则房间关闭。</p></div>',
+`<div class="feat"><h4>掉线重连 <span class="arr">→</span></h4><p>对手离开时房间保留，把房间码再发一次即可重连；房主离开则房间关闭。</p></div>
+          <div class="feat"><h4>跳棋与军棋 <span class="arr">→</span></h4><p>六角星跳棋与暗棋陆战棋，人机三档或本地双人；军棋支持布阵、铁路与夺旗。</p></div>
+          <div class="feat"><h4>2048 <span class="arr">→</span></h4><p>滑动合并数字，支持撤销、最高分与移动步数，一路合到 2048。</p></div>
+          <div class="feat"><h4>扫雷 <span class="arr">→</span></h4><p>初级、中级、高级与自定义雷区；第一击安全，支持插旗、计时与双击展开。</p></div>`);
+
+/* nav 2048 / 扫雷 direct */
+must('<a href="#games" data-jump="2048">2048</a>', '<a href="./2048" data-local="./game2048.html">2048</a>');
+must('<a href="#games" data-jump="扫雷">扫雷</a>', '<a href="./SL" data-local="./saolei.html">扫雷</a>');
+
+/* GH fallback rewrite */
+must(`document.querySelectorAll('a[href^="./HBQS"], a[href^="./ZGXQ"]').forEach(function(a){
+      var h = a.getAttribute('href');
+      if (h.indexOf('./HBQS') === 0) h = h.replace('./HBQS', './HBQS/');
+      else if (h.indexOf('./ZGXQ') === 0) h = h.replace('./ZGXQ', './ZGXQ/');
+      a.setAttribute('href', h);
+    });`,
+`document.querySelectorAll('a[href^="./HBQS"], a[href^="./ZGXQ"], a[href^="./TQ"], a[href^="./2048"], a[href^="./JQ"], a[href^="./SL"]').forEach(function(a){
+      var h = a.getAttribute('href'), keys = ['./HBQS','./ZGXQ','./TQ','./2048','./JQ','./SL'];
+      for (var k = 0; k < keys.length; k++) if (h.indexOf(keys[k]) === 0) { h = h.replace(keys[k], keys[k] + '/'); break; }
+      a.setAttribute('href', h);
+    });`);
+
+/* CSS for new visuals */
+must('  .gv-xiangqi{ background:linear-gradient(135deg,#3a2410 0%,#20304f 100%); }',
+`  .gv-xiangqi{ background:linear-gradient(135deg,#3a2410 0%,#20304f 100%); }
+  .gv-2048{ background:linear-gradient(135deg,#d9a441,#8a5a1e); }
+  .gv-2048 .gv-q{ color:#fff4dc; }
+  .gv-mine{ background:#27313f; }
+  .gv-mine .gv-q{ color:#8fa0c4; }
+  .gv-tiaoqi{ background:linear-gradient(135deg,#20304f,#2f5a3a); }
+  .gv-tiaoqi .gv-q{ color:#9fd6b0; }
+  .gv-junqi{ background:linear-gradient(135deg,#3a2a1a,#513a22); }
+  .gv-junqi .gv-q{ color:#e0b77a; }`);
+
 fs.writeFileSync(path.join(ROOT, 'index.html'), html, 'utf8');
 console.log('built homepage', Buffer.byteLength(html), 'bytes');

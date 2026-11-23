@@ -26,7 +26,7 @@ const waitFor = async (expr, ms = 12000) => {
 try {
   await t('livehome.loads', async () => {
     const r = await b.evaluate(`({ title: document.title, live: document.querySelectorAll('.game-card[data-status="live"]').length, cards: document.querySelectorAll('.game-card').length })`);
-    if (!r.title.includes('游戏大厅') || r.live !== 2 || r.cards !== 9) return JSON.stringify(r);
+    if (!r.title.includes('游戏大厅') || r.live !== 6 || r.cards !== 9) return JSON.stringify(r);
     return true;
   });
   await b.screenshot(path.join(SHOTS, 'live-home.png'));

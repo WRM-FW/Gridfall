@@ -6,10 +6,10 @@ const DIST = path.join(ROOT, 'dist');
 
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
-for (const file of ['index.html', 'play.html', 'xiangqi.html', 'supabase.js', 'supabase-config.js', '_redirects']) {
+for (const file of ['index.html', 'play.html', 'xiangqi.html', 'tiaoqi.html', 'game2048.html', 'junqi.html', 'saolei.html', 'supabase.js', 'supabase-config.js', '_redirects']) {
   fs.copyFileSync(path.join(ROOT, file), path.join(DIST, file));
 }
-for (const route of ['HBQS', 'ZGXQ']) {
+for (const route of ['HBQS', 'ZGXQ', 'TQ', '2048', 'JQ', 'SL']) {
   fs.mkdirSync(path.join(DIST, route), { recursive: true });
   fs.copyFileSync(path.join(ROOT, route, 'index.html'), path.join(DIST, route, 'index.html'));
 }

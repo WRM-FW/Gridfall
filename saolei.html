@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>扫雷</title>
+<link rel="canonical" href="./SL" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
+
+      :root {
+        --bg: #dfe5e8;
+        --bg-grad: #cfd8dc;
+        --panel: #f4f6f7;
+        --panel-edge: #9fb0b8;
+        --ink: #17242b;
+        --ink-dim: #54666f;
+        --accent: #0b6e4f;
+        --accent-ink: #ffffff;
+        --danger: #c62f1d;
+        --cell-hi: #ffffff;
+        --cell-lo: #7d929c;
+        --cell-face: #b9c8ce;
+        --cell-open: #dde5e8;
+        --cell-open-edge: #a7b6bd;
+        --led-bg: #10181c;
+        --led: #ff5347;
+        --tab-bg: #e7edef;
+        --tab-on: #17242b;
+        --tab-on-ink: #f4f6f7;
+        --n1: #1565d8; --n2: #1d7a1d; --n3: #d92d20; --n4: #1b2a8f;
+        --n5: #8f1d1d; --n6: #0e7a7a; --n7: #20262b; --n8: #66727a;
+        --boom: #e5484d;
+        --shadow: 0 10px 28px rgba(23, 36, 43, .18);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #131a1e;
+          --bg-grad: #0d1215;
+          --panel: #1d272d;
+          --panel-edge: #3d4f58;
+          --ink: #e8eff2;
+          --ink-dim: #9db1ba;
+          --accent: #2ea37c;
+          --accent-ink: #08130e;
+          --danger: #ff6b5e;
+          --cell-hi: #46585f;
+          --cell-lo: #0a0f12;
+          --cell-face: #2c3a41;
+          --cell-open: #182126;
+          --cell-open-edge: #33424a;
+          --led-bg: #05090b;
+          --led: #ff5347;
+          --tab-bg: #27343b;
+          --tab-on: #e8eff2;
+          --tab-on-ink: #17242b;
+          --n1: #6cb2ff; --n2: #5ec75e; --n3: #ff7a6e; --n4: #93a5ff;
+          --n5: #ff9d7a; --n6: #4fd8d8; --n7: #e8eff2; --n8: #9db1ba;
+          --boom: #b3261e;
+          --shadow: 0 10px 28px rgba(0, 0, 0, .45);
+        }
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: linear-gradient(180deg, var(--bg) 0%, var(--bg-grad) 100%);
+        color: var(--ink);
+        min-height: 100vh;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .wrap {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 18px 14px 40px;
+      }
+
+      /* ---------- control deck ---------- */
+      .deck {
+        background: var(--panel);
+        border: 1px solid var(--panel-edge);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        padding: 14px;
+      }
+      .statusbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: var(--cell-open);
+        border: 1px solid var(--cell-open-edge);
+        border-radius: 8px;
+        padding: 8px 10px;
+      }
+      .led {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        background: var(--led-bg);
+        color: var(--led);
+        border-radius: 4px;
+        padding: 2px 8px;
+        min-width: 86px;
+        text-align: center;
+        line-height: 1.25;
+        user-select: none;
+      }
+      .led small {
+        display: block;
+        font-size: 9px;
+        letter-spacing: 3px;
+        color: var(--led);
+        opacity: .65;
+        font-weight: 400;
+      }
+      .face-btn {
+        width: 52px; height: 52px;
+        min-height: 52px;
+        border-radius: 50%;
+        border: 2px solid var(--cell-lo);
+        background: #f5c542;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        flex: none;
+        box-shadow: inset -3px -4px 0 rgba(0,0,0,.12), inset 3px 4px 0 rgba(255,255,255,.35);
+      }
+      .face-btn:active { transform: scale(.94); }
+      .face-btn svg { width: 36px; height: 36px; display: block; }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-top: 12px;
+      }
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .tab {
+        border: 1px solid var(--panel-edge);
+        background: var(--tab-bg);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 7px 14px;
+        font-size: 14px;
+        cursor: pointer;
+        min-height: 38px;
+      }
+      .tab[aria-pressed="true"] {
+        background: var(--tab-on);
+        color: var(--tab-on-ink);
+        border-color: var(--tab-on);
+        font-weight: 600;
+      }
+      .tab .dim { opacity: .6; font-size: 12px; margin-left: 4px; }
+
+      .seg {
+        display: inline-flex;
+        border: 1px solid var(--panel-edge);
+        border-radius: 999px;
+        overflow: hidden;
+        margin-left: auto;
+      }
+      .seg button {
+        border: 0;
+        background: var(--tab-bg);
+        color: var(--ink);
+        padding: 7px 16px;
+        font-size: 14px;
+        cursor: pointer;
+        min-height: 38px;
+      }
+      .seg button[aria-pressed="true"] {
+        background: var(--accent);
+        color: var(--accent-ink);
+        font-weight: 600;
+      }
+
+      .custom {
+        display: none;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: end;
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px dashed var(--panel-edge);
+        border-radius: 8px;
+      }
+      .custom.show { display: flex; }
+      .custom label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 12px;
+        color: var(--ink-dim);
+      }
+      .custom input {
+        width: 84px;
+        padding: 7px 9px;
+        font-size: 15px;
+        border: 1px solid var(--panel-edge);
+        border-radius: 6px;
+        background: var(--panel);
+        color: var(--ink);
+        min-height: 38px;
+      }
+      .custom .go {
+        background: var(--accent);
+        color: var(--accent-ink);
+        border: 0;
+        border-radius: 6px;
+        padding: 8px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        min-height: 38px;
+      }
+      .custom .hint { width: 100%; font-size: 12px; color: var(--danger); min-height: 0; }
+      .custom .hint:empty { display: none; }
+
+      .msg {
+        margin: 12px 2px 0;
+        font-size: 14px;
+        color: var(--ink-dim);
+        min-height: 21px;
+      }
+      .msg strong { color: var(--ink); }
+      .msg .win { color: var(--accent); font-weight: 700; }
+      .msg .lose { color: var(--danger); font-weight: 700; }
+
+      /* ---------- board ---------- */
+      .board-scroll { margin-top: 10px; }
+      .board {
+        margin: 0 auto;
+        display: grid;
+        gap: 0;
+        background: var(--cell-open-edge);
+        border: 2px solid var(--cell-lo);
+        border-radius: 4px;
+        padding: 0;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .cell {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        min-height: 0;
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        line-height: 1;
+        cursor: pointer;
+        background: var(--cell-face);
+        box-shadow: inset 2px 2px 0 var(--cell-hi), inset -2px -2px 0 var(--cell-lo);
+        color: var(--ink);
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      }
+      .cell:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; z-index: 1; }
+      .cell.open {
+        background: var(--cell-open);
+        box-shadow: inset 0 0 0 1px var(--cell-open-edge);
+        cursor: default;
+      }
+      .cell.open.num { cursor: pointer; }
+      .cell.boom { background: var(--boom); }
+      .cell svg { width: 72%; height: 72%; display: block; pointer-events: none; }
+      .cell .q { color: var(--ink); font-family: inherit; }
+      .cell.wrongflag { position: relative; }
+      .n1 { color: var(--n1); } .n2 { color: var(--n2); } .n3 { color: var(--n3); } .n4 { color: var(--n4); }
+      .n5 { color: var(--n5); } .n6 { color: var(--n6); } .n7 { color: var(--n7); } .n8 { color: var(--n8); }
+
+      .best {
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--ink-dim);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 18px;
+      }
+      .best b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+      /* ---------- help ---------- */
+      .help {
+        margin-top: 22px;
+        background: var(--panel);
+        border: 1px solid var(--panel-edge);
+        border-radius: 10px;
+        padding: 16px 18px;
+      }
+      .help h2 { font-size: 16px; margin: 0 0 10px; }
+      .help ul { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.75; color: var(--ink-dim); }
+      .help ul b { color: var(--ink); }
+      .kbd {
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        font-size: 12px;
+        border: 1px solid var(--panel-edge);
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        padding: 0 5px;
+        background: var(--tab-bg);
+        color: var(--ink);
+      }
+      @media (max-width: 520px) {
+        .wrap { padding: 12px 8px 32px; }
+        .deck { padding: 10px; }
+        .led { font-size: 22px; min-width: 74px; }
+        .face-btn { width: 46px; height: 46px; min-height: 46px; }
+        .seg { margin-left: 0; }
+      }
+    </style>
+  </head>
+  <body>
+<a href="./index.html" title="返回 Gridfall 游戏大厅" style="position:fixed;right:16px;top:16px;z-index:2147483647;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:999px;background:rgba(10,14,22,.84);color:#fff;text-decoration:none;font:600 13px/1 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(0,0,0,.35);backdrop-filter:blur(8px)">← 游戏大厅</a>
+    <main class="wrap">
+      <section class="deck" aria-label="扫雷对局">
+        <div class="statusbar">
+          <div class="led" aria-label="剩余雷数"><span id="mineCount">010</span><small>MINES</small></div>
+          <button class="face-btn" id="resetBtn" type="button" aria-label="重新开始"></button>
+          <div class="led" aria-label="用时（秒）"><span id="timer">000</span><small>TIME</small></div>
+        </div>
+
+        <div class="controls">
+          <div class="tabs" role="group" aria-label="难度">
+            <button class="tab" type="button" data-diff="easy" aria-pressed="true">初级<span class="dim">9×9 · 10 雷</span></button>
+            <button class="tab" type="button" data-diff="mid" aria-pressed="false">中级<span class="dim">16×16 · 40 雷</span></button>
+            <button class="tab" type="button" data-diff="hard" aria-pressed="false">高级<span class="dim">30×16 · 99 雷</span></button>
+            <button class="tab" type="button" data-diff="custom" aria-pressed="false">自定义</button>
+          </div>
+          <div class="seg" role="group" aria-label="点击模式（触屏）">
+            <button type="button" id="modeDig" aria-pressed="true">挖雷</button>
+            <button type="button" id="modeFlag" aria-pressed="false">插旗</button>
+          </div>
+        </div>
+
+        <form class="custom" id="customForm">
+          <label>行数（8–24）
+            <input type="number" id="cRows" min="8" max="24" value="12" inputmode="numeric" />
+          </label>
+          <label>列数（8–30）
+            <input type="number" id="cCols" min="8" max="30" value="16" inputmode="numeric" />
+          </label>
+          <label>雷数
+            <input type="number" id="cMines" min="1" max="200" value="24" inputmode="numeric" />
+          </label>
+          <button class="go" type="submit">开始</button>
+          <p class="hint" id="customHint"></p>
+        </form>
+
+        <p class="msg" id="msg" role="status"></p>
+
+        <div class="board-scroll">
+          <div class="board" id="board" role="grid" aria-label="扫雷棋盘"></div>
+        </div>
+
+        <div class="best" id="bestRow" aria-label="本次打开的最佳成绩"></div>
+      </section>
+
+      <section class="help" aria-label="玩法说明">
+        <h2>玩法说明</h2>
+        <ul>
+          <li><b>目标：</b>翻开所有没有雷的格子，别踩到雷。数字表示它周围 8 格里有几颗雷。</li>
+          <li><b>第一击安全：</b>雷在第一次点击之后才布下，且第一击的格子及周围一圈绝不会有雷。</li>
+          <li><b>电脑：</b>左键翻开格子，右键插旗（再点依次变问号、取消）；键盘选中格子后按 <span class="kbd">Enter</span> 翻开、<span class="kbd">F</span> 插旗。</li>
+          <li><b>手机：</b>点按翻开，长按插旗；也可以切到「插旗」模式再点按。</li>
+          <li><b>双击展开：</b>已翻开的数字格，若周围旗数正好等于该数字，再点它一下会一次翻开周围其余格子——旗插错了会踩雷，小心。</li>
+          <li><b>笑脸按钮</b>随时重开一局；切难度也会开新局。最佳成绩只记在本次打开期间。</li>
+        </ul>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var PRESETS = {
+          easy:   { rows: 9,  cols: 9,  mines: 10, name: '初级' },
+          mid:    { rows: 16, cols: 16, mines: 40, name: '中级' },
+          hard:   { rows: 16, cols: 30, mines: 99, name: '高级' },
+          custom: { rows: 12, cols: 16, mines: 24, name: '自定义' }
+        };
+
+        var MINE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><g stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 2.5v19M2.5 12h19M5.3 5.3l13.4 13.4M18.7 5.3L5.3 18.7"/></g><circle cx="12" cy="12" r="5.4" fill="currentColor"/><circle cx="10.1" cy="10.1" r="1.5" fill="#fff" opacity=".8"/></svg>';
+        var FLAG_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 21.4a.9.9 0 0 1-.9-.9V4.2a.9.9 0 0 1 1.8 0v16.3a.9.9 0 0 1-.9.9z" fill="currentColor" opacity=".6"/><path d="M7.6 4.6c2.9-1.7 4.9 1.1 8.8.1v6.4c-3.9 1-5.9-1.8-8.8-.1z" fill="#d92d20"/><path d="M4 21.6h7.4l-1-2.2H5z" fill="currentColor" opacity=".6"/></svg>';
+        var CROSS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20" stroke="#c62f1d" stroke-width="2.6" stroke-linecap="round"/></svg>';
+
+        function faceSVG(kind) {
+          var eyes, mouth;
+          if (kind === 'dead') {
+            eyes = '<g stroke="#3a2c00" stroke-width="1.8" stroke-linecap="round"><path d="M7.2 7.2l3 3M10.2 7.2l-3 3M13.8 7.2l3 3M16.8 7.2l-3 3"/></g>';
+            mouth = '<path d="M8.4 17.6c1.2-1.5 6-1.5 7.2 0" fill="none" stroke="#3a2c00" stroke-width="1.8" stroke-linecap="round"/>';
+          } else if (kind === 'cool') {
+            eyes = '<rect x="4.6" y="8.6" width="14.8" height="4.4" rx="2.2" fill="#26221a"/><path d="M4.6 10.4H2.8M21.2 10.4h-1.8" stroke="#26221a" stroke-width="1.6"/>';
+            mouth = '<path d="M8.6 15.2c1.1 1.7 5.7 1.7 6.8 0" fill="none" stroke="#3a2c00" stroke-width="1.8" stroke-linecap="round"/>';
+          } else if (kind === 'ooh') {
+            eyes = '<circle cx="8.6" cy="9" r="1.5" fill="#3a2c00"/><circle cx="15.4" cy="9" r="1.5" fill="#3a2c00"/>';
+            mouth = '<circle cx="12" cy="15.6" r="2" fill="none" stroke="#3a2c00" stroke-width="1.7"/>';
+          } else {
+            eyes = '<circle cx="8.6" cy="9" r="1.5" fill="#3a2c00"/><circle cx="15.4" cy="9" r="1.5" fill="#3a2c00"/>';
+            mouth = '<path d="M8.4 13.8c1.2 2 6 2 7.2 0" fill="none" stroke="#3a2c00" stroke-width="1.8" stroke-linecap="round"/>';
+          }
+          return '<svg viewBox="0 0 24 24" aria-hidden="true">' + eyes + mouth + '</svg>';
+        }
+
+        var boardEl = document.getElementById('board');
+        var mineCountEl = document.getElementById('mineCount');
+        var timerEl = document.getElementById('timer');
+        var resetBtn = document.getElementById('resetBtn');
+        var msgEl = document.getElementById('msg');
+        var bestRow = document.getElementById('bestRow');
+        var customForm = document.getElementById('customForm');
+        var customHint = document.getElementById('customHint');
+
+        var diffKey = 'easy';
+        var rows = 9, cols = 9, mineTotal = 10;
+        var cells = [];        // {mine, open, mark:0 none 1 flag 2 question, adj}
+        var cellEls = [];
+        var started = false;   // mines placed
+        var over = false;
+        var won = false;
+        var flagsUsed = 0;
+        var openCount = 0;
+        var explodedIdx = -1;
+        var startTime = 0;
+        var elapsed = 0;
+        var timerId = null;
+        var flagMode = false;
+        var best = {};         // diffKey -> seconds (this session only)
+
+        function fmtCount(n) {
+          if (n < 0) return '-' + String(Math.min(99, -n)).padStart(2, '0');
+          return String(Math.min(999, n)).padStart(3, '0');
+        }
+        function fmtTime(s) { return String(Math.min(999, s)).padStart(3, '0'); }
+
+        function setFace(kind) { resetBtn.innerHTML = faceSVG(kind); }
+        function setMsg(html) { msgEl.innerHTML = html; }
+
+        function updateCounter() { mineCountEl.textContent = fmtCount(mineTotal - flagsUsed); }
+        function updateTimer() { timerEl.textContent = fmtTime(elapsed); }
+
+        function startTimer() {
+          startTime = Date.now();
+          timerId = setInterval(function () {
+            elapsed = Math.floor((Date.now() - startTime) / 1000);
+            if (elapsed >= 999) { elapsed = 999; stopTimer(); }
+            updateTimer();
+          }, 250);
+        }
+        function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
+
+        function neighbors(idx) {
+          var r = Math.floor(idx / cols), c = idx % cols, out = [];
+          for (var dr = -1; dr <= 1; dr++) {
+            for (var dc = -1; dc <= 1; dc++) {
+              if (!dr && !dc) continue;
+              var nr = r + dr, nc = c + dc;
+              if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) out.push(nr * cols + nc);
+            }
+          }
+          return out;
+        }
+
+        function placeMines(safeIdx) {
+          var banned = {};
+          banned[safeIdx] = true;
+          neighbors(safeIdx).forEach(function (i) { banned[i] = true; });
+          var pool = [];
+          for (var i = 0; i < cells.length; i++) if (!banned[i]) pool.push(i);
+          var n = Math.min(mineTotal, pool.length);
+          for (var k = 0; k < n; k++) {
+            var j = k + Math.floor(Math.random() * (pool.length - k));
+            var tmp = pool[k]; pool[k] = pool[j]; pool[j] = tmp;
+            cells[pool[k]].mine = true;
+          }
+          cells.forEach(function (cell, idx) {
+            if (cell.mine) return;
+            var cnt = 0;
+            neighbors(idx).forEach(function (ni) { if (cells[ni].mine) cnt++; });
+            cell.adj = cnt;
+          });
+        }
+
+        function renderCell(idx) {
+          var cell = cells[idx], el = cellEls[idx];
+          var cls = 'cell', html = '', label;
+          var r = Math.floor(idx / cols), c = idx % cols;
+          if (cell.open) {
+            cls += ' open';
+            if (idx === explodedIdx) cls += ' boom';
+            if (cell.mine) {
+              html = MINE_SVG;
+            } else if (cell.adj > 0) {
+              cls += ' num n' + cell.adj;
+              html = String(cell.adj);
+            }
+            label = cell.mine ? '雷' : (cell.adj ? '数字 ' + cell.adj : '空格');
+          } else if (over && cell.mine && cell.mark !== 1) {
+            cls += ' open';
+            html = MINE_SVG;
+            label = '雷';
+          } else if (over && !cell.mine && cell.mark === 1) {
+            html = MINE_SVG + CROSS_SVG;
+            label = '旗插错了';
+          } else if (cell.mark === 1) {
+            html = FLAG_SVG;
+            label = '旗';
+          } else if (cell.mark === 2) {
+            html = '<span class="q">?</span>';
+            label = '问号';
+          } else {
+            label = '未翻开';
+          }
+          el.className = cls;
+          el.innerHTML = html;
+          el.setAttribute('aria-label', '第 ' + (r + 1) + ' 行第 ' + (c + 1) + ' 列，' + label);
+        }
+
+        function renderAll() { for (var i = 0; i < cells.length; i++) renderCell(i); }
+
+        function fitBoard() {
+          var wrap = boardEl.parentElement;
+          var avail = wrap.clientWidth;
+          var cell = Math.floor(avail / cols);
+          cell = Math.max(15, Math.min(40, cell));
+          boardEl.style.width = (cell * cols) + 'px';
+          boardEl.style.gridTemplateColumns = 'repeat(' + cols + ', ' + cell + 'px)';
+          boardEl.style.gridTemplateRows = 'repeat(' + rows + ', ' + cell + 'px)';
+          boardEl.style.fontSize = Math.max(11, Math.round(cell * 0.55)) + 'px';
+        }
+
+        function newGame() {
+          stopTimer();
+          started = false; over = false; won = false;
+          flagsUsed = 0; openCount = 0; explodedIdx = -1;
+          elapsed = 0;
+          cells = [];
+          for (var i = 0; i < rows * cols; i++) cells.push({ mine: false, open: false, mark: 0, adj: 0 });
+          boardEl.innerHTML = '';
+          cellEls = [];
+          for (var j = 0; j < cells.length; j++) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'cell';
+            b.dataset.idx = j;
+            b.setAttribute('role', 'gridcell');
+            boardEl.appendChild(b);
+            cellEls.push(b);
+            renderCell(j);
+          }
+          setFace('smile');
+          updateCounter();
+          updateTimer();
+          setMsg('点任意格子开始 —— <strong>第一击不会踩雷</strong>。本局 ' + cols + '×' + rows + '，共 ' + mineTotal + ' 颗雷。');
+          fitBoard();
+        }
+
+        function endGame(isWin, hitIdx) {
+          over = true; won = isWin;
+          stopTimer();
+          if (isWin) {
+            cells.forEach(function (cell, i) {
+              if (cell.mine && cell.mark !== 1) { cell.mark = 1; }
+              renderCell(i);
+            });
+            flagsUsed = mineTotal;
+            updateCounter();
+            setFace('cool');
+            var prev = best[diffKey];
+            var record = (prev == null || elapsed < prev);
+            if (record) best[diffKey] = elapsed;
+            renderBest();
+            setMsg('<span class="win">扫完了！</span> 用时 <strong>' + elapsed + ' 秒</strong>' +
+              (record ? ' —— 本次打开的' + PRESETS[diffKey].name + '最佳成绩。' : '。') +
+              ' 点笑脸再来一局。');
+          } else {
+            explodedIdx = hitIdx;
+            cells[hitIdx].open = true;
+            renderAll();
+            setFace('dead');
+            setMsg('<span class="lose">踩到雷了。</span> 用时 ' + elapsed + ' 秒，点笑脸再来一局。');
+          }
+        }
+
+        function checkWin() {
+          if (openCount === rows * cols - mineTotal) endGame(true, -1);
+        }
+
+        function reveal(idx) {
+          var cell = cells[idx];
+          if (cell.open || cell.mark === 1) return true;
+          if (cell.mine) return false;
+          var stack = [idx];
+          while (stack.length) {
+            var cur = stack.pop();
+            var cc = cells[cur];
+            if (cc.open || cc.mark === 1) continue;
+            cc.open = true;
+            openCount++;
+            renderCell(cur);
+            if (cc.adj === 0) {
+              neighbors(cur).forEach(function (ni) {
+                if (!cells[ni].open && cells[ni].mark !== 1 && !cells[ni].mine) stack.push(ni);
+              });
+            }
+          }
+          return true;
+        }
+
+        function dig(idx) {
+          if (over) return;
+          var cell = cells[idx];
+          if (cell.open) { chord(idx); return; }
+          if (cell.mark === 1) return;
+          if (!started) {
+            placeMines(idx);
+            started = true;
+            startTimer();
+          }
+          if (cell.mine) {
+            cell.open = true;
+            endGame(false, idx);
+            return;
+          }
+          reveal(idx);
+          if (!over) checkWin();
+        }
+
+        function chord(idx) {
+          var cell = cells[idx];
+          if (!cell.open || cell.adj === 0 || cell.mine) return;
+          var ns = neighbors(idx);
+          var flagCount = 0;
+          ns.forEach(function (ni) { if (cells[ni].mark === 1) flagCount++; });
+          if (flagCount !== cell.adj) return;
+          var hit = -1;
+          for (var k = 0; k < ns.length; k++) {
+            var ni = ns[k], nc = cells[ni];
+            if (nc.open || nc.mark === 1) continue;
+            if (nc.mine) { hit = ni; break; }
+            reveal(ni);
+          }
+          if (hit >= 0) {
+            cells[hit].open = true;
+            endGame(false, hit);
+            return;
+          }
+          checkWin();
+        }
+
+        function cycleMark(idx) {
+          if (over) return;
+          var cell = cells[idx];
+          if (cell.open) return;
+          var before = cell.mark;
+          cell.mark = (cell.mark + 1) % 3;
+          if (before === 1 && cell.mark !== 1) flagsUsed--;
+          if (before !== 1 && cell.mark === 1) flagsUsed++;
+          renderCell(idx);
+          updateCounter();
+        }
+
+        /* ---------- input ---------- */
+        var longTimer = null, longFired = false;
+
+        boardEl.addEventListener('contextmenu', function (e) {
+          e.preventDefault();
+          var el = e.target.closest('.cell');
+          if (el) cycleMark(Number(el.dataset.idx));
+        });
+
+        boardEl.addEventListener('pointerdown', function (e) {
+          var el = e.target.closest('.cell');
+          if (!el || over) return;
+          if (e.pointerType === 'mouse') {
+            if (e.button === 0 && !cells[Number(el.dataset.idx)].open) setFace('ooh');
+            return;
+          }
+          longFired = false;
+          var idx = Number(el.dataset.idx);
+          longTimer = setTimeout(function () {
+            longFired = true;
+            cycleMark(idx);
+            if (navigator.vibrate) navigator.vibrate(12);
+          }, 380);
+        });
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) {
+          boardEl.addEventListener(ev, function () {
+            if (longTimer) { clearTimeout(longTimer); longTimer = null; }
+            if (!over) setFace(won ? 'cool' : 'smile');
+          });
+        });
+
+        boardEl.addEventListener('click', function (e) {
+          var el = e.target.closest('.cell');
+          if (!el) return;
+          if (longFired) { longFired = false; return; }
+          var idx = Number(el.dataset.idx);
+          if (flagMode && !cells[idx].open) cycleMark(idx);
+          else dig(idx);
+        });
+
+        boardEl.addEventListener('keydown', function (e) {
+          var el = e.target.closest('.cell');
+          if (!el) return;
+          var idx = Number(el.dataset.idx);
+          if (e.key === 'f' || e.key === 'F') { e.preventDefault(); cycleMark(idx); }
+        });
+
+        resetBtn.addEventListener('click', newGame);
+
+        /* ---------- difficulty ---------- */
+        var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+        function selectDiff(key) {
+          diffKey = key;
+          tabs.forEach(function (t) { t.setAttribute('aria-pressed', t.dataset.diff === key ? 'true' : 'false'); });
+          customForm.classList.toggle('show', key === 'custom');
+          if (key !== 'custom') {
+            var p = PRESETS[key];
+            rows = p.rows; cols = p.cols; mineTotal = p.mines;
+            newGame();
+          } else {
+            applyCustom();
+          }
+        }
+        tabs.forEach(function (t) {
+          t.addEventListener('click', function () { selectDiff(t.dataset.diff); });
+        });
+
+        function applyCustom() {
+          var r = parseInt(document.getElementById('cRows').value, 10);
+          var c = parseInt(document.getElementById('cCols').value, 10);
+          var m = parseInt(document.getElementById('cMines').value, 10);
+          var err = '';
+          if (!(r >= 8 && r <= 24)) err = '行数需在 8–24 之间。';
+          else if (!(c >= 8 && c <= 30)) err = '列数需在 8–30 之间。';
+          else if (!(m >= 1 && m <= r * c - 9)) err = '雷数需在 1–' + (r * c - 9) + ' 之间（要给第一击留出安全区）。';
+          customHint.textContent = err;
+          if (err) return;
+          rows = r; cols = c; mineTotal = m;
+          PRESETS.custom.rows = r; PRESETS.custom.cols = c; PRESETS.custom.mines = m;
+          newGame();
+        }
+        customForm.addEventListener('submit', function (e) { e.preventDefault(); applyCustom(); });
+
+        /* ---------- mode toggle ---------- */
+        var modeDig = document.getElementById('modeDig');
+        var modeFlag = document.getElementById('modeFlag');
+        function setMode(flag) {
+          flagMode = flag;
+          modeDig.setAttribute('aria-pressed', flag ? 'false' : 'true');
+          modeFlag.setAttribute('aria-pressed', flag ? 'true' : 'false');
+        }
+        modeDig.addEventListener('click', function () { setMode(false); });
+        modeFlag.addEventListener('click', function () { setMode(true); });
+
+        /* ---------- best times (session only) ---------- */
+        function renderBest() {
+          var parts = [];
+          ['easy', 'mid', 'hard', 'custom'].forEach(function (k) {
+            parts.push('<span>' + PRESETS[k].name + '最佳 <b>' + (best[k] == null ? '—' : best[k] + ' 秒') + '</b></span>');
+          });
+          bestRow.innerHTML = parts.join('');
+        }
+
+        window.addEventListener('resize', fitBoard);
+
+        renderBest();
+        newGame();
+      })();
+    </script>
+  </body>
+</html>

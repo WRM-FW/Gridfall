@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>军棋 · 陆战棋</title>
+<link rel="canonical" href="./JQ" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --blue:#2b3aee;
+        --blue-deep:#1c28b8;
+        --green:#2fd35f;
+        --green-dark:#1db84a;
+        --ink:#14161c;
+        --paper:#f4f2ec;
+        --card:#ffffff;
+        --line:#14161c;
+        --muted:#5b6070;
+        --sand:#e9dfc6;
+        --sand-2:#dfd2ae;
+        --rail:#5b8463;
+        --road:rgba(96,84,58,.5);
+        --red:#c93325;
+        --red-deep:#9c2115;
+        --blu:#2b59c3;
+        --blu-deep:#1d4396;
+        --gold:#e8b93c;
+        --shadow:5px 5px 0 #14161c;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --paper:#101319;
+          --card:#1a1e27;
+          --ink:#eef1f6;
+          --line:#eef1f6;
+          --muted:#9aa3b5;
+          --shadow:5px 5px 0 rgba(0,0,0,.65);
+        }
+      }
+      *{ box-sizing:border-box; }
+      html{ -webkit-text-size-adjust:100%; }
+      body{
+        margin:0;
+        background:var(--paper);
+        color:var(--ink);
+        font-family:"Noto Sans SC",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+        line-height:1.55;
+      }
+      button{ font-family:inherit; cursor:pointer; min-height:2.5rem; }
+      .num{ font-family:"Archivo","Noto Sans SC",sans-serif; }
+
+      /* ---------- Hero band ---------- */
+      .hero{
+        background:var(--blue);
+        color:#fff;
+        padding:1.4rem 1.1rem 1.6rem;
+        border-bottom:4px solid #14161c;
+      }
+      .hero-inner{ max-width:1120px; margin:0 auto; display:flex; flex-wrap:wrap; align-items:flex-end; gap:1rem 2rem; }
+      .hero h1{
+        margin:0;
+        font-size:clamp(2.6rem,8vw,4.6rem);
+        font-weight:900;
+        letter-spacing:.04em;
+        line-height:1.02;
+      }
+      .hero h1 .en{
+        display:block;
+        font-family:"Archivo",sans-serif;
+        font-size:clamp(.8rem,2.4vw,1.05rem);
+        font-weight:800;
+        letter-spacing:.34em;
+        margin-top:.45rem;
+        color:#cdd4ff;
+      }
+      .hero p{ margin:0; max-width:34rem; font-size:.98rem; color:#e3e7ff; }
+      .hero-facts{ display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.9rem; }
+      .fact{
+        border:2px solid #14161c;
+        background:#fff; color:#14161c;
+        box-shadow:3px 3px 0 #14161c;
+        padding:.28rem .7rem;
+        font-weight:700; font-size:.85rem;
+      }
+      .fact b{ font-family:"Archivo",sans-serif; font-weight:900; }
+
+      /* ---------- Layout ---------- */
+      .wrap{ max-width:1120px; margin:0 auto; padding:1.1rem 1.1rem 3rem; }
+      .toolbar{
+        display:flex; flex-wrap:wrap; gap:.7rem; align-items:center;
+        background:var(--card);
+        border:3px solid var(--line);
+        box-shadow:var(--shadow);
+        padding:.7rem .8rem;
+        margin-bottom:1.1rem;
+      }
+      .seg{ display:flex; border:3px solid var(--line); background:var(--card); }
+      .seg button{
+        border:0; background:transparent; color:var(--ink);
+        font-weight:800; font-size:.95rem; padding:.45rem 1rem; min-height:2.6rem;
+      }
+      .seg button + button{ border-left:3px solid var(--line); }
+      .seg button.on{ background:var(--blue); color:#fff; }
+      .btn{
+        border:3px solid #14161c;
+        background:#fff; color:#14161c;
+        font-weight:800; font-size:.95rem;
+        padding:.45rem 1.05rem;
+        box-shadow:3px 3px 0 #14161c;
+      }
+      .btn:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 #14161c; }
+      .btn.primary{ background:var(--green); }
+      .btn.primary:hover{ background:var(--green-dark); }
+      .btn.blue{ background:var(--blue); color:#fff; }
+      .btn:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
+      .toolbar .spacer{ flex:1; }
+      .toolbar .hintline{ width:100%; font-size:.88rem; color:var(--muted); margin:0; }
+
+      .layout{ display:grid; grid-template-columns:minmax(0,470px) minmax(0,1fr); gap:1.2rem; align-items:start; }
+      @media (max-width:860px){ .layout{ grid-template-columns:minmax(0,1fr); } }
+
+      .card{
+        background:var(--card);
+        border:3px solid var(--line);
+        box-shadow:var(--shadow);
+        padding:1rem;
+      }
+      .card h2{
+        margin:0 0 .6rem;
+        font-size:1.05rem; font-weight:900; letter-spacing:.06em;
+        display:flex; align-items:center; gap:.55rem;
+      }
+      .card h2::before{ content:""; width:.65rem; height:.65rem; background:var(--blue); border:2px solid #14161c; flex:none; }
+      aside{ display:grid; gap:1.2rem; }
+
+      /* ---------- Status bar ---------- */
+      .statusbar{
+        display:flex; flex-wrap:wrap; gap:.5rem .9rem; align-items:center;
+        border:3px solid var(--line);
+        padding:.5rem .75rem;
+        margin-bottom:.8rem;
+        font-weight:700; font-size:.95rem;
+        background:var(--card);
+      }
+      .turn-dot{ width:1rem; height:1rem; border:2px solid #14161c; border-radius:50%; flex:none; }
+      .turn-dot.red{ background:var(--red); }
+      .turn-dot.blue{ background:var(--blu); }
+      .statusbar .sub{ color:var(--muted); font-weight:500; font-size:.85rem; width:100%; }
+
+      /* ---------- Board ---------- */
+      .board-wrap{
+        position:relative;
+        width:100%;
+        max-width:470px;
+        margin:0 auto;
+        background:var(--sand);
+        border:3px solid #14161c;
+        padding:10px;
+        user-select:none;
+        -webkit-user-select:none;
+        touch-action:manipulation;
+      }
+      .board-inner{ position:relative; width:100%; aspect-ratio:5/12; }
+      .board-inner svg{ position:absolute; inset:0; width:100%; height:100%; }
+      .grid{
+        position:absolute; inset:0;
+        display:grid;
+        grid-template-columns:repeat(5,1fr);
+        grid-template-rows:repeat(12,1fr);
+      }
+      .cell{ position:relative; display:flex; align-items:center; justify-content:center; }
+      .cell .terrain{
+        position:absolute; left:50%; bottom:2px; transform:translateX(-50%);
+        font-size:.58rem; letter-spacing:.14em; color:rgba(90,74,44,.75); font-weight:700;
+        pointer-events:none; white-space:nowrap;
+      }
+      .cell.lastfrom::after,.cell.lastto::after{
+        content:""; position:absolute; inset:6%;
+        border:3px dashed rgba(20,22,28,.55); pointer-events:none;
+      }
+      .cell.lastto::after{ border-style:solid; border-color:var(--blue); }
+      .cell.target{ cursor:pointer; }
+      .cell.target::before{
+        content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+        width:26%; height:11%; min-width:14px; min-height:8px;
+        background:var(--green); border:2px solid #14161c; border-radius:999px;
+        pointer-events:none; z-index:3;
+      }
+      .cell.target-cap{ cursor:pointer; }
+      .cell.target-cap::before{
+        content:""; position:absolute; inset:4%;
+        border:4px solid var(--red); border-radius:6px; pointer-events:none; z-index:3;
+      }
+      .piece{
+        position:relative; z-index:2;
+        width:86%; height:78%;
+        border:3px solid #14161c;
+        border-radius:7px;
+        display:flex; align-items:center; justify-content:center;
+        font-weight:900;
+        font-size:clamp(.95rem,4.6vw,1.45rem);
+        letter-spacing:.08em;
+        color:#fff;
+        text-shadow:0 1px 0 rgba(0,0,0,.35);
+        box-shadow:2px 3px 0 rgba(20,22,28,.55);
+      }
+      .piece.red{ background:linear-gradient(180deg,#e0492f,var(--red) 55%,var(--red-deep)); }
+      .piece.blue{ background:linear-gradient(180deg,#3f74dd,var(--blu) 55%,var(--blu-deep)); }
+      .piece.blue .pname{ transform:rotate(180deg); }
+      .piece.back{
+        background:linear-gradient(180deg,#4a5468,#333c4d 60%,#262d3b);
+        color:var(--gold);
+        font-size:clamp(.8rem,3.6vw,1.15rem);
+      }
+      .piece.mine-flag{ outline:3px solid var(--gold); outline-offset:-6px; }
+      .piece.selectable{ cursor:pointer; }
+      .piece.selected{ outline:4px solid var(--green); outline-offset:1px; transform:translateY(-3px); }
+      .piece.known::after{
+        content:""; position:absolute; right:3px; top:3px;
+        width:8px; height:8px; border-radius:50%;
+        background:var(--gold); border:1.5px solid #14161c;
+      }
+      .piece.battle-flash{ animation:flash .5s ease 2; }
+      @keyframes flash{ 50%{ filter:brightness(1.7); } }
+      @media (prefers-reduced-motion: reduce){
+        .piece.battle-flash{ animation:none; }
+      }
+
+      .banner{
+        position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) scale(.96);
+        z-index:6;
+        background:#14161c; color:#fff;
+        border:3px solid #14161c;
+        box-shadow:5px 5px 0 rgba(20,22,28,.4);
+        padding:.7rem 1.2rem;
+        font-weight:900; font-size:1.05rem; text-align:center;
+        opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease;
+        max-width:92%;
+      }
+      .banner.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+      .banner .small{ display:block; font-size:.82rem; font-weight:500; color:#c9cede; margin-top:.15rem; }
+
+      .legend{ display:flex; flex-wrap:wrap; gap:.4rem 1rem; margin-top:.7rem; font-size:.82rem; color:var(--muted); }
+      .legend span{ display:inline-flex; align-items:center; gap:.35rem; }
+      .sw{ width:1.1rem; height:.32rem; border:2px solid #14161c; display:inline-block; }
+      .sw.rail{ background:var(--rail); }
+      .sw.road{ background:var(--road); border-color:transparent; }
+      .sw.camp{ background:transparent; border-radius:50%; width:.8rem; height:.8rem; border-color:var(--rail); }
+
+      /* ---------- Side panel ---------- */
+      .tray{ margin-bottom:.4rem; }
+      .tray .tray-head{ display:flex; justify-content:space-between; font-weight:800; font-size:.9rem; margin-bottom:.3rem; }
+      .chips{ display:flex; flex-wrap:wrap; gap:.35rem; min-height:1.7rem; }
+      .chip{
+        border:2px solid #14161c; padding:.08rem .5rem; font-size:.8rem; font-weight:700;
+        background:var(--card); color:var(--ink);
+      }
+      .chip.cap-red{ background:#fbe9e6; color:#8f1f12; }
+      .chip.cap-blue{ background:#e6edfb; color:#1d4396; }
+      @media (prefers-color-scheme: dark){
+        .chip.cap-red{ background:#3a1d18; color:#ffb4a3; }
+        .chip.cap-blue{ background:#1b2a4a; color:#a9c4ff; }
+      }
+      .chips .none{ color:var(--muted); font-size:.82rem; }
+      .log{
+        list-style:none; margin:0; padding:0;
+        max-height:300px; overflow:auto;
+        font-size:.88rem;
+      }
+      .log li{ padding:.42rem .2rem; border-bottom:1.5px dashed rgba(120,128,150,.4); display:flex; gap:.6rem; }
+      .log li .n{ font-family:"Archivo",sans-serif; font-weight:800; color:var(--muted); flex:none; }
+      .log li.battle{ font-weight:700; }
+      .rules{ font-size:.9rem; }
+      .rules ul{ margin:.2rem 0 0; padding-left:1.15rem; }
+      .rules li{ margin-bottom:.35rem; }
+      .rules b{ font-weight:900; }
+
+      /* ---------- Overlay ---------- */
+      .overlay{
+        position:fixed; inset:0; z-index:50;
+        background:var(--blue);
+        color:#fff;
+        display:none;
+        align-items:center; justify-content:center;
+        padding:1.2rem;
+      }
+      .overlay.show{ display:flex; }
+      .overlay .box{ max-width:30rem; text-align:center; }
+      .overlay .side-name{ font-size:clamp(2rem,9vw,3.4rem); font-weight:900; letter-spacing:.06em; line-height:1.15; margin:0 0 .6rem; }
+      .overlay p{ color:#dfe4ff; margin:0 0 1.4rem; }
+      .overlay .btn{ font-size:1.05rem; padding:.7rem 1.6rem; }
+
+      .toast{
+        position:fixed; left:50%; bottom:1.2rem; transform:translateX(-50%) translateY(20px);
+        background:#14161c; color:#fff; font-weight:700; font-size:.92rem;
+        padding:.6rem 1.1rem; border:2px solid #14161c; box-shadow:4px 4px 0 rgba(20,22,28,.35);
+        opacity:0; pointer-events:none; transition:all .2s ease; z-index:60; max-width:92vw; text-align:center;
+      }
+      .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+    </style>
+  </head>
+  <body>
+<a href="./index.html" title="返回 Gridfall 游戏大厅" style="position:fixed;right:16px;top:16px;z-index:2147483647;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:999px;background:rgba(10,14,22,.84);color:#fff;text-decoration:none;font:600 13px/1 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(0,0,0,.35);backdrop-filter:blur(8px)">← 游戏大厅</a>
+    <header class="hero">
+      <div class="hero-inner">
+        <div>
+          <h1>军棋<span class="en">LUZHANQI · LAND BATTLE CHESS</span></h1>
+          <div class="hero-facts">
+            <span class="fact">每方 <b>25</b> 枚棋子</span>
+            <span class="fact">棋盘 <b>5 × 12</b></span>
+            <span class="fact">铁路疾行 · 行营护身</span>
+            <span class="fact">夺取军旗者胜</span>
+          </div>
+        </div>
+        <p>双方棋子暗置，谁也不知道对面站的是司令还是工兵。沿铁路长驱直入、派工兵排雷、拿炸弹换掉对方大员——先摸清虚实，再一举夺旗。本页为本地对战：双人轮流交接设备，或单人挑战电脑。</p>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <div class="toolbar" role="group" aria-label="对局控制">
+        <div class="seg" role="tablist" aria-label="对战模式">
+          <button id="modePvp" class="on" type="button">双人对战</button>
+          <button id="modePve" type="button">人机对战</button>
+        </div>
+        <button id="btnRedeploy" class="btn" type="button">随机布阵</button>
+        <button id="btnConfirm" class="btn primary" type="button">完成布阵</button>
+        <span class="spacer"></span>
+        <button id="btnResign" class="btn" type="button" disabled>认输</button>
+        <button id="btnRestart" class="btn blue" type="button">新对局</button>
+        <p class="hintline" id="hintline">布阵阶段：点击己方两枚棋子可交换位置，调整好后点「完成布阵」。</p>
+      </div>
+
+      <div class="layout">
+        <section class="card" aria-label="棋盘">
+          <div class="statusbar">
+            <span class="turn-dot red" id="turnDot"></span>
+            <span id="statusText">红方布阵</span>
+            <span class="num" id="moveCount"></span>
+            <span class="sub" id="statusSub">红方在下、蓝方在上，红方先行。</span>
+          </div>
+          <div class="board-wrap">
+            <div class="board-inner" id="boardInner">
+              <svg id="boardSvg" viewBox="0 0 500 1200" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <div class="grid" id="grid"></div>
+              <div class="banner" id="banner"></div>
+            </div>
+          </div>
+          <div class="legend">
+            <span><i class="sw rail"></i>铁路线：可长距离直行（工兵可拐弯）</span>
+            <span><i class="sw road"></i>公路线：每次走一格</span>
+            <span><i class="sw camp"></i>行营：里面的棋子不会被攻击</span>
+            <span>金点 = 已在交战中亮明身份的棋子</span>
+          </div>
+        </section>
+
+        <aside>
+          <section class="card" aria-label="战况">
+            <h2>战况</h2>
+            <div class="tray">
+              <div class="tray-head"><span>红方缴获（蓝方损失）</span><span class="num" id="capRedCount"></span></div>
+              <div class="chips" id="capRed"></div>
+            </div>
+            <div class="tray">
+              <div class="tray-head"><span>蓝方缴获（红方损失）</span><span class="num" id="capBlueCount"></span></div>
+              <div class="chips" id="capBlue"></div>
+            </div>
+            <p style="margin:.5rem 0 0;font-size:.85rem;color:var(--muted)">被吃掉的棋子身份公开，计入缴获。棋盘上带金点的棋子，是已经在交战中亮明过的，双方都能看见。</p>
+          </section>
+
+          <section class="card" aria-label="战报">
+            <h2>战报</h2>
+            <ul class="log" id="log"></ul>
+          </section>
+
+          <section class="card rules" aria-label="玩法规则">
+            <h2>玩法规则</h2>
+            <ul>
+              <li><b>大小顺序：</b>司令 ＞ 军长 ＞ 师长 ＞ 旅长 ＞ 团长 ＞ 营长 ＞ 连长 ＞ 排长 ＞ 工兵。大吃小，同级同归于尽。</li>
+              <li><b>地雷：</b>只能布在后两排，不能移动。除工兵能挖、炸弹能同归于尽外，任何棋子碰雷即亡。</li>
+              <li><b>炸弹：</b>碰到任何棋子都同归于尽（碰军旗则夺旗成功）；不能布在第一排。</li>
+              <li><b>军旗：</b>必须布在大本营内，不能移动。军旗被夺，对方立即获胜。</li>
+              <li><b>移动：</b>公路每次走一格（含斜线连接处）；铁路可沿线走任意格，普通棋子只能直行，<b>工兵可以在铁路上拐弯</b>。</li>
+              <li><b>行营：</b>圆圈位置，里面的棋子不能被攻击，可以自由进出。</li>
+              <li><b>大本营：</b>布在大本营里的棋子开局后不能再移动。</li>
+              <li><b>判负：</b>军旗被夺，或轮到行动时无棋可走，判负。</li>
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlay">
+      <div class="box">
+        <p class="side-name" id="overlayTitle">交给蓝方</p>
+        <p id="overlayText">棋盘已经盖住，对方看不到你的棋子。</p>
+        <button class="btn primary" id="overlayBtn" type="button">我是蓝方，查看棋盘</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+    "use strict";
+    /* ================= Board geometry ================= */
+    var COLS = 5, ROWS = 12;
+    function idx(r, c){ return r * COLS + c; }
+    function rowOf(i){ return Math.floor(i / COLS); }
+    function colOf(i){ return i % COLS; }
+    function inBoard(r, c){ return r >= 0 && r < ROWS && c >= 0 && c < COLS; }
+
+    var CAMPS = {};
+    [[1,1],[1,3],[2,2],[3,1],[3,3],[8,1],[8,3],[9,2],[10,1],[10,3]].forEach(function(p){ CAMPS[idx(p[0],p[1])] = true; });
+    var HQ = { red: [idx(11,1), idx(11,3)], blue: [idx(0,1), idx(0,3)] };
+    var HQSET = {}; HQ.red.concat(HQ.blue).forEach(function(i){ HQSET[i] = true; });
+
+    function isRail(i){
+      var r = rowOf(i), c = colOf(i);
+      return r === 1 || r === 5 || r === 6 || r === 10 || c === 0 || c === 4;
+    }
+    /* Diagonal road links: around every camp, plus the centre front-line cross. */
+    var DIAG = {};
+    function addDiag(a, b){ DIAG[a + "-" + b] = true; DIAG[b + "-" + a] = true; }
+    Object.keys(CAMPS).forEach(function(k){
+      var i = +k, r = rowOf(i), c = colOf(i);
+      [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(function(d){
+        var nr = r + d[0], nc = c + d[1];
+        if (inBoard(nr, nc)) addDiag(i, idx(nr, nc));
+      });
+    });
+    addDiag(idx(5,1), idx(6,2)); addDiag(idx(5,3), idx(6,2));
+    addDiag(idx(6,1), idx(5,2)); addDiag(idx(6,3), idx(5,2));
+
+    function roadNeighbors(i){
+      var r = rowOf(i), c = colOf(i), out = [];
+      [[-1,0],[1,0],[0,-1],[0,1]].forEach(function(d){
+        var nr = r + d[0], nc = c + d[1];
+        if (inBoard(nr, nc)) out.push(idx(nr, nc));
+      });
+      [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(function(d){
+        var nr = r + d[0], nc = c + d[1];
+        if (inBoard(nr, nc) && DIAG[i + "-" + idx(nr, nc)]) out.push(idx(nr, nc));
+      });
+      return out;
+    }
+    function railNeighbors(i){
+      if (!isRail(i)) return [];
+      var r = rowOf(i), c = colOf(i), out = [];
+      [[-1,0],[1,0],[0,-1],[0,1]].forEach(function(d){
+        var nr = r + d[0], nc = c + d[1];
+        if (!inBoard(nr, nc)) return;
+        var j = idx(nr, nc);
+        if (!isRail(j)) return;
+        /* The two front lines are rail-linked only at columns 0, 2 and 4. */
+        if (d[1] === 0 && ((r === 5 && nr === 6) || (r === 6 && nr === 5)) && !(c === 0 || c === 2 || c === 4)) return;
+        out.push(j);
+      });
+      return out;
+    }
+
+    /* ================= Pieces ================= */
+    var DEFS = [
+      { name: "司令", rank: 9, count: 1 },
+      { name: "军长", rank: 8, count: 1 },
+      { name: "师长", rank: 7, count: 2 },
+      { name: "旅长", rank: 6, count: 2 },
+      { name: "团长", rank: 5, count: 2 },
+      { name: "营长", rank: 4, count: 2 },
+      { name: "连长", rank: 3, count: 3 },
+      { name: "排长", rank: 2, count: 3 },
+      { name: "工兵", rank: 1, count: 3 },
+      { name: "炸弹", rank: 0, special: "bomb", count: 2 },
+      { name: "地雷", rank: 0, special: "mine", count: 3 },
+      { name: "军旗", rank: 0, special: "flag", count: 1 }
+    ];
+    var ZONE = { red: [6, 11], blue: [0, 5] };       /* row range per side */
+    var BACKROWS = { red: [11, 10], blue: [0, 1] };
+    var FRONTROW = { red: 6, blue: 5 };
+    var SIDE_CN = { red: "红方", blue: "蓝方" };
+    var OTHER = { red: "blue", blue: "red" };
+
+    function zoneCells(side){
+      var out = [], z = ZONE[side];
+      for (var r = z[0]; r <= z[1]; r++)
+        for (var c = 0; c < COLS; c++){
+          var i = idx(r, c);
+          if (!CAMPS[i]) out.push(i);
+        }
+      return out;
+    }
+    function shuffle(a){
+      for (var i = a.length - 1; i > 0; i--){
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = a[i]; a[i] = a[j]; a[j] = t;
+      }
+      return a;
+    }
+    function makePiece(side, def){
+      return { side: side, name: def.name, rank: def.rank, special: def.special || null, revealed: false, idx: -1 };
+    }
+    /* Random deployment that obeys: flag in HQ, mines in back two rows, bombs off the front row. */
+    function deploy(board, side){
+      var cells = zoneCells(side);
+      cells.forEach(function(i){ if (board[i] && board[i].side === side) board[i] = null; });
+      var used = {}, placement = {};
+      function take(list){ for (var k = 0; k < list.length; k++) if (!used[list[k]]){ used[list[k]] = true; return list[k]; } return -1; }
+      var hq = shuffle(HQ[side].slice());
+      var flagCell = take(hq);
+      placement[flagCell] = makePiece(side, DEFS[11]);
+      var backCells = shuffle(cells.filter(function(i){ return BACKROWS[side].indexOf(rowOf(i)) >= 0 && !used[i]; }));
+      for (var m = 0; m < 3; m++){ var mc = take(backCells); placement[mc] = makePiece(side, DEFS[10]); }
+      var bombCells = shuffle(cells.filter(function(i){ return rowOf(i) !== FRONTROW[side] && !used[i]; }));
+      for (var b = 0; b < 2; b++){ var bc = take(bombCells); placement[bc] = makePiece(side, DEFS[9]); }
+      var restDefs = [];
+      DEFS.slice(0, 9).forEach(function(d){ for (var k = 0; k < d.count; k++) restDefs.push(d); });
+      shuffle(restDefs);
+      var restCells = shuffle(cells.filter(function(i){ return !used[i]; }));
+      restCells.forEach(function(cell, k){ placement[cell] = makePiece(side, restDefs[k]); });
+      Object.keys(placement).forEach(function(k){
+        var p = placement[k]; p.idx = +k; board[+k] = p;
+      });
+    }
+    function validatePlacement(board, side){
+      for (var i = 0; i < ROWS * COLS; i++){
+        var p = board[i];
+        if (!p || p.side !== side) continue;
+        if (p.special === "flag" && HQ[side].indexOf(i) < 0) return "军旗必须放在大本营里";
+        if (p.special === "mine" && BACKROWS[side].indexOf(rowOf(i)) < 0) return "地雷只能放在后两排";
+        if (p.special === "bomb" && rowOf(i) === FRONTROW[side]) return "炸弹不能放在第一排（前线）";
+      }
+      return null;
+    }
+
+    /* ================= Movement & combat ================= */
+    function pieceMoves(board, i){
+      var p = board[i];
+      if (!p) return [];
+      if (p.special === "flag" || p.special === "mine") return [];
+      if (HQSET[i]) return [];                       /* HQ pieces never move */
+      var moves = {}, out = [];
+      function add(to){
+        if (moves[to]) return;
+        var t = board[to];
+        if (t && t.side === p.side) return;
+        if (t && CAMPS[to]) return;                  /* camped pieces are safe */
+        moves[to] = true;
+        out.push({ from: i, to: to, capture: !!t });
+      }
+      roadNeighbors(i).forEach(add);
+      if (isRail(i)){
+        if (p.name === "工兵"){
+          var seen = {}, q = [i]; seen[i] = true;
+          while (q.length){
+            var cur = q.shift();
+            railNeighbors(cur).forEach(function(n){
+              if (seen[n]) return;
+              seen[n] = true;
+              var t = board[n];
+              if (!t){ add(n); q.push(n); }
+              else if (t.side !== p.side){ add(n); }
+            });
+          }
+        } else {
+          var r = rowOf(i), c = colOf(i);
+          [[-1,0],[1,0],[0,-1],[0,1]].forEach(function(d){
+            var cr = r, cc = c, prev = i;
+            while (true){
+              var nr = cr + d[0], nc = cc + d[1];
+              if (!inBoard(nr, nc)) break;
+              var n = idx(nr, nc);
+              if (railNeighbors(prev).indexOf(n) < 0) break;
+              var t = board[n];
+              if (!t){ add(n); }
+              else { if (t.side !== p.side) add(n); break; }
+              prev = n; cr = nr; cc = nc;
+            }
+          });
+        }
+      }
+      return out;
+    }
+    function sideHasMove(board, side){
+      for (var i = 0; i < ROWS * COLS; i++){
+        var p = board[i];
+        if (p && p.side === side && pieceMoves(board, i).length) return true;
+      }
+      return false;
+    }
+    /* Returns: 'att' attacker survives, 'def' defender survives, 'both', 'flag' flag captured */
+    function combat(att, def){
+      if (def.special === "flag") return "flag";
+      if (att.special === "bomb" || def.special === "bomb") return "both";
+      if (def.special === "mine") return att.name === "工兵" ? "att" : "def";
+      if (att.rank > def.rank) return "att";
+      if (att.rank < def.rank) return "def";
+      return "both";
+    }
+
+    /* ================= Game state ================= */
+    var state;
+    function newGame(mode){
+      var board = new Array(ROWS * COLS).fill(null);
+      deploy(board, "red");
+      deploy(board, "blue");
+      state = {
+        mode: mode,                 /* 'pvp' | 'pve' */
+        board: board,
+        phase: "setup",             /* setup | play | over */
+        setupSide: "red",
+        turn: "red",
+        viewer: "red",
+        selected: -1,
+        targets: [],
+        moveNo: 0,
+        lastMove: null,
+        flashIdx: -1,
+        captured: { red: [], blue: [] },   /* pieces each side has captured */
+        log: [],
+        winner: null,
+        busy: false
+      };
+      pushLog("对局开始，双方布阵。红方先行。", false);
+      render();
+      updateChrome();
+    }
+    function pushLog(text, battle){
+      state.log.unshift({ n: state.moveNo, text: text, battle: !!battle });
+      if (state.log.length > 80) state.log.pop();
+    }
+    function coordName(i){
+      return "ABCDE"[colOf(i)] + (12 - rowOf(i));
+    }
+
+    /* ================= Move execution ================= */
+    function executeMove(mv){
+      var board = state.board;
+      var att = board[mv.from], def = board[mv.to];
+      state.lastMove = { from: mv.from, to: mv.to };
+      state.selected = -1; state.targets = [];
+      var mover = att.side, foe = OTHER[mover];
+      if (!def){
+        board[mv.to] = att; board[mv.from] = null; att.idx = mv.to;
+        pushLog(SIDE_CN[mover] + " " + coordName(mv.from) + " → " + coordName(mv.to), false);
+        finishTurn(null);
+        return;
+      }
+      var res = combat(att, def);
+      att.revealed = true; def.revealed = true;
+      state.flashIdx = mv.to;
+      var summary;
+      if (res === "flag"){
+        board[mv.to] = att; board[mv.from] = null; att.idx = mv.to;
+        state.captured[mover].push(def);
+        summary = SIDE_CN[mover] + att.name + " 夺下军旗";
+        pushLog(summary + "，" + SIDE_CN[mover] + "获胜！", true);
+        endGame(mover, "军旗被夺");
+        showBanner(att.name + " 夺旗！", SIDE_CN[mover] + "获胜");
+        return;
+      } else if (res === "att"){
+        board[mv.to] = att; board[mv.from] = null; att.idx = mv.to;
+        state.captured[mover].push(def);
+        summary = SIDE_CN[mover] + att.name + " 吃掉 " + SIDE_CN[foe] + def.name;
+      } else if (res === "def"){
+        board[mv.from] = null;
+        state.captured[foe].push(att);
+        summary = SIDE_CN[mover] + att.name + " 撞上 " + SIDE_CN[foe] + def.name + "，阵亡";
+      } else {
+        board[mv.from] = null; board[mv.to] = null;
+        state.captured[mover].push(def);
+        state.captured[foe].push(att);
+        summary = SIDE_CN[mover] + att.name + " 与 " + SIDE_CN[foe] + def.name + " 同归于尽";
+      }
+      pushLog(summary, true);
+      showBanner(summary, battleSub(res, att, def));
+      finishTurn(summary);
+    }
+    function battleSub(res, att, def){
+      if (def.special === "mine" && res === "att") return "工兵挖雷成功";
+      if (def.special === "mine" && res === "def") return "触雷阵亡";
+      if (att.special === "bomb" || def.special === "bomb") return "炸弹爆破";
+      if (res === "both") return "同级对撞";
+      return "";
+    }
+    function finishTurn(battleSummary){
+      var mover = state.turn, foe = OTHER[mover];
+      if (!sideHasMove(state.board, foe)){
+        endGame(mover, SIDE_CN[foe] + "无棋可走");
+        pushLog(SIDE_CN[foe] + "无棋可走，" + SIDE_CN[mover] + "获胜！", true);
+        showBanner(SIDE_CN[mover] + " 获胜", SIDE_CN[foe] + "无棋可走");
+        render(); updateChrome();
+        return;
+      }
+      state.turn = foe;
+      state.moveNo = Math.floor(state.moveNo) + (foe === "red" ? 1 : 0);
+      if (foe === "red") state.moveNo = state.moveNo; /* moveNo counts red moves */
+      render(); updateChrome();
+      if (state.mode === "pve" && state.turn === "blue"){
+        state.busy = true;
+        setTimeout(aiMove, 750);
+      } else if (state.mode === "pvp"){
+        state.busy = true;
+        var delay = battleSummary ? 1150 : 500;
+        setTimeout(function(){
+          if (state.phase !== "play") return;
+          showOverlay(
+            "交给" + SIDE_CN[state.turn],
+            (battleSummary ? "刚才战况：" + battleSummary + "。" : "") + "棋盘已盖住，把设备交给" + SIDE_CN[state.turn] + "。",
+            "我是" + SIDE_CN[state.turn] + "，查看棋盘",
+            function(){ state.viewer = state.turn; state.busy = false; state.flashIdx = -1; render(); }
+          );
+        }, delay);
+      }
+    }
+    function endGame(winner, reason){
+      state.phase = "over";
+      state.winner = winner;
+      state.viewer = winner;
+      render(); updateChrome();
+    }
+
+    /* ================= Simple AI (blue) ================= */
+    function aiMove(){
+      if (state.phase !== "play" || state.turn !== "blue"){ state.busy = false; return; }
+      var board = state.board, all = [];
+      for (var i = 0; i < ROWS * COLS; i++){
+        var p = board[i];
+        if (p && p.side === "blue") pieceMoves(board, i).forEach(function(m){ all.push(m); });
+      }
+      if (!all.length){ state.busy = false; return; }
+      function score(m){
+        var att = board[m.from], def = board[m.to];
+        var s = Math.random() * 8;
+        s += (rowOf(m.to) - rowOf(m.from)) * 2.2;               /* advance south */
+        if (att.name === "工兵" && isRail(m.from)) s += 3;
+        if (att.special === "bomb") s -= 2;
+        if (def){
+          if (def.revealed){
+            var res = combat(att, def);
+            if (res === "flag") s += 200;
+            else if (res === "att") s += 46 + def.rank * 3;
+            else if (res === "both") s += def.rank >= 7 ? 16 : 2;
+            else s -= 55;
+          } else {
+            if (def.special) s += 0;                              /* unknown to AI */
+            s += att.rank * 3.4 + (att.special === "bomb" ? 14 : 0) + (att.name === "工兵" ? 7 : 0);
+            if (att.rank >= 8) s -= 16;                           /* don't gamble the top brass blind */
+            if (att.special === "flag" || att.special === "mine") s -= 999;
+          }
+        }
+        return s;
+      }
+      all.sort(function(a, b){ return score(b) - score(a); });
+      var top = all.slice(0, Math.min(3, all.length));
+      var pick = top[Math.floor(Math.random() * top.length)];
+      state.busy = false;
+      executeMove(pick);
+      render(); updateChrome();
+    }
+
+    /* ================= Rendering ================= */
+    var gridEl = document.getElementById("grid");
+    var cells = [];
+    (function buildCells(){
+      for (var i = 0; i < ROWS * COLS; i++){
+        var d = document.createElement("div");
+        d.className = "cell";
+        d.dataset.idx = i;
+        if (CAMPS[i]){ var t = document.createElement("span"); t.className = "terrain"; t.textContent = "行营"; d.appendChild(t); }
+        else if (HQSET[i]){ var h = document.createElement("span"); h.className = "terrain"; h.textContent = "大本营"; d.appendChild(h); }
+        d.addEventListener("click", onCellClick);
+        gridEl.appendChild(d);
+        cells.push(d);
+      }
+    })();
+    (function drawLines(){
+      var svg = document.getElementById("boardSvg");
+      var NS = "http://www.w3.org/2000/svg";
+      function line(x1, y1, x2, y2, w, color, opacity){
+        var l = document.createElementNS(NS, "line");
+        l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+        l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+        l.setAttribute("stroke", color); l.setAttribute("stroke-width", w);
+        l.setAttribute("stroke-linecap", "round");
+        if (opacity) l.setAttribute("opacity", opacity);
+        svg.appendChild(l);
+      }
+      function cx(i){ return colOf(i) * 100 + 50; }
+      function cy(i){ return rowOf(i) * 100 + 50; }
+      var i, j;
+      /* roads */
+      for (i = 0; i < ROWS * COLS; i++){
+        roadNeighbors(i).forEach(function(n){
+          if (n > i) line(cx(i), cy(i), cx(n), cy(n), 3, "#60543a", ".45");
+        });
+      }
+      /* rails over roads */
+      for (i = 0; i < ROWS * COLS; i++){
+        railNeighbors(i).forEach(function(n){
+          if (n > i) line(cx(i), cy(i), cx(n), cy(n), 11, "#5b8463", ".9");
+        });
+      }
+      for (i = 0; i < ROWS * COLS; i++){
+        railNeighbors(i).forEach(function(n){
+          if (n > i) line(cx(i), cy(i), cx(n), cy(n), 2.5, "#e9dfc6", ".55");
+        });
+      }
+      /* front line divider */
+      line(8, 600, 492, 600, 4, "#8a6d3b", ".8");
+      /* camps */
+      Object.keys(CAMPS).forEach(function(k){
+        i = +k;
+        var cEl = document.createElementNS(NS, "circle");
+        cEl.setAttribute("cx", cx(i)); cEl.setAttribute("cy", cy(i)); cEl.setAttribute("r", 37);
+        cEl.setAttribute("fill", "rgba(255,255,255,.28)");
+        cEl.setAttribute("stroke", "#5b8463"); cEl.setAttribute("stroke-width", "4");
+        svg.appendChild(cEl);
+      });
+      /* HQ markers */
+      HQ.red.concat(HQ.blue).forEach(function(h){
+        var rect = document.createElementNS(NS, "rect");
+        rect.setAttribute("x", cx(h) - 40); rect.setAttribute("y", cy(h) - 40);
+        rect.setAttribute("width", 80); rect.setAttribute("height", 80);
+        rect.setAttribute("fill", "none");
+        rect.setAttribute("stroke", "#b3402f"); rect.setAttribute("stroke-width", "3.5");
+        rect.setAttribute("stroke-dasharray", "8 6");
+        svg.appendChild(rect);
+      });
+      /* station dots */
+      for (i = 0; i < ROWS * COLS; i++){
+        if (CAMPS[i] || HQSET[i]) continue;
+        var dot = document.createElementNS(NS, "circle");
+        dot.setAttribute("cx", cx(i)); dot.setAttribute("cy", cy(i)); dot.setAttribute("r", 5);
+        dot.setAttribute("fill", "#8a7a52");
+        svg.appendChild(dot);
+      }
+    })();
+
+    function faceUp(p){
+      if (state.phase === "over") return true;
+      if (state.phase === "setup") return p.side === state.setupSide;
+      if (p.revealed) return true;
+      return p.side === state.viewer;
+    }
+    function render(){
+      for (var i = 0; i < ROWS * COLS; i++){
+        var cell = cells[i], p = state.board[i];
+        var old = cell.querySelector(".piece");
+        if (old) old.remove();
+        cell.classList.toggle("lastfrom", !!state.lastMove && state.lastMove.from === i);
+        cell.classList.toggle("lastto", !!state.lastMove && state.lastMove.to === i);
+        var tgt = null;
+        for (var k = 0; k < state.targets.length; k++) if (state.targets[k].to === i) tgt = state.targets[k];
+        cell.classList.toggle("target", !!tgt && !tgt.capture);
+        cell.classList.toggle("target-cap", !!tgt && tgt.capture);
+        if (!p) continue;
+        var el = document.createElement("div");
+        var up = faceUp(p);
+        el.className = "piece " + (up ? p.side : "back");
+        if (up){
+          var nm = document.createElement("span");
+          nm.className = "pname"; nm.textContent = p.name;
+          el.appendChild(nm);
+          if (p.revealed && state.phase === "play") el.classList.add("known");
+          if (p.special === "flag" || p.special === "mine") el.classList.add("mine-flag");
+        } else {
+          el.textContent = "★";
+        }
+        if (state.phase === "play" && !state.busy && p.side === state.turn && state.viewer === state.turn && pieceMoves(state.board, i).length) el.classList.add("selectable");
+        if (state.phase === "setup" && p.side === state.setupSide) el.classList.add("selectable");
+        if (state.selected === i) el.classList.add("selected");
+        if (state.flashIdx === i) el.classList.add("battle-flash");
+        cell.appendChild(el);
+      }
+      renderTrays();
+      renderLog();
+    }
+    function renderTrays(){
+      function fill(elId, countId, list, cls){
+        var box = document.getElementById(elId);
+        box.innerHTML = "";
+        if (!list.length){ box.innerHTML = '<span class="none">暂无</span>'; }
+        list.forEach(function(p){
+          var s = document.createElement("span");
+          s.className = "chip " + cls; s.textContent = p.name;
+          box.appendChild(s);
+        });
+        document.getElementById(countId).textContent = list.length ? list.length + " 枚" : "";
+      }
+      fill("capRed", "capRedCount", state.captured.red, "cap-blue");
+      fill("capBlue", "capBlueCount", state.captured.blue, "cap-red");
+    }
+    function renderLog(){
+      var ul = document.getElementById("log");
+      ul.innerHTML = "";
+      state.log.forEach(function(e){
+        var li = document.createElement("li");
+        if (e.battle) li.className = "battle";
+        var n = document.createElement("span");
+        n.className = "n"; n.textContent = e.n ? "#" + e.n : "·";
+        li.appendChild(n);
+        li.appendChild(document.createTextNode(e.text));
+        ul.appendChild(li);
+      });
+      if (!state.log.length) ul.innerHTML = '<li><span class="n">·</span>暂无战报</li>';
+    }
+
+    /* ================= Chrome (status & buttons) ================= */
+    var statusText = document.getElementById("statusText");
+    var statusSub = document.getElementById("statusSub");
+    var turnDot = document.getElementById("turnDot");
+    var moveCountEl = document.getElementById("moveCount");
+    var hintline = document.getElementById("hintline");
+    var btnConfirm = document.getElementById("btnConfirm");
+    var btnRedeploy = document.getElementById("btnRedeploy");
+    var btnResign = document.getElementById("btnResign");
+    function updateChrome(){
+      turnDot.className = "turn-dot " + (state.phase === "setup" ? state.setupSide : state.turn);
+      moveCountEl.textContent = state.phase === "play" ? "第 " + (state.moveNo + 1) + " 手" : "";
+      btnResign.disabled = state.phase !== "play";
+      if (state.phase === "setup"){
+        statusText.textContent = SIDE_CN[state.setupSide] + "布阵";
+        statusSub.textContent = state.setupSide === "red"
+          ? "点击己方两枚棋子交换位置。军旗须在大本营、地雷在后两排、炸弹不在第一排。"
+          : "蓝方布阵：点击己方两枚棋子交换位置，规则同红方。";
+        btnConfirm.textContent = state.setupSide === "red" && state.mode === "pvp" ? "红方布阵完成" : "开始对弈";
+        btnRedeploy.disabled = false;
+        hintline.textContent = "布阵阶段：点一枚棋子再点另一枚即可交换；不满意整套阵型可以「随机布阵」换一套。";
+      } else if (state.phase === "play"){
+        statusText.textContent = SIDE_CN[state.turn] + "回合";
+        statusSub.textContent = state.mode === "pve" && state.turn === "blue"
+          ? "电脑思考中…"
+          : "点一枚己方棋子查看可走位置，绿色标记为可移动格，红框为可攻击目标。";
+        btnConfirm.textContent = "对弈中";
+        btnRedeploy.disabled = true;
+        hintline.textContent = state.mode === "pvp"
+          ? "双人对战：每步走完会盖住棋盘再交接设备，对方棋子只有交战亮明后才可见。"
+          : "人机对战：电脑执蓝方。对方棋子只有交战亮明后才可见（带金点）。";
+      } else {
+        statusText.textContent = SIDE_CN[state.winner] + "获胜";
+        statusSub.textContent = "对局结束，全部棋子已亮明。点「新对局」再来一盘。";
+        btnConfirm.textContent = "已结束";
+        btnRedeploy.disabled = true;
+        hintline.textContent = "对局结束。";
+      }
+      btnConfirm.disabled = state.phase !== "setup";
+    }
+
+    /* ================= Interaction ================= */
+    var toastTimer = null;
+    function toast(msg){
+      var t = document.getElementById("toast");
+      t.textContent = msg; t.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2400);
+    }
+    var bannerTimer = null;
+    function showBanner(main, sub){
+      var b = document.getElementById("banner");
+      b.innerHTML = "";
+      b.appendChild(document.createTextNode(main));
+      if (sub){ var s = document.createElement("span"); s.className = "small"; s.textContent = sub; b.appendChild(s); }
+      b.classList.add("show");
+      clearTimeout(bannerTimer);
+      bannerTimer = setTimeout(function(){ b.classList.remove("show"); }, 1500);
+    }
+    var overlay = document.getElementById("overlay");
+    var overlayCb = null;
+    function showOverlay(title, text, btnText, cb){
+      document.getElementById("overlayTitle").textContent = title;
+      document.getElementById("overlayText").textContent = text;
+      document.getElementById("overlayBtn").textContent = btnText;
+      overlayCb = cb || null;
+      overlay.classList.add("show");
+    }
+    document.getElementById("overlayBtn").addEventListener("click", function(){
+      overlay.classList.remove("show");
+      if (overlayCb){ var cb = overlayCb; overlayCb = null; cb(); }
+    });
+
+    function onCellClick(ev){
+      var i = +ev.currentTarget.dataset.idx;
+      if (state.busy) return;
+      if (state.phase === "setup") return setupClick(i);
+      if (state.phase !== "play") return;
+      if (state.mode === "pve" && state.turn === "blue") return;
+      if (state.viewer !== state.turn) return;
+      var p = state.board[i];
+      if (state.selected >= 0){
+        for (var k = 0; k < state.targets.length; k++){
+          if (state.targets[k].to === i){
+            var mv = state.targets[k];
+            state.flashIdx = -1;
+            executeMove(mv);
+            render(); updateChrome();
+            return;
+          }
+        }
+      }
+      if (p && p.side === state.turn){
+        if (state.selected === i){ state.selected = -1; state.targets = []; }
+        else {
+          state.selected = i;
+          state.targets = pieceMoves(state.board, i);
+          if (!state.targets.length) toast(p.special === "flag" ? "军旗不能移动" : p.special === "mine" ? "地雷不能移动" : HQSET[i] ? "大本营里的棋子不能移动" : "这枚棋子无路可走");
+        }
+      } else {
+        state.selected = -1; state.targets = [];
+      }
+      render();
+    }
+    function setupClick(i){
+      var p = state.board[i];
+      if (!p || p.side !== state.setupSide){ state.selected = -1; render(); return; }
+      if (state.selected < 0){ state.selected = i; render(); return; }
+      if (state.selected === i){ state.selected = -1; render(); return; }
+      var a = state.board[state.selected], b = p;
+      var ai = state.selected;
+      state.board[ai] = b; state.board[i] = a;
+      a.idx = i; b.idx = ai;
+      var err = validatePlacement(state.board, state.setupSide);
+      if (err){
+        state.board[ai] = a; state.board[i] = b;
+        a.idx = ai; b.idx = i;
+        toast(err + "，已换回");
+      }
+      state.selected = -1;
+      render();
+    }
+
+    btnRedeploy.addEventListener("click", function(){
+      if (state.phase !== "setup") return;
+      deploy(state.board, state.setupSide);
+      state.selected = -1;
+      toast(SIDE_CN[state.setupSide] + "已重新随机布阵");
+      render();
+    });
+    btnConfirm.addEventListener("click", function(){
+      if (state.phase !== "setup") return;
+      var err = validatePlacement(state.board, state.setupSide);
+      if (err){ toast(err); return; }
+      if (state.mode === "pvp" && state.setupSide === "red"){
+        state.setupSide = "blue";
+        state.selected = -1;
+        render(); updateChrome();
+        showOverlay("交给蓝方布阵", "红方阵型已定。棋盘上只显示蓝方自己的棋子，红方棋子已盖住。",
+          "我是蓝方，开始布阵", function(){ render(); });
+      } else {
+        state.phase = "play";
+        state.turn = "red"; state.viewer = "red"; state.moveNo = 0;
+        state.selected = -1;
+        pushLog("布阵完成，红方先行。", false);
+        render(); updateChrome();
+        if (state.mode === "pvp"){
+          state.busy = true;
+          showOverlay("交给红方", "双方布阵完成。红方先行，把设备交给红方。",
+            "我是红方，开始对弈", function(){ state.viewer = "red"; state.busy = false; render(); });
+        }
+      }
+    });
+    btnResign.addEventListener("click", function(){
+      if (state.phase !== "play") return;
+      var loser = state.mode === "pve" ? "red" : state.turn;
+      pushLog(SIDE_CN[loser] + "认输，" + SIDE_CN[OTHER[loser]] + "获胜！", true);
+      endGame(OTHER[loser], "认输");
+      showBanner(SIDE_CN[OTHER[loser]] + " 获胜", SIDE_CN[loser] + "认输");
+    });
+    document.getElementById("btnRestart").addEventListener("click", function(){
+      overlay.classList.remove("show");
+      newGame(state.mode);
+      toast("新对局：重新布阵");
+    });
+    var modePvp = document.getElementById("modePvp");
+    var modePve = document.getElementById("modePve");
+    function setMode(m){
+      modePvp.classList.toggle("on", m === "pvp");
+      modePve.classList.toggle("on", m === "pve");
+      overlay.classList.remove("show");
+      newGame(m);
+    }
+    modePvp.addEventListener("click", function(){ if (state.mode !== "pvp") setMode("pvp"); });
+    modePve.addEventListener("click", function(){ if (state.mode !== "pve") setMode("pve"); });
+
+    newGame("pvp");
+    </script>
+  </body>
+</html>

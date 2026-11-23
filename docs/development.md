@@ -27,14 +27,16 @@
   - `tools/design/board-reference.html`：木质陶瓷对局视觉参考
   - `tools/design/xiangqi-reference.html`：中国象棋视觉与引擎参考
   - `tools/src/legacy.html`：旧单页，作为引擎提取来源
+  - `tools/design/tiaoqi-reference.html`、`2048-reference.html`、`junqi-reference.html`、`saolei-reference.html`：四款小游戏参考
   - `tools/src/markup.html`、`extra.css`、`visual.js`、`online.js`、`deeplink.js`、`xiangqi-online.js`
-  - `tools/build-page.mjs`、`tools/build-home.mjs`、`tools/build-xiangqi.mjs`、`tools/build-dist.mjs`
+  - `tools/build-page.mjs`、`tools/build-home.mjs`、`tools/build-xiangqi.mjs`、`tools/build-minigames.mjs`、`tools/build-dist.mjs`
 - 修改界面请改 `tools/src` 或 `tools/design` 后重新构建，不要只手改生成文件；如果确实直接修了生成文件，下一次构建会覆盖。
 - 构建：
   ```bash
   node tools/build-page.mjs   # 生成 play.html
   node tools/build-home.mjs   # 生成 index.html
   node tools/build-xiangqi.mjs # 生成 xiangqi.html
+  node tools/build-minigames.mjs # 生成 tiaoqi / game2048 / junqi / saolei
   node tools/build-dist.mjs   # 生成 dist/（部署用）
   ```
 - `dist/` 不入库；部署：
@@ -80,5 +82,5 @@
   | 军棋 | `/JQ` |
   | 扫雷 | `/SL` |
   | 卡牌 | `/KP` |
-  | 2048 | `/2048`（数字名，非拼音首字母特例） |
+  | 四子棋 | `/SZQ` |
 - 新增入口步骤：生成本地入口页或确定承载页 → 在 `_redirects` 加 `200` 代理 → 加斜杠 `301` 到无斜杠 → 加 GitHub Pages 回退目录（如需镜像）→ 首页卡片指向该路径 → 更新 `tests/route-test.mjs` 或同等路由测试。

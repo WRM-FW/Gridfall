@@ -39,7 +39,7 @@ try {
       err: window.__qaErrors || []
     })`);
     if (!r.title.includes('游戏大厅')) return 'title ' + r.title;
-    if (r.cards !== 9 || r.live !== 2 || r.soon !== 7) return 'cards ' + JSON.stringify(r);
+    if (r.cards !== 9 || r.live !== 6 || r.soon !== 3) return 'cards ' + JSON.stringify(r);
     if (r.err.length) return 'errors ' + JSON.stringify(r.err);
     return true;
   });
@@ -63,7 +63,7 @@ try {
     await b.evaluate(`[...document.querySelectorAll('.chip')].find(c=>c.dataset.filter==='soon').click()`);
     await sleep(200);
     let r = await b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').length`);
-    if (r !== 7) return 'soon filter ' + r;
+    if (r !== 3) return 'soon filter ' + r;
     await b.evaluate(`[...document.querySelectorAll('.chip')].find(c=>c.dataset.filter==='all').click()`);
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value='围棋'; i.dispatchEvent(new Event('input')); })()`);
     await sleep(200);
@@ -103,6 +103,26 @@ try {
     await b.clickSel('.hall-link');
     await sleep(900);
     return (await b.evaluate('document.title')).includes('游戏大厅') ? true : 'back failed';
+  });
+
+  await t('home.minigameLinks', async () => {
+    const games = [
+      ['./game2048.html', '2048 · 游戏'],
+      ['./saolei.html', '扫雷'],
+      ['./tiaoqi.html', '跳棋'],
+      ['./junqi.html', '军棋 · 陆战棋']
+    ];
+    for (const [local, title] of games) {
+      await goto(home);
+      await waitFor(`document.querySelectorAll('.game-card').length === 9`, 8000);
+      const clicked = await b.evaluate(`(() => { const a = document.querySelector('.game-card a[data-local="${local}"]'); if (!a) return false; a.click(); return true; })()`);
+      if (!clicked) return 'card missing ' + local;
+      if (!await waitFor(`document.title.includes(${JSON.stringify(title)})`, 8000)) return 'did not open ' + local;
+      if (!await b.evaluate(`!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]')`)) return 'no hall pill ' + local;
+      await b.clickSel('a[title="返回 Gridfall 游戏大厅"]');
+      if (!await waitFor(`document.title.includes('游戏大厅')`, 8000)) return 'back failed ' + local;
+    }
+    return true;
   });
 
   await t('home.renjuFormalLink', async () => {

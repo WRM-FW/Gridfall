@@ -19,6 +19,8 @@ node live-online.mjs       # 线上整局，4 项
 node route-test.mjs        # /HBQS 路由、刷新、查询、尾斜杠、前进后退，7 项
 node xiangqi-route.mjs     # /ZGXQ 路由、刷新、尾斜杠、首页卡片，4 项
 node xiangqi-online.mjs    # 象棋联机、换方、认输、再来一局、音效开关，7 项
+node minigames-smoke.mjs   # 跳棋/2048/军棋/扫雷本地交互冒烟
+node minigames-route.mjs   # /TQ /2048 /JQ /SL 路由、刷新、尾斜杠、首页卡片，9 项
 ```
 
 - 本地测试读取仓库根目录的 `index.html` / `play.html`。

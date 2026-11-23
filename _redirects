@@ -4,3 +4,15 @@
 # 中国象棋统一入口
 /ZGXQ /xiangqi 200
 /ZGXQ/ /ZGXQ 301
+# 跳棋
+/TQ /tiaoqi 200
+/TQ/ /TQ 301
+# 2048
+/2048 /game2048 200
+/2048/ /2048 301
+# 军棋
+/JQ /junqi 200
+/JQ/ /JQ 301
+# 扫雷
+/SL /saolei 200
+/SL/ /SL 301
