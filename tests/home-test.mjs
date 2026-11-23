@@ -174,7 +174,8 @@ try {
     if (!r.card) return 'co-build panel missing';
     if (!r.mails.includes('mailto:3391792088@qq.com')) return 'email link missing ' + JSON.stringify(r.mails);
     if (!r.pr) return 'PR link missing';
-    if (!r.note.includes('AI Agent') || !r.note.includes('PR')) return 'note ' + r.note;
+    if (!r.note.includes('PR') || !r.note.includes('开发说明')) return 'note ' + r.note;
+    if (r.note.includes('AI Agent')) return 'note still prescribes AI Agent: ' + r.note;
     return true;
   });
 

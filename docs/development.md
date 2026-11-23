@@ -66,7 +66,7 @@
 ## 点单 / 社区共建
 
 - 开发者邮箱：3391792088@qq.com
-- 贡献流程见仓库根目录 `CONTRIBUTING.md`：AI Agent 做单文件小游戏、首页卡片、拼音首字母路由、测试与 PR。
+- 贡献流程见仓库根目录 `CONTRIBUTING.md`：自己开发或借助 AI 辅助做单文件小游戏、首页卡片、拼音首字母路由、测试与 PR。
 - 新游戏合并后按现有部署流程验证 Cloudflare Pages 与 GitHub Pages。
 
 ## 扩展新游戏

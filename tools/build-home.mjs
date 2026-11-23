@@ -412,8 +412,8 @@ replaceCard('更多游戏 新游戏 点单', `        <article class="game-card"
             <p>跳棋、军棋、四子棋，或是任何你想玩的小游戏……大厅的桌子会一直加下去，不限品类。</p>
             <div class="co-build">
               <div class="co-build-row"><span class="k">联系开发者</span><a href="mailto:3391792088@qq.com">3391792088@qq.com</a></div>
-              <div class="co-build-row"><span class="k">自主共建</span><a href="https://github.com/WRM-FW/Gridfall/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">用 AI Agent 开发，提交 PR →</a></div>
-              <p class="co-note">有想做的玩法，可以让 AI Agent 按开发说明做一个单文件小游戏，提交 PR；通过后会摆进大厅。</p>
+              <div class="co-build-row"><span class="k">自主共建</span><a href="https://github.com/WRM-FW/Gridfall/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">自己开发，提交 PR →</a></div>
+              <p class="co-note">有想做的玩法，可以按开发说明做一个单文件小游戏，自己写或借助 AI 工具辅助，提交 PR；通过后会摆进大厅。</p>
             </div>
             <div class="tags"><span>持续上新</span><span>社区共建</span></div>
             <div class="game-foot">
@@ -576,7 +576,7 @@ var ROADMAP = `  <!-- COMING SOON -->
   <section class="block" id="soon">
     <div class="wrap">
       <h2 class="big"><span class="en">ON THE BENCH</span>下一批桌子。</h2>
-      <p class="sec-sub">大厅现在有六个入口。下面三款还在候选清单里，没有开发排期；想先玩哪一款，可以直接点单，或用 AI Agent 做好后提交 PR。</p>
+      <p class="sec-sub">大厅现在有六个入口。下面三款还在候选清单里，没有开发排期；想先玩哪一款，可以直接点单，也可以自己写好代码后提交 PR。</p>
       <div class="roadmap-row">
         <article class="roadmap-card">
           <div class="roadmap-cover"><img src="./assets/covers/chess.png" alt="国际象棋规划封面" width="1200" height="600" decoding="async"><span class="st">规划中</span></div>
@@ -608,7 +608,7 @@ var ROADMAP = `  <!-- COMING SOON -->
         <div class="co-build-copy">
           <span class="co-kicker">OPEN SOURCE · 社区共建</span>
           <h3>下一款游戏，由你点单，也可以由你来做。</h3>
-          <p class="co-note">写一封信告诉我们想玩什么；或者让 AI Agent 按 <a href="https://github.com/WRM-FW/Gridfall/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">开发说明</a> 做一个单文件小游戏，提交 PR。通过后会补上路由、封面和首页卡片，正式摆进大厅。</p>
+          <p class="co-note">写一封信告诉我们想玩什么；也可以按开发说明自己做一个单文件小游戏，自己写或借助 AI 工具辅助都行，再提交 PR。通过后会补上路由、封面和首页卡片，正式摆进大厅。</p>
           <div class="co-actions">
             <a class="btn btn-green" href="mailto:3391792088@qq.com">3391792088@qq.com</a>
             <a class="btn btn-ghost" href="https://github.com/WRM-FW/Gridfall/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">查看共建说明 →</a>

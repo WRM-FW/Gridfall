@@ -34,7 +34,7 @@
 | `saolei.html` | 扫雷：单人，三档难度/自定义 |
 | `_redirects` | Cloudflare Pages 路由：六个游戏入口 200 代理，尾斜杠 301 |
 | `assets/covers/` | 大厅游戏封面（1200×600 PNG；`connect4.png` 为四子棋预留） |
-| `CONTRIBUTING.md` | 点单与社区共建：AI Agent 开发、PR 流程、开发者邮箱 |
+| `CONTRIBUTING.md` | 点单与社区共建：自己开发或 AI 辅助、PR 流程、开发者邮箱 |
 | `HBQS/index.html` | GitHub Pages 的入口回退，跳转到 `play.html` |
 | `ZGXQ/index.html` | GitHub Pages 的入口回退，跳转到 `xiangqi.html` |
 | `TQ/2048/JQ/SL/index.html` | GitHub Pages 的入口回退 |
@@ -91,7 +91,7 @@ GitHub Pages：从 `main` 分支根目录发布，推送后自动更新。
 ## 点单 / 共建
 
 - 开发者邮箱：3391792088@qq.com
-- 有想做的玩法，可以让 AI Agent 做一个单文件小游戏，向仓库提交 PR；具体约定与流程见 `CONTRIBUTING.md`。通过后会摆进大厅。
+- 有想做的玩法，可以自己实现单文件小游戏（也可借助 AI 工具辅助），向仓库提交 PR；具体约定与流程见 `CONTRIBUTING.md`。通过后会摆进大厅。
 
 ## 测试
 
