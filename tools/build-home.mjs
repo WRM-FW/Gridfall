@@ -167,11 +167,19 @@ must('@media (max-width:900px){',
 
 must('</body>', `<script>
 (function(){
-  if (location.protocol !== 'file:') return;
-  document.querySelectorAll('a[data-local]').forEach(function(a){
-    var v = a.getAttribute('data-local');
-    if (v) a.setAttribute('href', v);
-  });
+  if (location.protocol === 'file:') {
+    document.querySelectorAll('a[data-local]').forEach(function(a){
+      var v = a.getAttribute('data-local');
+      if (v) a.setAttribute('href', v);
+    });
+    return;
+  }
+  // GitHub Pages 不支持 200 代理，走目录回退页；Cloudflare Pages 保持 /HBQS
+  if (/(^|\.)github\.io$/.test(location.hostname)) {
+    document.querySelectorAll('a[href^="./HBQS"]').forEach(function(a){
+      a.setAttribute('href', a.getAttribute('href').replace('./HBQS', './HBQS/'));
+    });
+  }
 })();
 </script>
 </body>`);

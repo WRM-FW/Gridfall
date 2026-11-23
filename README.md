@@ -4,7 +4,7 @@
 
 - 游戏大厅（Cloudflare Pages，主站）：https://play-gridfall.pages.dev/
 - 黑白棋社统一入口：https://play-gridfall.pages.dev/HBQS
-- GitHub Pages：https://wrm-fw.github.io/Gridfall/ （`/Gridfall/HBQS` 回退到 `play.html`）
+- GitHub Pages：https://wrm-fw.github.io/Gridfall/ （`/Gridfall/HBQS/` 回退到 `play.html`）
 
 `index.html` 是平台首页；`/HBQS` 是黑白棋社的固定入口（Cloudflare Pages 200 代理到 `play.html`，地址保持 `/HBQS`）；`play.html` 是对局页实现。`gridfall.pages.dev` 已被其他项目占用，因此主站使用 `play-gridfall.pages.dev`。
 

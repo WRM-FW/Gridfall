@@ -69,7 +69,7 @@
 - 规则：游戏中文名的汉语拼音首字母，全部大写，直接作为主域名下的一级路径；不使用子域名。
 - 每个入口必须是可刷新、可复制、可前进/后退的真实 URL，不依赖前端内存路由。
 - 当前已上线：
-  - 黑白棋社：`/HBQS`（Cloudflare Pages `_redirects` 200 代理到 `play.html`，地址保持 `/HBQS`；`/HBQS/` 301 到 `/HBQS`；GitHub Pages 用 `HBQS/index.html` 回退到 `play.html`）
+  - 黑白棋社：`/HBQS`（Cloudflare Pages `_redirects` 200 代理到 `play.html`，地址保持 `/HBQS`；`/HBQS/` 301 到 `/HBQS`；GitHub Pages 用 `HBQS/index.html`（以 `/HBQS/` 访问）回退到 `play.html`）
 - 预留命名（后续上线时按同一规则创建入口与 `_redirects`）：
   | 游戏 | 路径 |
   | --- | --- |
