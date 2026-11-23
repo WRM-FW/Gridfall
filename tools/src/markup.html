@@ -1,0 +1,274 @@
+<header class="top">
+  <div class="brand">
+    <h1>棋盘</h1>
+    <p class="sub">Gridfall <span class="sep">—</span> 木质棋盘 · 陶瓷棋子 · 五子棋 / 连珠 / 围棋</p>
+  </div>
+  <div class="top-actions">
+    <a class="hall-link" href="./index.html" title="返回 Gridfall 游戏大厅">← 游戏大厅</a>
+    <button class="dl-btn" id="btnDownload" type="button">下载单文件 HTML</button>
+  </div>
+</header>
+
+<nav class="tabs" id="mainTabs" aria-label="游戏切换">
+  <button id="tabGomoku" class="active" type="button">五子棋</button>
+  <button id="tabGo" type="button">围棋</button>
+  <button id="tabOnline" type="button">联机</button>
+</nav>
+
+<section id="secGomoku">
+  <div class="layout">
+    <div class="board-col">
+      <div class="board-frame" id="gFrame">
+        <div class="board-inner"><canvas id="gBoard" width="1240" height="1240"></canvas></div>
+      </div>
+      <p class="board-note">香榧木纹盘面 · 黑瓷与白瓷釉面棋子 · 红点为最后一手</p>
+    </div>
+    <div class="side">
+      <div class="card card-status">
+        <div class="result" id="gResult"></div>
+        <div class="status" id="gStatus"></div>
+        <div class="hint phasebar hidden" id="gPhase"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="primary" id="gNew" type="button">新对局</button>
+          <button id="gUndo" type="button">悔棋</button>
+          <button id="gResign" type="button">认输</button>
+          <button id="gRules" type="button">规则说明</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="gReplayBtn" type="button">棋谱回放</button>
+          <button id="gMarkToggle" type="button">禁手点标记：开</button>
+        </div>
+        <div id="gReplayPanel" class="hidden" style="margin-top:10px">
+          <div class="hint" id="gRepInfo"></div>
+          <div class="row" style="margin-top:6px">
+            <button id="gRepPrev" type="button">◀ 上一步</button>
+            <button id="gRepNext" type="button">下一步 ▶</button>
+            <button id="gRepExit" type="button">退出回放</button>
+          </div>
+        </div>
+        <div id="gOpeningPanel" class="hidden" style="margin-top:12px">
+          <div class="hint" style="margin:0 0 6px">选择开局形状（临时黑方落前三手）</div>
+          <div class="openings" id="gOpenings"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>对局设置</h2>
+        <div class="seg" id="gRuleSeg">
+          <button data-v="free" class="active" type="button">普通五子棋</button>
+          <button data-v="renju" type="button">国际连珠 Renju</button>
+        </div>
+        <div id="gOpeningWrap" class="hidden" style="margin-top:8px">
+          <div class="seg" id="gOpeningSeg">
+            <button data-v="free" class="active" type="button">自由开局</button>
+            <button data-v="formal" type="button">RIF 正式开局</button>
+          </div>
+        </div>
+        <div class="seg" id="gOppSeg" style="margin-top:8px">
+          <button data-v="ai" class="active" type="button">人机对战</button>
+          <button data-v="human" type="button">双人对弈</button>
+        </div>
+        <div id="gAiOpts" style="margin-top:8px">
+          <div class="seg" id="gLevelSeg">
+            <button data-v="1" type="button">简单</button>
+            <button data-v="2" type="button">一般</button>
+            <button data-v="3" class="active" type="button">普通</button>
+            <button data-v="4" type="button">困难</button>
+            <button data-v="5" type="button">极难</button>
+          </div>
+        </div>
+        <div class="seg" id="gColorSeg" style="margin-top:8px">
+          <button data-v="1" class="active" type="button">执黑 · 先行</button>
+          <button data-v="2" type="button">执白 · 后行</button>
+        </div>
+        <p class="hint" style="margin:9px 0 0">黑棋永远先行：选执黑由你落第一子，选执白则电脑执黑先落。</p>
+      </div>
+
+      <div class="card">
+        <h2>对局记录</h2>
+        <div class="stat-grid">
+          <span><b id="gTimeB">00:00</b></span>
+          <span><b id="gTimeW">00:00</b></span>
+          <span>手数 <b id="gMoveCount">0</b></span>
+          <span>最后一手 <b id="gLastText">—</b></span>
+        </div>
+        <div class="moves" id="gMoves"></div>
+        <p class="statsline" id="gStats"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="secGo" class="hidden">
+  <div class="layout">
+    <div class="board-col">
+      <div class="board-frame" id="wFrame">
+        <div class="board-inner"><canvas id="wBoard" width="1240" height="1240"></canvas></div>
+      </div>
+      <p class="board-note">香榧木纹盘面 · 陶瓷棋子 · 中国规则数子</p>
+    </div>
+    <div class="side">
+      <div class="card card-status">
+        <div class="result" id="wResult"></div>
+        <div class="status" id="wStatus"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="primary" id="wNew" type="button">新对局</button>
+          <button id="wPass" type="button">停一手</button>
+          <button id="wUndo" type="button">悔棋</button>
+          <button id="wResign" type="button">认输</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="wRules" type="button">规则说明</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>对局设置</h2>
+        <div class="seg" id="wSizeSeg">
+          <button data-v="9" type="button">9 路</button>
+          <button data-v="13" type="button">13 路</button>
+          <button data-v="19" class="active" type="button">19 路</button>
+        </div>
+        <div class="seg" id="wOppSeg" style="margin-top:8px">
+          <button data-v="ai" class="active" type="button">人机对战</button>
+          <button data-v="human" type="button">双人对弈</button>
+        </div>
+        <div id="wAiOpts" style="margin-top:8px">
+          <div class="seg" id="wLevelSeg">
+            <button data-v="1" type="button">简单</button>
+            <button data-v="2" type="button">一般</button>
+            <button data-v="3" class="active" type="button">普通</button>
+            <button data-v="4" type="button">困难</button>
+            <button data-v="5" type="button">极难</button>
+          </div>
+        </div>
+        <div class="seg" id="wColorSeg" style="margin-top:8px">
+          <button data-v="1" class="active" type="button">执黑 · 先行</button>
+          <button data-v="2" type="button">执白 · 后行</button>
+        </div>
+        <p class="hint" style="margin:9px 0 0">黑先，9/13/19 路可选；围棋五档为启发式棋力差异。</p>
+      </div>
+
+      <div class="card">
+        <h2>对局记录</h2>
+        <div class="stat-grid">
+          <span><b id="wTimeB">00:00</b></span>
+          <span><b id="wTimeW">00:00</b></span>
+          <span>手数 <b id="wMoveCount">0</b></span>
+          <span>提子 黑 <b id="wCapB">0</b> · 白 <b id="wCapW">0</b></span>
+        </div>
+        <div class="moves" id="wMoves"></div>
+        <p class="statsline" id="wStats"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="secOnline" class="hidden">
+  <div class="layout">
+    <div class="board-col">
+      <div class="board-frame" id="nFrame">
+        <div class="board-inner"><canvas id="nBoard" width="1240" height="1240"></canvas></div>
+      </div>
+      <p class="board-note" id="nNote">联机对局 · 房主权威判定 · 双方盘面完全同步</p>
+    </div>
+    <div class="side">
+      <div class="card card-status">
+        <div class="result" id="nResult"></div>
+        <div class="status" id="nStatus">联机未连接</div>
+        <div class="hint" id="nSubStatus">创建房间，或输入房间码加入。</div>
+        <div class="row" style="margin-top:12px">
+          <button class="primary" id="nRematch" type="button" disabled>再来一局</button>
+          <button id="nPass" type="button" disabled class="hidden">停一手</button>
+          <button id="nResign" type="button" disabled>认输</button>
+          <button id="nLeave" type="button" disabled>离开房间</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="nRules" type="button">规则说明</button>
+        </div>
+      </div>
+
+      <div class="card" id="nLobbyCard">
+        <h2>联机房间</h2>
+        <div class="seg" id="nGameSeg">
+          <button data-v="gomoku" class="active" type="button">五子棋</button>
+          <button data-v="go" type="button">围棋</button>
+        </div>
+        <div id="nGomokuOpts" style="margin-top:8px">
+          <div class="seg" id="nRuleSeg">
+            <button data-v="free" class="active" type="button">普通五子棋</button>
+            <button data-v="renju" type="button">国际连珠</button>
+          </div>
+          <div id="nOpeningWrap" class="hidden" style="margin-top:8px">
+            <div class="seg" id="nOpeningSeg">
+              <button data-v="free" class="active" type="button">自由开局</button>
+              <button data-v="formal" type="button">RIF 正式开局</button>
+            </div>
+          </div>
+        </div>
+        <div id="nGoOpts" class="hidden" style="margin-top:8px">
+          <div class="seg" id="nSizeSeg">
+            <button data-v="9" type="button">9 路</button>
+            <button data-v="13" type="button">13 路</button>
+            <button data-v="19" class="active" type="button">19 路</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="primary" id="nCreate" type="button">创建房间</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <input id="nCodeInput" maxlength="6" placeholder="输入 6 位房间码" autocomplete="off" spellcheck="false">
+          <button id="nJoin" type="button">加入房间</button>
+        </div>
+        <p class="hint" id="nLobbyHint" style="margin:9px 0 0">房间码即入场凭证，只发给你的对手。房主执黑先行。</p>
+        <div class="room-code hidden" id="nRoomBox">
+          <span>房间码</span><b id="nRoomCode">------</b><button id="nCopy" type="button">复制</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>对局信息</h2>
+        <div class="stat-grid">
+          <span>你执 <b id="nColor">—</b></span>
+          <span>轮次 <b id="nTurnText">—</b></span>
+          <span>手数 <b id="nMoveCount">0</b></span>
+          <span>连接 <b id="nConn">未连接</b></span>
+          <span>本房间 <b id="nRecord">0 胜 0 负</b></span>
+          <span>规则 <b id="nRuleText">—</b></span>
+        </div>
+        <div class="moves" id="nMoves"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<details class="pages" style="margin-top:18px">
+  <summary>关于联机与部署</summary>
+  <ol>
+    <li>联机后端为 Supabase Realtime（Broadcast + Presence），不需要数据库表；房间码即频道名的一部分。</li>
+    <li>房主是权威端：落子、禁手、胜负、劫争都由房主按本地规则判定后广播全量盘面，客户端只渲染快照。</li>
+    <li>单机功能离线可用；联机需要网络与 Supabase 配置，页面会按需加载客户端库。</li>
+  </ol>
+</details>
+
+<div class="modal" id="rulesModal" role="dialog" aria-modal="true">
+  <div class="box">
+    <h2>规则说明</h2>
+    <h3>普通五子棋</h3>
+    <p>15×15，黑先，无禁手，任意方向连成五子或以上（长连）即胜。</p>
+    <h3>国际连珠 Renju（RIF）</h3>
+    <p>黑棋受禁手限制，白棋不受限。黑棋必须恰好五连才胜（五连优先于三三/四四）；白棋五连或长连均胜。黑棋禁手：<b>三三</b>（同时形成两个活三）、<b>四四</b>（同时形成两个四）、<b>长连</b>（六子或以上）。活三按 RIF 9.3 递归判定：延伸点本身是禁手的三不算活三（伪活三）。</p>
+    <h3>RIF 正式开局</h3>
+    <p>临时黑方落第 1 手于天元，双方按 26 种规定开局完成前三手（黑-白-黑，直接开局 13 种 + 间接开局 13 种）；临时白方决定是否交换黑白；执白方落第 4 手；执黑方提出两个第五手候选（须通过禁手检测），执白方选其一落下；执白方落第 6 手后进入正常对弈。</p>
+    <h3>围棋</h3>
+    <p>黑先，可选 9/13/19 路。无气提子、禁着点（不可自杀）、劫争不可立即回提。双方连续停手终局，中国规则数子，黑贴 3.75 子（7.5 目）。</p>
+    <h3>联机</h3>
+    <p>房主执黑先行；房间码只发给对手。所有规则由房主端按上面的本地规则判定，再把完整盘面广播给对手。未轮到的一方不能落子。对手掉线时房间保留，可等待重连；房主离开则房间关闭。对局结束后双方都点「再来一局」才会开始新局。</p>
+    <h3>难度</h3>
+    <p>简单 → 一般 → 普通 → 困难 → 极难。极难使用 Alpha-Beta 深搜 + VCF 连续冲四搜索，minimax 有 3.4 秒思考上限。</p>
+    <p class="hint">说明：正式开局的 26 种形状按 RIF 官方图校正（直接开局第二手在天元正右，间接开局在右上斜邻）；对局与战绩只保存在当前页面内，刷新后清空。</p>
+    <button class="primary" id="rulesClose" type="button">关闭</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>

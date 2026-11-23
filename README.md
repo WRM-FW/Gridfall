@@ -46,6 +46,22 @@ GitHub Pages：从 `main` 分支根目录发布，推送后自动更新。
 - 游戏大厅直接复用项目素材库 `00_Gridfall首页.html` 的蓝色街机大厅设计，并替换为当前真实游戏与联机入口。
 - 对局页复用 `01_木质棋盘陶瓷棋子以及配套UI.html` 的木质棋盘、陶瓷棋子与瓷白/深木 UI，Canvas 绘制。
 
+## 测试
+
+```bash
+cd tests
+node run-engine.mjs
+node local-visual.mjs
+node online-core.mjs
+node online-extra.mjs
+node online-swap.mjs
+node home-test.mjs
+node live-home.mjs
+node live-online.mjs
+```
+
+详见 `tests/README.md`。
+
 ## 已验证
 
 - 引擎规则测试 31/31；本地界面 5/5；联机核心 7/7；联机扩展 5/5；线上核心 4/4；线上正式连珠交换 4/4；首页与深链接 9/9。

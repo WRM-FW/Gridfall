@@ -1,0 +1,95 @@
+/* ===== Gridfall 新增：标签、结果、棋谱、联机、弹窗、提示 ===== */
+.tabs{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px; }
+.tabs button{
+  min-height:42px; padding:8px 22px; border-radius:999px; cursor:pointer;
+  border:1px solid #c9b489; color:#3a2410; font-weight:600; letter-spacing:.06em;
+  background:linear-gradient(180deg,#fffdf6,#f1e5c9);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 5px rgba(0,0,0,.28);
+}
+.tabs button:hover{ border-color:#e8cf96; }
+.tabs button.active{
+  background:linear-gradient(180deg,#5a3c17,#33200a); color:#f7ecd4; border-color:#241708;
+  box-shadow:inset 0 1px 0 rgba(255,226,170,.35), inset 0 -2px 4px rgba(0,0,0,.45), 0 2px 5px rgba(0,0,0,.3);
+}
+canvas#gBoard, canvas#wBoard, canvas#nBoard{
+  display:block; width:100%; height:auto; aspect-ratio:1/1;
+  cursor:pointer; touch-action:manipulation; border-radius:4px;
+}
+canvas#gBoard.no-turn, canvas#wBoard.no-turn, canvas#nBoard.no-turn{ cursor:not-allowed; }
+.phasebar{ background:rgba(255,255,255,.06); border:1px solid rgba(255,235,190,.18); border-radius:8px; padding:7px 10px; line-height:1.6; }
+.card-status .phasebar{ color:#f0e2c4; }
+.card .phasebar{ background:var(--tray); border-color:var(--line); color:var(--ink2); }
+.result{ border-radius:9px; padding:9px 12px; font-weight:700; font-size:15px; display:none; margin-bottom:11px; border:1px solid transparent; }
+.result.show{ display:block; }
+.result.win{ background:rgba(46,125,70,.20); border-color:#2e7d46; color:#1f5d33; }
+.result.lose{ background:rgba(179,55,42,.16); border-color:#b3372a; color:#8e2a20; }
+.result.draw{ background:rgba(120,90,40,.12); border-color:#c9b489; color:#6a563d; }
+.card-status .result.win{ color:#c8f4d2; border-color:#4f9d68; background:rgba(46,125,70,.28); }
+.card-status .result.lose{ color:#ffc8bc; border-color:#c0503f; background:rgba(179,55,42,.28); }
+.card-status .result.draw{ color:#f3e7cb; border-color:#8a7355; background:rgba(255,255,255,.08); }
+.moves{
+  max-height:190px; overflow:auto; font-size:13px; line-height:1.9; border-top:1px dashed var(--line);
+  margin-top:10px; padding-top:8px; font-variant-numeric:tabular-nums; color:var(--ink2);
+}
+.moves span{ display:inline-block; min-width:74px; }
+.statsline{ font-size:12.5px; color:var(--ink3); line-height:1.8; margin:8px 0 0; }
+.card-status .statsline{ color:#cdb488; }
+.room-code{
+  display:flex; align-items:center; gap:10px; margin-top:12px; padding:10px 12px;
+  border:1px dashed var(--line-dark); border-radius:9px; background:var(--tray); color:var(--ink2); font-size:13px;
+}
+.room-code b{ font:700 24px/1 ui-monospace,Consolas,"Courier New",monospace; letter-spacing:.18em; color:var(--wood-800); }
+.room-code button{ margin-left:auto; min-height:34px; }
+#nCodeInput{
+  flex:1 1 120px; min-height:40px; border:1px solid var(--line-dark); border-radius:8px;
+  padding:6px 10px; font:inherit; letter-spacing:.14em; text-transform:uppercase;
+  background:#fffdf7; color:var(--ink); box-shadow:inset 0 2px 4px rgba(101,70,26,.12);
+}
+#nCodeInput::placeholder{ letter-spacing:.04em; text-transform:none; color:var(--ink3); }
+.toast{
+  position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(16px);
+  opacity:0; pointer-events:none; z-index:70; transition:opacity .2s, transform .2s;
+  background:linear-gradient(180deg,#54350f,#33200b); color:#f7ecd4; border:1px solid #8a6a34;
+  border-radius:999px; padding:9px 18px; font-size:13.5px; box-shadow:0 10px 24px rgba(0,0,0,.4);
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.modal{ position:fixed; inset:0; background:rgba(24,14,2,.62); display:none; align-items:flex-start; justify-content:center; overflow:auto; padding:28px 12px; z-index:50; }
+.modal.show{ display:flex; }
+.modal .box{
+  background:linear-gradient(180deg,#fffdf7,var(--porcelain)); border:1px solid var(--line-dark);
+  border-top:6px solid var(--wood-800); border-radius:12px; max-width:640px; width:100%;
+  padding:22px 24px; line-height:1.75; font-size:14px; color:var(--ink);
+  box-shadow:0 24px 60px rgba(10,5,0,.5);
+}
+.modal .box h2{ margin:0 0 10px; font-size:19px; font-family:"Songti SC","STSong","SimSun",serif; letter-spacing:.06em; }
+.modal .box h3{ font-size:15px; margin:16px 0 4px; color:var(--ink2); }
+.modal .box p{ margin:6px 0; }
+.modal .box code{ background:var(--tray); padding:1px 6px; border-radius:5px; }
+details.pages{ background:linear-gradient(180deg,#fffdf7,var(--porcelain)); border:1px solid var(--line); border-radius:12px; padding:12px 16px; box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(8,4,0,.22); }
+details.pages summary{ font-weight:600; cursor:pointer; min-height:32px; color:var(--ink2); letter-spacing:.04em; }
+details.pages ol{ line-height:1.9; font-size:13.5px; margin:8px 0; padding-left:20px; }
+.hidden{ display:none !important; }
+.side .card{ margin-bottom:0; }
+.side{ align-self:start; }
+@media (min-width:1024px){
+  .side{ position:sticky; top:20px; }
+}
+/* 选中态：与素材库的 aria-pressed 视觉一致 */
+.seg button.active{
+  background:linear-gradient(180deg,#5a3c17 0%, #40290d 60%, #33200a 100%);
+  color:#f7ecd4; border-color:#241708;
+  box-shadow: inset 0 1px 0 rgba(255,226,170,.4), inset 0 -2px 4px rgba(0,0,0,.45), 0 2px 5px rgba(60,38,8,.35);
+}
+.card-status .okmsg{ color:#a7e6b4; font-weight:600; }
+.stat-grid b.on{ color:var(--wood-700); }
+.card-status .stat-grid b.on{ color:#f0c878; }
+
+/* 游戏页顶栏：返回大厅 */
+.top-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-left:auto; }
+.hall-link{
+  display:inline-flex; align-items:center; min-height:40px; padding:7px 14px; border-radius:9px;
+  border:1px solid #c9b489; background:linear-gradient(180deg,#fffdf6,#f1e5c9); color:#3a2410;
+  font-weight:700; font-size:14px; text-decoration:none; letter-spacing:.04em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 5px rgba(0,0,0,.25);
+}
+.hall-link:hover{ border-color:#e8cf96; }

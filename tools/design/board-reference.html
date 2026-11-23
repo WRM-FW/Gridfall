@@ -1,0 +1,1372 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<link rel="icon" href="data:," />
+<title>棋盘 · 木质陶瓷版 — Gridfall 参考版</title>
+<style>
+  :root{
+    --ink:#2e2013; --ink2:#6a563d; --ink3:#8a7355;
+    --porcelain:#fdfaf2; --porcelain2:#f7f0df; --tray:#ece0c6;
+    --line:#ddd0b2; --line-dark:#c9b489;
+    --wood-900:#241708; --wood-800:#3a2410; --wood-700:#54350f;
+    --wood:#8a5a1e; --wood-light:#b3812f; --danger:#b3372a; --danger-lt:#ffab9d;
+    --radius:12px;
+    color-scheme: light;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+    color:var(--ink); min-height:100dvh;
+    /* 木桌台面：深胡桃木色 + 与盘面同走向的细纹，衬托瓷白面板与棋盘 */
+    background:
+      repeating-linear-gradient(93deg, rgba(0,0,0,.14) 0 2px, transparent 2px 9px, rgba(255,214,150,.045) 9px 11px, transparent 11px 19px),
+      repeating-linear-gradient(178deg, rgba(0,0,0,.08) 0 1px, transparent 1px 6px),
+      radial-gradient(1100px 520px at 50% -8%, rgba(214,164,92,.28) 0%, transparent 62%),
+      linear-gradient(160deg,#4c3319 0%, #3c2712 46%, #2e1e0d 100%);
+    background-attachment:fixed;
+  }
+  button,select{ font:inherit; }
+  button{ -webkit-tap-highlight-color:transparent; }
+  button:focus-visible{ outline:2px solid var(--wood-light); outline-offset:2px; }
+  .wrap{ max-width:1400px; margin:0 auto; padding:20px clamp(14px,2.6vw,32px) 36px; }
+
+  /* ---------- 顶栏：木牌题字 + 瓷面按钮 ---------- */
+  header.top{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .brand{ display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; min-width:0; }
+  header.top h1{
+    font-family:"Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;
+    font-size:30px; line-height:1.1; margin:0; font-weight:700; letter-spacing:.22em;
+    color:#f6ead0; text-shadow:0 1px 0 rgba(0,0,0,.45), 0 0 22px rgba(230,180,100,.18);
+  }
+  header.top .sub{ margin:0; font-size:13px; }
+  header.top .sub{ color:#cdbb96; letter-spacing:.05em; }
+  header.top .sub .sep{ opacity:.55; margin:0 2px; }
+  .dl-btn{
+    min-height:40px; cursor:pointer; font-size:14px; letter-spacing:.04em;
+    color:#3a2410; background:linear-gradient(180deg,#fffdf6 0%, #f6ecd6 58%, #eee0c2 100%);
+    border:1px solid #d8c49a; border-radius:9px; padding:8px 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -2px 4px rgba(146,110,52,.22), 0 3px 8px rgba(0,0,0,.35);
+  }
+  .dl-btn:hover{ background:linear-gradient(180deg,#ffffff 0%, #faf1dc 58%, #f2e4c6 100%); }
+  .dl-btn:active{ transform:translateY(1px); }
+
+  /* ---------- 主布局 ---------- */
+  .layout{ display:grid; grid-template-columns:minmax(0,1fr) 372px; gap:22px; align-items:start; }
+  .board-col{ min-width:0; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .board-note{ margin:0; font-size:12.5px; letter-spacing:.08em; color:#bfa87e; text-align:center; line-height:1.6; }
+
+  /* ---------- 木质棋盘框（保留上一版验收质感） ---------- */
+  .board-frame{
+    width:min(100%, 672px); min-width:0;
+    padding:clamp(12px,2.2vw,22px);
+    border-radius:10px;
+    background:
+      repeating-linear-gradient(93deg, rgba(60,32,8,.16) 0 2px, transparent 2px 7px, rgba(255,220,160,.07) 7px 9px, transparent 9px 15px),
+      repeating-linear-gradient(178deg, rgba(40,20,4,.10) 0 1px, transparent 1px 5px),
+      linear-gradient(135deg,#7c4f22 0%, #96682e 28%, #7a4a1e 55%, #8f5f27 80%, #6e441b 100%);
+    box-shadow:
+      inset 0 2px 3px rgba(255,226,170,.55),
+      inset 0 -3px 6px rgba(30,16,2,.55),
+      inset 2px 0 4px rgba(255,226,170,.25),
+      inset -2px 0 5px rgba(30,16,2,.4),
+      0 22px 44px rgba(10,5,0,.5),
+      0 4px 12px rgba(10,5,0,.4);
+    position:relative;
+  }
+  .board-frame::after{
+    content:""; position:absolute; inset:clamp(8px,1.8vw,16px); border-radius:6px;
+    box-shadow: inset 0 0 0 2px rgba(43,24,4,.35), inset 0 3px 8px rgba(43,24,4,.45);
+    pointer-events:none;
+  }
+  .board-inner{
+    border-radius:4px; overflow:hidden; line-height:0;
+    box-shadow: 0 1px 2px rgba(40,22,2,.5), inset 0 0 24px rgba(120,72,10,.25);
+    background:#dfb264;
+  }
+  canvas#board{ display:block; width:100%; height:auto; aspect-ratio:1/1; cursor:pointer; touch-action:manipulation; }
+  canvas#board.no-turn{ cursor:not-allowed; }
+
+  /* ---------- 侧栏：瓷白面板 ---------- */
+  .side{ min-width:0; display:flex; flex-direction:column; gap:14px; }
+  .card{
+    background:linear-gradient(180deg,#fffdf7 0%, var(--porcelain) 55%, var(--porcelain2) 100%);
+    border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px 16px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.9),
+      inset 0 -3px 6px rgba(146,110,52,.08),
+      0 10px 22px rgba(8,4,0,.32);
+  }
+  .card h2{
+    font-size:12.5px; margin:0 0 11px; color:var(--ink2); letter-spacing:.22em; font-weight:600;
+    display:flex; align-items:center; gap:9px;
+  }
+  .card h2::before{ content:""; width:7px; height:7px; border-radius:50%; flex:0 0 auto; }
+  .card h2::before{ background:radial-gradient(circle at 35% 30%, #ffffff, #c9b489 78%); box-shadow:0 1px 2px rgba(90,64,20,.4), inset 0 -1px 2px rgba(90,64,20,.3); }
+  .card h2::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, var(--line), transparent); }
+
+  /* 状态卡：深木牌面，与棋盘框同语言 */
+  .card-status{
+    color:#f3e7cb;
+    background:
+      repeating-linear-gradient(93deg, rgba(0,0,0,.16) 0 2px, transparent 2px 8px, rgba(255,220,160,.05) 8px 10px, transparent 10px 16px),
+      linear-gradient(150deg,#54350f 0%, #3f270e 55%, #33200b 100%);
+    border-color:#241708;
+    box-shadow:
+      inset 0 1px 0 rgba(255,226,170,.35),
+      inset 0 -3px 7px rgba(0,0,0,.5),
+      0 10px 22px rgba(8,4,0,.4);
+  }
+  .card-status .hint{ color:#cdb488; }
+  .card-status .warn{ color:var(--danger-lt); }
+  .card-status .row button{
+    background:linear-gradient(180deg,#fffdf6,#f1e5c9); border-color:#c9b489; color:#3a2410;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 2px 5px rgba(0,0,0,.3);
+  }
+  .card-status .row button.primary{
+    background:linear-gradient(180deg,#c08c3a,#9a6a24); border-color:#6e4a12; color:#fff8e8;
+    box-shadow: inset 0 1px 0 rgba(255,235,190,.55), inset 0 -2px 4px rgba(60,36,4,.4), 0 2px 5px rgba(0,0,0,.3);
+  }
+  .card-status .row button:hover:not(:disabled){ border-color:#e8cf96; }
+  .card-status .hint button{
+    background:linear-gradient(180deg,#fffdf6,#f1e5c9); color:#3a2410; border:1px solid #c9b489;
+    border-radius:7px; padding:4px 12px; cursor:pointer; margin:4px 2px 0;
+  }
+  .card-status #openingPanel button{
+    background:linear-gradient(180deg,#fffdf6,#f1e5c9); color:#3a2410; border:1px solid #c9b489; border-radius:7px; cursor:pointer;
+  }
+
+  /* 分段选择：木托盘 + 瓷钮，选中为深木釉面 */
+  .seg{
+    display:flex; flex-wrap:wrap; gap:5px;
+    background:var(--tray); border:1px solid var(--line); border-radius:10px; padding:5px;
+    box-shadow: inset 0 2px 5px rgba(101,70,26,.18), inset 0 -1px 0 rgba(255,255,255,.55);
+  }
+  .seg + .seg{ margin-top:8px; }
+  .seg button{
+    flex:1 1 auto; min-height:38px;
+    border:1px solid transparent; background:transparent; color:var(--ink2);
+    border-radius:7px; padding:6px 10px; cursor:pointer; font-size:14px; white-space:nowrap;
+  }
+  .seg button:hover:not(:disabled){ color:var(--ink); }
+  .seg button[aria-pressed="true"]{
+    background:linear-gradient(180deg,#5a3c17 0%, #40290d 60%, #33200a 100%);
+    color:#f7ecd4; border-color:#241708;
+    box-shadow: inset 0 1px 0 rgba(255,226,170,.4), inset 0 -2px 4px rgba(0,0,0,.45), 0 2px 5px rgba(60,38,8,.35);
+  }
+  .seg button:disabled{ opacity:.45; cursor:not-allowed; }
+  .opts{ margin-top:10px; }
+  .opts .seg:first-child{ margin-top:0; }
+
+  .row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .row button{
+    flex:1 1 auto; min-height:38px;
+    border:1px solid var(--line-dark); background:linear-gradient(180deg,#fffdf7,#f6edd8);
+    border-radius:8px; padding:7px 10px; cursor:pointer; font-size:14px; white-space:nowrap; color:var(--ink);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 1px 3px rgba(90,64,20,.14);
+  }
+  .row button.primary{
+    background:linear-gradient(180deg,#a4742c,#86591c); border-color:#5f3f10; color:#fff8e8;
+    box-shadow: inset 0 1px 0 rgba(255,235,190,.5), inset 0 -2px 4px rgba(60,36,4,.35), 0 2px 5px rgba(60,38,8,.3);
+  }
+  .row button:hover:not(:disabled){ border-color:var(--wood-light); }
+  .row button:active:not(:disabled){ transform:translateY(1px); }
+  .row button:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .status{ font-size:15.5px; line-height:1.55; font-weight:600; letter-spacing:.02em; }
+  .status .turn-dot{ display:inline-block; width:13px; height:13px; border-radius:50%; vertical-align:-2px; margin-right:6px; box-shadow:0 1px 3px rgba(0,0,0,.5), inset -2px -3px 4px rgba(0,0,0,.25), inset 2px 3px 4px rgba(255,255,255,.5);}
+  .dot-b{ background:radial-gradient(circle at 35% 30%, #6a6a6a, #0a0a0a 70%); }
+  .dot-w{ background:radial-gradient(circle at 35% 30%, #ffffff, #cfc6b4 75%); }
+  .hint{ font-size:13px; color:var(--ink2); line-height:1.6; }
+  .warn{ color:var(--danger); font-weight:600; }
+  .stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:7px 14px; font-size:14px; color:var(--ink2); }
+  .stat-grid b{ color:var(--ink); font-variant-numeric:tabular-nums; margin-left:2px; }
+  .openings{ display:grid; grid-template-columns:repeat(auto-fill,minmax(86px,1fr)); gap:6px; max-height:190px; overflow:auto; padding:2px; }
+  .openings button{ border:1px solid var(--line-dark); background:linear-gradient(180deg,#fffdf7,#f6edd8); border-radius:7px; padding:5px 4px; font-size:12.5px; cursor:pointer; min-height:34px; color:var(--ink); }
+  .openings button:hover{ border-color:var(--wood-light); }
+  .hidden{ display:none !important; }
+  .foot{ margin:12px 0 0; font-size:12.5px; color:var(--ink3); line-height:1.7; border-top:1px solid var(--line); padding-top:10px; }
+
+  dialog{ border:1px solid var(--line-dark); border-top:6px solid var(--wood-800); border-radius:12px; max-width:min(92vw,560px); padding:22px 24px; background:linear-gradient(180deg,#fffdf7,var(--porcelain)); color:var(--ink); box-shadow:0 24px 60px rgba(10,5,0,.5); }
+  dialog::backdrop{ background:rgba(24,14,2,.55); }
+  dialog h3{ margin:0 0 10px; font-size:17px; font-family:"Songti SC","STSong","SimSun",serif; letter-spacing:.06em; }
+  dialog p, dialog li{ font-size:14px; line-height:1.7; }
+
+  /* ---------- 桌面横屏：棋盘按视口高度收束，侧栏独立滚动 ---------- */
+  @media (min-width:1024px){
+    .board-frame{ width:min(100%, 672px, calc(100dvh - 176px)); }
+    .side{ position:sticky; top:20px; max-height:calc(100dvh - 40px); overflow-y:auto; padding:2px 4px 6px 2px; scrollbar-width:thin; scrollbar-color:#8a6a34 transparent; }
+    .side::-webkit-scrollbar{ width:6px; }
+    .side::-webkit-scrollbar-thumb{ background:#8a6a34; border-radius:3px; }
+  }
+  @media (min-width:1024px) and (max-width:1240px){
+    .layout{ grid-template-columns:minmax(0,1fr) 336px; gap:18px; }
+  }
+  /* ---------- 平板 / 窄屏 ---------- */
+  @media (max-width:1023px){
+    .layout{ grid-template-columns:minmax(0,1fr); gap:16px; }
+    .side{ width:100%; }
+    .board-frame{ width:min(100%, 640px); }
+  }
+  /* ---------- 手机竖屏：棋盘占满宽度在上，操作在下 ---------- */
+  @media (max-width:640px){
+    .wrap{ padding:14px 10px 28px; }
+    header.top{ margin-bottom:12px; }
+    header.top h1{ font-size:25px; }
+    header.top .sub{ font-size:12px; width:100%; }
+    .dl-btn{ min-height:44px; }
+    .board-frame{ width:100%; padding:10px; border-radius:8px; }
+    .board-note{ font-size:11.5px; padding:0 6px; }
+    .card{ padding:14px 13px 15px; }
+    .seg{ gap:4px; padding:4px; }
+    .seg button{ min-height:44px; font-size:13.5px; padding:6px 7px; }
+    .row button{ min-height:44px; }
+    .openings button{ min-height:40px; }
+    .stat-grid{ font-size:13.5px; }
+    dialog{ padding:18px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>棋盘</h1>
+      <p class="sub">木质棋盘 · 陶瓷棋子 <span class="sep">—</span> Gridfall 视觉参考版（单文件）</p>
+    </div>
+    <button class="dl-btn" id="btnDownload" type="button">下载单文件 HTML</button>
+  </header>
+
+  <div class="layout">
+    <div class="board-col">
+      <div class="board-frame" aria-label="棋盘">
+        <div class="board-inner"><canvas id="board" width="1240" height="1240"></canvas></div>
+      </div>
+      <p class="board-note">香榧木纹盘面 · 深色硬木边框 · 黑瓷与白瓷釉面棋子 · 最后一手以棋子正中心红点标记</p>
+    </div>
+
+    <div class="side">
+      <div class="card card-status">
+        <div class="status" id="status">—</div>
+        <div class="hint" id="subStatus" style="margin-top:4px"></div>
+        <div class="row" style="margin-top:12px">
+          <button type="button" class="primary" id="btnNew">新对局</button>
+          <button type="button" id="btnUndo">悔棋</button>
+          <button type="button" id="btnPass" class="hidden">停一手</button>
+          <button type="button" id="btnResign">认输</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button type="button" id="btnReplayPrev">◀ 回放</button>
+          <button type="button" id="btnReplayNext">回放 ▶</button>
+          <button type="button" id="btnRules">规则说明</button>
+        </div>
+        <div id="openingPanel" class="hidden" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card">
+        <h2>游戏</h2>
+        <div class="seg" id="segGame">
+          <button type="button" data-v="gomoku" aria-pressed="true">五子棋</button>
+          <button type="button" data-v="go" aria-pressed="false">围棋</button>
+        </div>
+        <div id="gomokuOpts" class="opts">
+          <div class="seg" id="segRule">
+            <button type="button" data-v="free" aria-pressed="true">普通五子棋</button>
+            <button type="button" data-v="renju" aria-pressed="false">国际连珠 Renju</button>
+          </div>
+          <div class="seg" id="segOpening">
+            <button type="button" data-v="free" aria-pressed="true">自由开局</button>
+            <button type="button" data-v="formal" aria-pressed="false">正式开局（26 种）</button>
+          </div>
+        </div>
+        <div id="goOpts" class="hidden opts">
+          <div class="seg" id="segGoSize">
+            <button type="button" data-v="9" aria-pressed="false">9 路</button>
+            <button type="button" data-v="13" aria-pressed="false">13 路</button>
+            <button type="button" data-v="19" aria-pressed="true">19 路</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>对局设置</h2>
+        <div class="seg" id="segOpp">
+          <button type="button" data-v="ai" aria-pressed="true">人机对战</button>
+          <button type="button" data-v="2p" aria-pressed="false">双人对弈</button>
+        </div>
+        <div class="seg" id="segDiff" aria-label="难度">
+          <button type="button" data-v="1" aria-pressed="false">简单</button>
+          <button type="button" data-v="2" aria-pressed="false">一般</button>
+          <button type="button" data-v="3" aria-pressed="true">普通</button>
+          <button type="button" data-v="4" aria-pressed="false">困难</button>
+          <button type="button" data-v="5" aria-pressed="false">极难</button>
+        </div>
+        <div class="seg" id="segColor" aria-label="玩家执子">
+          <button type="button" data-v="1" aria-pressed="true">我执黑（先行）</button>
+          <button type="button" data-v="2" aria-pressed="false">我执白（黑先行）</button>
+        </div>
+        <p class="hint" style="margin:9px 0 0">规则：无论选黑选白，永远黑棋先行；选白时由对方执黑落第一手。</p>
+      </div>
+
+      <div class="card">
+        <h2>对局信息</h2>
+        <div class="stat-grid">
+          <span>黑方用时 <b id="timeB">00:00</b></span>
+          <span>白方用时 <b id="timeW">00:00</b></span>
+          <span>手数 <b id="moveCount">0</b></span>
+          <span id="capWrap">提子 黑 <b id="capB">0</b> · 白 <b id="capW">0</b></span>
+          <span>战绩（本页） 黑胜 <b id="winB">0</b></span>
+          <span>白胜 <b id="winW">0</b> · 和 <b id="winD">0</b></span>
+        </div>
+        <p class="foot">本参考版为纯静态单文件：无服务端、无大模型对战；战绩与对局只存在当前页面内，刷新即清空。材质说明：盘面为程序化绘制的香榧木纹（走向、深浅与节疤），边框为深色硬木框；棋子按陶瓷釉面渲染——黑瓷深黑釉光、白瓷乳白釉光，均带高光、边缘反光与落地阴影。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<dialog id="rulesDlg">
+  <h3>规则说明</h3>
+  <p><b>普通五子棋：</b>15×15，黑先，双方无禁手，五连或以上获胜。</p>
+  <p><b>国际连珠 Renju：</b>黑棋受三三、四四、长连禁手限制，且必须恰好五连获胜（五连优先于三三/四四）；白棋无禁手，五连或长连均胜。黑方回合时禁手点以红叉动态标记。活三按能否延伸为活四判定，并排除延伸点本身为禁手的伪活三。</p>
+  <p><b>正式开局：</b>临时黑方按 26 种规定开局落前三手（13 直接 + 13 间接，固定朝向呈现）→ 临时白方决定是否交换 → 白方落第四手 → 黑方提出两个第五手候选（须过禁手检测）→ 白方选其一 → 白方落第六手 → 正常对弈。</p>
+  <p><b>围棋：</b>9/13/19 路，黑先；提子、禁着点（无气自杀不可落）、简单劫争（提子后一手内不可回提）；停一手、认输、悔棋；双方连续停手终局，中国规则数子，黑贴 7.5 目（3.75 子）。</p>
+  <div class="row"><button type="button" id="btnCloseRules" class="primary">关闭</button></div>
+</dialog>
+
+<script>
+"use strict";
+/* ============================================================
+   Gridfall 木质陶瓷版 — 单文件参考实现
+   结构：board 渲染（木纹/陶瓷子） / gomoku+renju 规则 / go 规则
+         opening 开局状态机 / AI（5 档） / game-state / timer / replay
+   ============================================================ */
+var DIRS = [[1,0],[0,1],[1,1],[1,-1]];
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function fmtTime(s){ var m=Math.floor(s/60), r=s%60; return (m<10?"0":"")+m+":"+(r<10?"0":"")+r; }
+
+/* ---------------- 全局状态 ---------------- */
+var S = {
+  game:"gomoku", rule:"renjuFree", renju:false, openingMode:"free",
+  goSize:19, opp:"ai", diff:3, humanColor:1,
+  size:15, board:null, turn:1, history:[], snaps:[], over:false, winner:0, winReason:"",
+  lastMove:null, caps:{1:0,2:0}, ko:null, passes:0,
+  time:{1:0,2:0}, timerId:null, thinking:false,
+  replayIdx:-1, // -1 = 实时
+  stats:{1:0,2:0,draw:0},
+  opening:null, // {stage, tempBlackOwner, cand:[], candPick}
+  forbidden:new Map(), forbiddenWhy:new Map()
+};
+function ownerOf(color){ // 返回 'human' | 'ai' | 'p2a' | 'p2b'
+  if(S.opp==="2p") return color===1?"p2a":"p2b";
+  return color===S.humanColor?"human":"ai";
+}
+function isHumanTurn(){
+  if(S.over || S.thinking) return false;
+  var o = ownerOf(S.turn);
+  return o==="human"||o==="p2a"||o==="p2b";
+}
+function newBoard(n){ var b=[]; for(var i=0;i<n*n;i++) b.push(0); return b; }
+function idx(x,y){ return y*S.size+x; }
+function inB(x,y){ return x>=0&&y>=0&&x<S.size&&y<S.size; }
+
+/* ============================================================
+   渲染：木纹盘面 + 陶瓷棋子（Canvas）
+   ============================================================ */
+var cv = document.getElementById("board"), ctx = cv.getContext("2d");
+var W = 1240, PAD = 92; // 画布内边距（含坐标区）
+var woodCache = null, woodCacheKey = "";
+function cellPx(){ return (W - PAD*2)/(S.size-1); }
+function seededRand(seed){ var s=seed>>>0; return function(){ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+
+function makeWood(n){
+  var key = n+"";
+  if(woodCache && woodCacheKey===key) return woodCache;
+  var c = document.createElement("canvas"); c.width=W; c.height=W;
+  var g = c.getContext("2d"), rnd = seededRand(20261123);
+  // 基底：香榧/榧木黄褐，带纵向（y 向）轻微明暗带
+  var base = g.createLinearGradient(0,0,W,0);
+  base.addColorStop(0,"#dfae5e"); base.addColorStop(.25,"#e7ba6c");
+  base.addColorStop(.5,"#e2b263"); base.addColorStop(.78,"#e9bf71"); base.addColorStop(1,"#dcab5b");
+  g.fillStyle = base; g.fillRect(0,0,W,W);
+  // 大尺度色泽深浅云斑
+  for(var i=0;i<26;i++){
+    var x=rnd()*W, y=rnd()*W, r=120+rnd()*320;
+    var rg=g.createRadialGradient(x,y,0,x,y,r);
+    var dark = rnd()>0.5;
+    rg.addColorStop(0, dark?"rgba(166,110,32,0.10)":"rgba(255,230,170,0.10)");
+    rg.addColorStop(1,"rgba(0,0,0,0)");
+    g.fillStyle=rg; g.fillRect(x-r,y-r,r*2,r*2);
+  }
+  // 木纹：沿 x 方向走向的细长波纹（纹理走向一致，疏密/深浅随机）
+  for(var j=0;j<210;j++){
+    var gx = rnd()*W, amp = 2+rnd()*7, per = 260+rnd()*420, ph = rnd()*6.28;
+    var alpha = 0.04+rnd()*0.11, lw = 0.6+rnd()*1.7;
+    g.strokeStyle = "rgba(122,74,18,"+alpha.toFixed(3)+")";
+    g.lineWidth = lw; g.beginPath();
+    for(var yy=-10; yy<=W+10; yy+=14){
+      var xx = gx + Math.sin(yy/per*6.28+ph)*amp + Math.sin(yy/47+ph*2)*1.2;
+      if(yy===-10) g.moveTo(xx,yy); else g.lineTo(xx,yy);
+    }
+    g.stroke();
+  }
+  // 少量深纹主线
+  for(var k=0;k<14;k++){
+    var mx=rnd()*W, amp2=3+rnd()*6, per2=300+rnd()*300, ph2=rnd()*6.28;
+    g.strokeStyle="rgba(96,54,10,"+(0.13+rnd()*0.1).toFixed(3)+")";
+    g.lineWidth=1.6+rnd()*1.6; g.beginPath();
+    for(var y2=-10;y2<=W+10;y2+=12){
+      var x2=mx+Math.sin(y2/per2*6.28+ph2)*amp2;
+      if(y2===-10) g.moveTo(x2,y2); else g.lineTo(x2,y2);
+    }
+    g.stroke();
+  }
+  // 节疤（木节）2 处，克制
+  for(var q=0;q<2;q++){
+    var kx=120+rnd()*(W-240), ky=120+rnd()*(W-240);
+    for(var rr=16; rr>2; rr-=3){
+      g.strokeStyle="rgba(100,58,12,"+(0.10+ (16-rr)*0.012).toFixed(3)+")";
+      g.lineWidth=1.4; g.beginPath();
+      g.ellipse(kx,ky,rr*0.7,rr*1.25,0.2,0,6.29); g.stroke();
+    }
+    g.fillStyle="rgba(88,48,8,0.35)";
+    g.beginPath(); g.ellipse(kx,ky,2.6,4.4,0.2,0,6.29); g.fill();
+  }
+  // 盘面整体内阴影与暖光
+  var vg=g.createRadialGradient(W/2,W/2,W*0.32,W/2,W/2,W*0.74);
+  vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(94,54,6,0.16)");
+  g.fillStyle=vg; g.fillRect(0,0,W,W);
+  var hl=g.createLinearGradient(0,0,0,W);
+  hl.addColorStop(0,"rgba(255,240,200,0.10)"); hl.addColorStop(.5,"rgba(255,240,200,0)"); hl.addColorStop(1,"rgba(80,44,4,0.06)");
+  g.fillStyle=hl; g.fillRect(0,0,W,W);
+  woodCache=c; woodCacheKey=key; return c;
+}
+
+function starPoints(){
+  var n=S.size, pts=[];
+  if(n===15){ var a=[3,7,11]; for(var i=0;i<3;i++) for(var j=0;j<3;j++) pts.push([a[i],a[j]]); }
+  else if(n===19){ var b=[3,9,15]; for(var i2=0;i2<3;i2++) for(var j2=0;j2<3;j2++) pts.push([b[i2],b[j2]]); }
+  else if(n===13){ var c=[3,6,9]; pts.push([3,3],[9,3],[3,9],[9,9],[6,6],[3,6],[9,6],[6,3],[6,9]); }
+  else if(n===9){ pts.push([2,2],[6,2],[2,6],[6,6],[4,4]); }
+  return pts;
+}
+
+function drawStone(g, cx, cy, r, color, alpha){
+  g.save(); g.globalAlpha = alpha==null?1:alpha;
+  // 落地阴影
+  g.beginPath(); g.ellipse(cx+r*0.10, cy+r*0.16, r*0.98, r*0.92, 0, 0, 6.29);
+  g.fillStyle="rgba(43,22,2,0.34)"; g.fill();
+  g.beginPath(); g.ellipse(cx+r*0.05, cy+r*0.08, r*0.99, r*0.95, 0, 0, 6.29);
+  g.fillStyle="rgba(43,22,2,0.20)"; g.fill();
+  // 子身：陶瓷釉面径向渐变
+  var grad;
+  if(color===1){
+    grad=g.createRadialGradient(cx-r*0.38, cy-r*0.42, r*0.1, cx, cy, r*1.05);
+    grad.addColorStop(0,"#7d7d84"); grad.addColorStop(.28,"#3a3a40");
+    grad.addColorStop(.62,"#131316"); grad.addColorStop(1,"#000000");
+  } else {
+    grad=g.createRadialGradient(cx-r*0.38, cy-r*0.42, r*0.1, cx, cy, r*1.08);
+    grad.addColorStop(0,"#ffffff"); grad.addColorStop(.35,"#fdfaf2");
+    grad.addColorStop(.72,"#efe7d6"); grad.addColorStop(1,"#cfc2a8");
+  }
+  g.beginPath(); g.arc(cx,cy,r,0,6.29); g.fillStyle=grad; g.fill();
+  // 边缘反光环（釉面轮廓光）
+  g.beginPath(); g.arc(cx,cy,r*0.965,0,6.29);
+  g.strokeStyle = color===1 ? "rgba(210,220,235,0.20)" : "rgba(120,96,52,0.28)";
+  g.lineWidth = r*0.045; g.stroke();
+  // 主高光：左上釉面镜面光
+  var hg=g.createRadialGradient(cx-r*0.40, cy-r*0.46, 0, cx-r*0.40, cy-r*0.46, r*0.52);
+  hg.addColorStop(0, color===1?"rgba(255,255,255,0.85)":"rgba(255,255,255,0.95)");
+  hg.addColorStop(1,"rgba(255,255,255,0)");
+  g.beginPath(); g.ellipse(cx-r*0.38, cy-r*0.44, r*0.34, r*0.22, -0.6, 0, 6.29);
+  g.fillStyle=hg; g.fill();
+  // 底部弱反光（桌面反射回釉面）
+  g.beginPath(); g.ellipse(cx+r*0.18, cy+r*0.52, r*0.36, r*0.16, -0.4, 0, 6.29);
+  g.fillStyle = color===1 ? "rgba(190,200,215,0.13)" : "rgba(255,255,255,0.35)";
+  g.fill();
+  g.restore();
+}
+
+var hoverPos = null;
+function render(){
+  var n=S.size, cell=cellPx();
+  ctx.clearRect(0,0,W,W);
+  ctx.drawImage(makeWood(n),0,0);
+  // 坐标
+  ctx.fillStyle="rgba(74,44,8,0.85)"; ctx.font="600 25px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  var letters="ABCDEFGHJKLMNOPQRST";
+  for(var i=0;i<n;i++){
+    var p=PAD+i*cell;
+    if(S.game==="go") ctx.fillText(letters[i], p, PAD-46);
+    ctx.fillText(String(n-i), PAD-48, p);
+  }
+  // 网格
+  ctx.strokeStyle="rgba(66,38,6,0.88)"; ctx.lineWidth=2;
+  for(var a=0;a<n;a++){
+    var pa=PAD+a*cell;
+    ctx.beginPath(); ctx.moveTo(PAD,pa); ctx.lineTo(W-PAD,pa); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pa,PAD); ctx.lineTo(pa,W-PAD); ctx.stroke();
+  }
+  // 边线加粗
+  ctx.lineWidth=3.4; ctx.strokeStyle="rgba(52,29,3,0.95)";
+  ctx.strokeRect(PAD,PAD,W-PAD*2,W-PAD*2);
+  // 星位
+  ctx.fillStyle="rgba(52,29,3,0.92)";
+  starPoints().forEach(function(pt){
+    ctx.beginPath(); ctx.arc(PAD+pt[0]*cell, PAD+pt[1]*cell, n>=19?7:8.5, 0, 6.29); ctx.fill();
+  });
+  // 显示用棋盘（回放时用快照）
+  var board = (S.replayIdx>=0 && S.snaps[S.replayIdx]) ? S.snaps[S.replayIdx] : S.board;
+  var last = (S.replayIdx>=0) ? (S.history[S.replayIdx]||null) : S.lastMove;
+  var r = cell*0.475;
+  for(var y=0;y<n;y++) for(var x=0;x<n;x++){
+    var v=board[idx(x,y)]; if(!v) continue;
+    drawStone(ctx, PAD+x*cell, PAD+y*cell, r, v, 1);
+  }
+  // 连珠禁手点（仅黑方回合、实时、正式判定）
+  if(S.game==="gomoku" && S.renju && S.turn===1 && !S.over && S.replayIdx<0){
+    ctx.strokeStyle="rgba(179,55,42,0.9)"; ctx.lineWidth=4; ctx.lineCap="round";
+    S.forbidden.forEach(function(_,key){
+      var kx=key%S.size, ky=Math.floor(key/S.size);
+      var cxp=PAD+kx*cell, cyp=PAD+ky*cell, d=cell*0.17;
+      ctx.beginPath();
+      ctx.moveTo(cxp-d,cyp-d); ctx.lineTo(cxp+d,cyp+d);
+      ctx.moveTo(cxp+d,cyp-d); ctx.lineTo(cxp-d,cyp+d);
+      ctx.stroke();
+    });
+  }
+  // 围棋劫位标记
+  if(S.game==="go" && S.ko && S.replayIdx<0){
+    var kx2=S.ko[0], ky2=S.ko[1];
+    ctx.strokeStyle="rgba(179,55,42,0.95)"; ctx.lineWidth=3.5;
+    ctx.strokeRect(PAD+kx2*cell-cell*0.21, PAD+ky2*cell-cell*0.21, cell*0.42, cell*0.42);
+  }
+  // 开局第五手候选标记
+  if(S.opening && S.opening.stage==="pick5"){
+    S.opening.cand.forEach(function(cd,i2){
+      var cxp=PAD+cd[0]*cell, cyp=PAD+cd[1]*cell;
+      ctx.beginPath(); ctx.arc(cxp,cyp,cell*0.30,0,6.29);
+      ctx.fillStyle="rgba(179,55,42,0.92)"; ctx.fill();
+      ctx.fillStyle="#fff"; ctx.font="700 "+Math.round(cell*0.34)+"px sans-serif";
+      ctx.fillText(String(i2+1), cxp, cyp+1);
+    });
+  }
+  if(S.opening && S.opening.stage==="propose5" && S.opening.cand.length){
+    S.opening.cand.forEach(function(cd){
+      var cxp=PAD+cd[0]*cell, cyp=PAD+cd[1]*cell;
+      ctx.beginPath(); ctx.arc(cxp,cyp,cell*0.20,0,6.29);
+      ctx.strokeStyle="rgba(179,55,42,0.95)"; ctx.lineWidth=4; ctx.stroke();
+    });
+  }
+  // 悬停预览
+  if(hoverPos && isHumanTurn() && S.replayIdx<0 && !S.over){
+    var hx=hoverPos[0], hy=hoverPos[1];
+    if(inB(hx,hy) && !board[idx(hx,hy)]){
+      var bad = S.game==="gomoku" && S.renju && S.turn===1 && S.forbidden.has(idx(hx,hy));
+      drawStone(ctx, PAD+hx*cell, PAD+hy*cell, r, S.turn, bad?0.25:0.55);
+      if(bad){
+        var cxp2=PAD+hx*cell, cyp2=PAD+hy*cell, d2=cell*0.2;
+        ctx.strokeStyle="rgba(179,55,42,0.95)"; ctx.lineWidth=5; ctx.lineCap="round";
+        ctx.beginPath(); ctx.moveTo(cxp2-d2,cyp2-d2); ctx.lineTo(cxp2+d2,cyp2+d2);
+        ctx.moveTo(cxp2+d2,cyp2-d2); ctx.lineTo(cxp2-d2,cyp2+d2); ctx.stroke();
+      }
+    }
+  }
+  // 最后一手标记：棋子正中心红点
+  if(last && board[idx(last[0],last[1])]){
+    ctx.beginPath();
+    ctx.arc(PAD+last[0]*cell, PAD+last[1]*cell, Math.max(5,cell*0.11), 0, 6.29);
+    ctx.fillStyle="#d42a1e"; ctx.fill();
+    ctx.lineWidth=2; ctx.strokeStyle="rgba(255,255,255,0.75)"; ctx.stroke();
+  }
+  // 胜利连线
+  if(S.over && S.winLine && S.replayIdx<0){
+    ctx.strokeStyle="rgba(212,42,30,0.85)"; ctx.lineWidth=6; ctx.lineCap="round";
+    ctx.beginPath();
+    ctx.moveTo(PAD+S.winLine[0][0]*cell, PAD+S.winLine[0][1]*cell);
+    ctx.lineTo(PAD+S.winLine[1][0]*cell, PAD+S.winLine[1][1]*cell);
+    ctx.stroke();
+  }
+}
+
+/* ============================================================
+   五子棋 / Renju 规则
+   ============================================================ */
+function lineCount(b,x,y,dx,dy,color){
+  var c=1, i;
+  for(i=1;i<6;i++){ var nx=x+dx*i, ny=y+dy*i; if(!inB(nx,ny)||b[idx(nx,ny)]!==color) break; c++; }
+  for(i=1;i<6;i++){ var mx=x-dx*i, my=y-dy*i; if(!inB(mx,my)||b[idx(mx,my)]!==color) break; c++; }
+  return c;
+}
+function winLineFor(b,x,y,color){
+  for(var d=0;d<4;d++){
+    var dx=DIRS[d][0], dy=DIRS[d][1];
+    var cells=[[x,y]], i, nx, ny;
+    for(i=1;i<6;i++){ nx=x+dx*i; ny=y+dy*i; if(!inB(nx,ny)||b[idx(nx,ny)]!==color) break; cells.push([nx,ny]); }
+    for(i=1;i<6;i++){ nx=x-dx*i; ny=y-dy*i; if(!inB(nx,ny)||b[idx(nx,ny)]!==color) break; cells.unshift([nx,ny]); }
+    if(cells.length>=5) return [cells[0], cells[cells.length-1], cells.length];
+  }
+  return null;
+}
+// 某方向上，以 (x,y) 落 color 后，5 窗口内恰含 4 子且空 1 的获胜空点集合
+function fourWinPoints(b,x,y,dx,dy,color){
+  var pts=new Set();
+  for(var s=-4;s<=0;s++){
+    var cnt=0, empty=null, ok=true;
+    for(var i=0;i<5;i++){
+      var px=x+dx*(s+i), py=y+dy*(s+i);
+      if(!inB(px,py)){ ok=false; break; }
+      var v=(px===x&&py===y)?color:b[idx(px,py)];
+      if(v===color) cnt++;
+      else if(v===0) empty=[px,py];
+      else { ok=false; break; }
+    }
+    if(ok && cnt===4 && empty) pts.add(idx(empty[0],empty[1]));
+  }
+  return pts;
+}
+// 活三判定：存在延伸点 p，使落子后成活四（该方向获胜点恰为 2），且 p 本身非禁手（递归 1 层，depth 控制）
+function isLiveThreeDir(b,x,y,dx,dy,color,depth){
+  for(var t=-4;t<=4;t++){
+    if(t===0) continue;
+    var px=x+dx*t, py=y+dy*t;
+    if(!inB(px,py)||b[idx(px,py)]!==0) continue;
+    var b2=b.slice(); b2[idx(px,py)]=color;
+    // p 点须与 (x,y) 同属一个潜在连线：p 落子后该方向含 (x,y) 的连子数 >=3
+    if(lineCount(b2,px,py,dx,dy,color)<3) continue;
+    var wp=fourWinPoints(b2,x,y,dx,dy,color);
+    if(wp.size===2){
+      if(color===1 && depth>0){
+        // 伪活三排除：延伸点 p 本身若是禁手，则不算（RIF 9.3 递归，深度上限 1 层加速版）
+        var sub=analyzeGomoku(b,px,py,1,depth-1);
+        if(sub.forbidden) continue;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+function analyzeGomoku(b,x,y,color,depth){
+  if(depth==null) depth=1;
+  var b2=b.slice(); b2[idx(x,y)]=color;
+  var res={five:false, exactFive:false, overline:false, fours:0, liveThrees:0, fourDirs:0, forbidden:false, why:""};
+  var maxRun=0;
+  for(var d=0;d<4;d++){
+    var dx=DIRS[d][0], dy=DIRS[d][1];
+    var run=lineCount(b2,x,y,dx,dy,color);
+    if(run>maxRun) maxRun=run;
+    var wp=fourWinPoints(b,x,y,dx,dy,color); // 以原盘 + (x,y) 视为已落：fourWinPoints 内部已把 (x,y) 当 color
+    if(wp.size>0) res.fourDirs++;
+    if(color===1 && isLiveThreeDir(b,x,y,dx,dy,color,depth)) res.liveThrees++;
+    if(color===2 && isLiveThreeDir(b,x,y,dx,dy,color,0)) res.liveThrees++;
+  }
+  // 四的计数：用窗口去重（同一获胜点不重复计为两个四，但不同方向/不同获胜点分别计）
+  var fourSet=new Set();
+  for(var d2=0;d2<4;d2++){
+    var wp2=fourWinPoints(b,x,y,DIRS[d2][0],DIRS[d2][1],color);
+    wp2.forEach(function(p){ fourSet.add(d2+":"+p); });
+  }
+  // 活四在同一方向有 2 个获胜点，只算一个四：按方向折算
+  res.fours=res.fourDirs;
+  res.exactFive = (maxRun===5);
+  res.five = (maxRun>=5);
+  res.overline = (maxRun>=6);
+  if(color===1 && S.renju){
+    if(res.exactFive){ res.forbidden=false; } // 五连优先
+    else if(res.overline){ res.forbidden=true; res.why="长连禁手"; }
+    else if(res.fours>=2){ res.forbidden=true; res.why="四四禁手"; }
+    else if(res.liveThrees>=2){ res.forbidden=true; res.why="三三禁手"; }
+  }
+  res.maxRun=maxRun;
+  return res;
+}
+function gomokuLegal(x,y){
+  if(!inB(x,y)||S.board[idx(x,y)]!==0||S.over) return {ok:false};
+  if(S.game==="gomoku" && S.renju && S.turn===1){
+    var a=analyzeGomoku(S.board,x,y,1,1);
+    if(a.forbidden) return {ok:false, why:a.why};
+  }
+  return {ok:true};
+}
+function refreshForbidden(){
+  S.forbidden.clear(); S.forbiddenWhy.clear();
+  if(S.game!=="gomoku"||!S.renju||S.over) return;
+  for(var y=0;y<S.size;y++) for(var x=0;x<S.size;x++){
+    if(S.board[idx(x,y)]!==0) continue;
+    var a=analyzeGomoku(S.board,x,y,1,1);
+    if(a.forbidden){ S.forbidden.set(idx(x,y),true); S.forbiddenWhy.set(idx(x,y),a.why); }
+  }
+}
+
+/* ============================================================
+   围棋规则
+   ============================================================ */
+function groupAndLibs(b,x,y){
+  var color=b[idx(x,y)], seen=new Set([idx(x,y)]), stack=[[x,y]], libs=new Set(), stones=[];
+  while(stack.length){
+    var cur=stack.pop(), cx=cur[0], cy=cur[1]; stones.push(cur);
+    var nb=[[cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]];
+    for(var i=0;i<4;i++){
+      var nx=nb[i][0], ny=nb[i][1];
+      if(!inB(nx,ny)) continue;
+      var v=b[idx(nx,ny)];
+      if(v===0) libs.add(idx(nx,ny));
+      else if(v===color && !seen.has(idx(nx,ny))){ seen.add(idx(nx,ny)); stack.push([nx,ny]); }
+    }
+  }
+  return {stones:stones, libs:libs};
+}
+function goTryMove(b,x,y,color,ko){
+  if(!inB(x,y)||b[idx(x,y)]!==0) return null;
+  if(ko && ko[0]===x && ko[1]===y) return null;
+  var nb=b.slice(); nb[idx(x,y)]=color;
+  var opp=3-color, captured=0, capStones=[];
+  var adj=[[x+1,y],[x-1,y],[x,y+1],[x,y-1]], seenG=new Set();
+  for(var i=0;i<4;i++){
+    var ax=adj[i][0], ay=adj[i][1];
+    if(!inB(ax,ay)||nb[idx(ax,ay)]!==opp||seenG.has(idx(ax,ay))) continue;
+    var gr=groupAndLibs(nb,ax,ay);
+    gr.stones.forEach(function(s){ seenG.add(idx(s[0],s[1])); });
+    if(gr.libs.size===0){ captured+=gr.stones.length; capStones=capStones.concat(gr.stones); }
+  }
+  capStones.forEach(function(s){ nb[idx(s[0],s[1])]=0; });
+  var self=groupAndLibs(nb,x,y);
+  if(self.libs.size===0) return null; // 禁着点：自杀
+  var newKo=null;
+  if(captured===1 && self.stones.length===1) newKo=capStones[0];
+  return {board:nb, captured:captured, ko:newKo};
+}
+function goScore(b){
+  var n=S.size, seen=new Set(), black=0, white=0;
+  for(var y=0;y<n;y++) for(var x=0;x<n;x++){
+    var v=b[idx(x,y)];
+    if(v===1) black++; else if(v===2) white++;
+    else if(!seen.has(idx(x,y))){
+      // 空区域洪泛
+      var region=[], borders=new Set(), st=[[x,y]]; seen.add(idx(x,y));
+      while(st.length){
+        var cur=st.pop(); region.push(cur);
+        var nb2=[[cur[0]+1,cur[1]],[cur[0]-1,cur[1]],[cur[0],cur[1]+1],[cur[0],cur[1]-1]];
+        for(var i=0;i<4;i++){
+          var nx=nb2[i][0], ny=nb2[i][1];
+          if(!inB(nx,ny)) continue;
+          var vv=b[idx(nx,ny)];
+          if(vv===0 && !seen.has(idx(nx,ny))){ seen.add(idx(nx,ny)); st.push([nx,ny]); }
+          else if(vv!==0) borders.add(vv);
+        }
+      }
+      if(borders.size===1){ if(borders.has(1)) black+=region.length; else white+=region.length; }
+    }
+  }
+  return {black:black, white:white+7.5};
+}
+
+/* ============================================================
+   AI
+   ============================================================ */
+function gomokuCandidates(b,radius){
+  var set=new Set(), has=false;
+  for(var y=0;y<S.size;y++) for(var x=0;x<S.size;x++){
+    if(b[idx(x,y)]!==0){
+      has=true;
+      for(var dy=-radius;dy<=radius;dy++) for(var dx=-radius;dx<=radius;dx++){
+        var nx=x+dx, ny=y+dy;
+        if(inB(nx,ny)&&b[idx(nx,ny)]===0) set.add(idx(nx,ny));
+      }
+    }
+  }
+  if(!has) return [idx(7,7)];
+  return Array.from(set).map(function(k){ return [k%S.size, Math.floor(k/S.size)]; });
+}
+function pointScore(b,x,y,color){
+  // 启发式：进攻 + 防守，基于 analyze 的棋形
+  var atk=analyzeGomoku(b,x,y,color,0), def=analyzeGomoku(b,x,y,3-color,0);
+  function val(a){
+    if(a.five) return 10000000;
+    if(a.fours>=1 && a.liveThrees>=1) return 900000; // 四三
+    if(a.liveThrees>=2) return 850000;
+    if(a.fours>=2) return 880000;
+    if(a.fours>=1) return 120000; // 四（活四/冲四）
+    if(a.liveThrees>=1) return 30000;
+    return a.maxRun*100;
+  }
+  var s = val(atk)*1.0 + val(def)*0.92;
+  // 距中心微调
+  s += (14 - (Math.abs(x-7)+Math.abs(y-7)))*3;
+  return s;
+}
+function gomokuAI(){
+  var color=S.turn, b=S.board;
+  var cands=gomokuCandidates(b,2);
+  var legal=cands.filter(function(c){
+    if(S.renju && color===1){ var a=analyzeGomoku(b,c[0],c[1],1,1); if(a.forbidden) return false; }
+    return true;
+  });
+  if(!legal.length) legal=cands;
+  var lv=S.diff;
+  if(lv===1){
+    // 简单：只偶尔堵五，其余在中心附近随机
+    for(var i=0;i<legal.length;i++){
+      var d=analyzeGomoku(b,legal[i][0],legal[i][1],3-color,0);
+      if(d.five && Math.random()<0.45) return legal[i];
+      var a1=analyzeGomoku(b,legal[i][0],legal[i][1],color,0);
+      if(a1.five) return legal[i];
+    }
+    legal.sort(function(p,q){ return (Math.abs(p[0]-7)+Math.abs(p[1]-7))-(Math.abs(q[0]-7)+Math.abs(q[1]-7)); });
+    return legal[Math.floor(Math.random()*Math.min(10,legal.length))];
+  }
+  var scored=legal.map(function(c){ return {c:c, s:pointScore(b,c[0],c[1],color)+ (lv===2?Math.random()*26000:0)}; });
+  scored.sort(function(p,q){ return q.s-p.s; });
+  if(lv===2) return scored[0].c;
+  if(lv===3) return scored[0].c;
+  // 困难 / 极难：极小极大搜索
+  var depth = lv===4?2:3, topN = lv===4?9:7;
+  var opp=3-color;
+  function evalMove(bb,x,y,cl){
+    if(S.renju && cl===1){ var aa=analyzeGomoku(bb,x,y,1,0); if(aa.forbidden) return -Infinity; }
+    return pointScore(bb,x,y,cl);
+  }
+  function search(bb, dpt, alpha, beta, maximizing){
+    var cl = maximizing?color:opp;
+    var cs=gomokuCandidates(bb,2).filter(function(c){
+      if(S.renju && cl===1){ var aa=analyzeGomoku(bb,c[0],c[1],1,0); if(aa.forbidden) return false; }
+      return true;
+    });
+    if(!cs.length) return 0;
+    var sc=cs.map(function(c){ return {c:c, s:evalMove(bb,c[0],c[1],cl)}; });
+    sc.sort(function(p,q){ return q.s-p.s; });
+    sc=sc.slice(0, topN);
+    // 终局：有人成五
+    for(var i=0;i<sc.length;i++){ if(sc[i].s>=10000000) return maximizing? 10000000+dpt : -10000000-dpt; }
+    if(dpt===0) return (maximizing?1:-1)*(sc[0].s - pointScore(bb, sc[0].c[0], sc[0].c[1], 3-cl)*0.0);
+    var best = maximizing? -Infinity: Infinity;
+    for(var j=0;j<sc.length;j++){
+      var cc=sc[j].c, nb=bb.slice(); nb[idx(cc[0],cc[1])]=cl;
+      var v;
+      if(winLineFor(nb,cc[0],cc[1],cl) && (!S.renju || cl===2 || lineCount(nb,cc[0],cc[1],1,0)===5 || true)){
+        var wl=winLineFor(nb,cc[0],cc[1],cl);
+        var isWin = S.renju&&cl===1 ? (wl[2]===5) : (wl[2]>=5);
+        v = isWin ? (maximizing? 9000000+dpt : -9000000-dpt) : search(nb,dpt-1,alpha,beta,!maximizing);
+      } else v = search(nb,dpt-1,alpha,beta,!maximizing);
+      if(maximizing){ best=Math.max(best,v); alpha=Math.max(alpha,best); }
+      else { best=Math.min(best,v); beta=Math.min(beta,best); }
+      if(beta<=alpha) break;
+    }
+    return best;
+  }
+  var bestC=scored[0].c, bestV=-Infinity, alpha=-Infinity;
+  var rootList=scored.slice(0, lv===5?10:9);
+  for(var k=0;k<rootList.length;k++){
+    var c=rootList[k].c, nb2=b.slice(); nb2[idx(c[0],c[1])]=color;
+    var wl2=winLineFor(nb2,c[0],c[1],color);
+    if(wl2 && (S.renju&&color===1 ? wl2[2]===5 : wl2[2]>=5)) return c;
+    var v2=search(nb2, depth-1, alpha, Infinity, false) + rootList[k].s*0.001;
+    if(v2>bestV){ bestV=v2; bestC=c; }
+    alpha=Math.max(alpha,bestV);
+  }
+  return bestC;
+}
+function goAI(){
+  var color=S.turn, b=S.board, opp=3-color;
+  var moves=[];
+  for(var y=0;y<S.size;y++) for(var x=0;x<S.size;x++){
+    if(b[idx(x,y)]!==0) continue;
+    var t=goTryMove(b,x,y,color,S.ko);
+    if(!t) continue;
+    var s=Math.random()*(S.diff===1?60:(S.diff===2?26:8));
+    s += t.captured*900;
+    // 打吃 / 救子
+    var adj=[[x+1,y],[x-1,y],[x,y+1],[x,y-1]];
+    for(var i=0;i<4;i++){
+      var ax=adj[i][0], ay=adj[i][1];
+      if(!inB(ax,ay)) continue;
+      var v=b[idx(ax,ay)];
+      if(v===opp){ var g1=groupAndLibs(b,ax,ay); if(g1.libs.size===1) s+=700; if(g1.libs.size===2) s+=60; }
+      if(v===color){ var g2=groupAndLibs(b,ax,ay); if(g2.libs.size===1) s+=650; }
+    }
+    // 避免填自己的真眼（粗略：四邻皆己子且无提子）
+    var own=0; adj.forEach(function(p){ if(inB(p[0],p[1])&&b[idx(p[0],p[1])]===color) own++; });
+    if(own===4 && t.captured===0) s-= (S.diff>=3? 2000: 200);
+    // 星位/三线偏好
+    var edge=Math.min(x,y,S.size-1-x,S.size-1-y);
+    if(edge===2||edge===3) s+=24;
+    s += (S.size - (Math.abs(x-(S.size-1)/2)+Math.abs(y-(S.size-1)/2)))*2;
+    moves.push({x:x,y:y,s:s});
+  }
+  if(!moves.length) return null;
+  moves.sort(function(p,q){ return q.s-p.s; });
+  if(S.diff===1 && Math.random()<0.4) return moves[Math.floor(Math.random()*Math.min(12,moves.length))];
+  var best=moves[0];
+  // 棋盘已满大半且无提子好点时停一手
+  var stones=S.history.length;
+  if(stones > S.size*S.size*0.72 && best.s < 120 && S.diff>=2) return null;
+  return [best.x,best.y];
+}
+
+/* ============================================================
+   Renju 正式开局（26 种，固定朝向）
+   开局形状以中心 (7,7) 为第一手；第二手偏移、第三手偏移如下
+   ============================================================ */
+var OPENINGS=[
+  {name:"寒星", d:[1,0],  t:[2,0]},  {name:"溪月", d:[1,0],  t:[2,1]},
+  {name:"疏星", d:[1,0],  t:[3,0]},  {name:"花月", d:[1,0],  t:[1,1]},
+  {name:"残月", d:[1,0],  t:[2,-1]}, {name:"雨月", d:[1,0],  t:[3,1]},
+  {name:"金星", d:[1,0],  t:[3,-1]}, {name:"松月", d:[1,0],  t:[4,0]},
+  {name:"丘月", d:[1,0],  t:[4,1]},  {name:"新月", d:[1,0],  t:[4,-1]},
+  {name:"瑞星", d:[1,0],  t:[5,0]},  {name:"山月", d:[1,0],  t:[5,1]},
+  {name:"游星", d:[1,0],  t:[5,-1]},
+  {name:"长星", d:[1,1],  t:[2,0]},  {name:"峡月", d:[1,1],  t:[2,1]},
+  {name:"恒星", d:[1,1],  t:[2,2]},  {name:"水月", d:[1,1],  t:[3,1]},
+  {name:"流星", d:[1,1],  t:[3,0]},  {name:"岚月", d:[1,1],  t:[3,-1]},
+  {name:"银月", d:[1,1],  t:[3,3]},  {name:"明月", d:[1,1],  t:[4,1]},
+  {name:"彗星", d:[1,1],  t:[4,0]},  {name:"名月", d:[1,1],  t:[4,-1]},
+  {name:"天月", d:[1,1],  t:[5,1]},  {name:"岚星", d:[1,1],  t:[5,0]},
+  {name:"彗月", d:[1,1],  t:[5,-1]}
+];
+
+/* ============================================================
+   对局流程
+   ============================================================ */
+var el = function(id){ return document.getElementById(id); };
+function snapshot(){ S.snaps.push(S.board.slice()); }
+function pushHistory(x,y,color,extra){
+  S.history.push([x,y,color]);
+  snapshot();
+  S.lastMove=[x,y];
+}
+function startTimer(){
+  stopTimer();
+  S.timerId=setInterval(function(){
+    if(!S.over){ S.time[S.turn]++; el("timeB").textContent=fmtTime(S.time[1]); el("timeW").textContent=fmtTime(S.time[2]); }
+  },1000);
+}
+function stopTimer(){ if(S.timerId){ clearInterval(S.timerId); S.timerId=null; } }
+
+function newGame(){
+  S.size = S.game==="gomoku"?15:S.goSize;
+  S.board=newBoard(S.size);
+  S.turn=1; S.history=[]; S.snaps=[S.board.slice()]; S.over=false; S.winner=0; S.winReason=""; S.winLine=null;
+  S.lastMove=null; S.caps={1:0,2:0}; S.ko=null; S.passes=0;
+  S.time={1:0,2:0}; S.thinking=false; S.replayIdx=-1; S.opening=null; hoverPos=null;
+  el("timeB").textContent="00:00"; el("timeW").textContent="00:00";
+  if(S.game==="gomoku" && S.renju && S.openingMode==="formal"){
+    S.opening={stage:"pickOpening", cand:[], blackOwner:null};
+    showOpeningPicker();
+  } else {
+    el("openingPanel").classList.add("hidden"); el("openingPanel").innerHTML="";
+  }
+  refreshForbidden(); updateUI(); render(); startTimer();
+  maybeAI();
+}
+function endGame(winner, reason){
+  S.over=true; S.winner=winner; S.winReason=reason; stopTimer();
+  if(winner===1) S.stats[1]++; else if(winner===2) S.stats[2]++; else S.stats.draw++;
+  updateUI(); render();
+}
+function afterMove(){
+  refreshForbidden(); updateUI(); render();
+  if(!S.over) maybeAI();
+}
+function maybeAI(){
+  if(S.over || S.opp!=="ai") return;
+  // 开局阶段的 AI 决策在 opening 流程内单独处理
+  if(S.opening && S.opening.stage!=="done" && S.opening.stage!=="pickOpening"){ openingAITick(); return; }
+  if(S.opening && S.opening.stage==="pickOpening") return;
+  if(ownerOf(S.turn)!=="ai") return;
+  S.thinking=true; updateUI();
+  setTimeout(function(){
+    S.thinking=false;
+    if(S.over) return;
+    if(S.game==="gomoku"){
+      var mv=gomokuAI();
+      if(mv) placeGomoku(mv[0],mv[1]);
+      else endGame(3-S.turn,"对方无合法落子");
+    } else {
+      var gm=goAI();
+      if(gm) placeGo(gm[0],gm[1]); else doPass(true);
+    }
+    updateUI(); render();
+  }, S.game==="gomoku" && S.diff>=4 ? 60 : 260);
+}
+
+/* ---------- 五子棋落子 ---------- */
+function placeGomoku(x,y){
+  var leg=gomokuLegal(x,y);
+  if(!leg.ok) return false;
+  var color=S.turn;
+  S.board[idx(x,y)]=color;
+  pushHistory(x,y,color);
+  S.passes=0;
+  var wl=winLineFor(S.board,x,y,color);
+  var a=analyzeGomoku(S.board,x,y,color,1);
+  var isWin=false;
+  if(S.renju){
+    if(color===1) isWin = (wl && a.exactFive); // 黑恰好五连（五连优先已在 analyze 中处理禁手）
+    else isWin = (wl && wl[2]>=5);
+  } else isWin = (wl && wl[2]>=5);
+  if(isWin){
+    S.winLine=[wl[0],wl[1]];
+    endGame(color, color===1?"黑棋五连":"白棋五连");
+  } else if(S.history.length>=S.size*S.size){
+    endGame(0,"棋盘已满，和棋");
+  } else {
+    S.turn=3-color;
+  }
+  afterMove();
+  return true;
+}
+
+/* ---------- 围棋落子 ---------- */
+function placeGo(x,y){
+  var t=goTryMove(S.board,x,y,S.turn,S.ko);
+  if(!t) return false;
+  var color=S.turn;
+  S.board=t.board; S.caps[color]+=t.captured; S.ko=t.ko; S.passes=0;
+  pushHistory(x,y,color);
+  S.turn=3-color;
+  afterMove();
+  return true;
+}
+function doPass(fromAI){
+  if(S.over) return;
+  S.passes++;
+  pushHistory(-1,-1,S.turn);
+  S.lastMove=null; S.ko=null;
+  if(S.passes>=2){
+    var sc=goScore(S.board);
+    var w = sc.black>sc.white?1:2;
+    endGame(w, "双方停手终局 · 数子：黑 "+sc.black+" : 白 "+sc.white.toFixed(1)+"（含贴目 7.5），"+(w===1?"黑胜":"白胜"));
+  } else {
+    S.turn=3-S.turn;
+  }
+  afterMove();
+}
+
+/* ---------- 开局流程 ---------- */
+function showOpeningPicker(){
+  var p=el("openingPanel"); p.classList.remove("hidden");
+  var html="<p class='hint' style='margin:0 0 8px'><b>正式开局：</b>请选择 26 种规定开局之一（临时黑方落前三手，固定朝向）。</p><div class='openings'>";
+  OPENINGS.forEach(function(o,i){ html+="<button type='button' data-open='"+i+"'>"+(i+1)+". "+o.name+(i<13?"（直接）":"（间接）")+"</button>"; });
+  html+="</div>";
+  p.innerHTML=html;
+  p.querySelectorAll("[data-open]").forEach(function(btn){
+    btn.addEventListener("click", function(){ applyOpening(parseInt(btn.getAttribute("data-open"),10)); });
+  });
+}
+function applyOpening(i){
+  var o=OPENINGS[i], cx=7, cy=7;
+  S.board[idx(cx,cy)]=1; pushHistory(cx,cy,1);
+  S.board[idx(cx+o.d[0],cy+o.d[1])]=2; pushHistory(cx+o.d[0],cy+o.d[1],2);
+  S.board[idx(cx+o.t[0],cy+o.t[1])]=1; pushHistory(cx+o.t[0],cy+o.t[1],1);
+  S.opening={stage:"swap", cand:[], openingName:o.name};
+  el("openingPanel").classList.add("hidden"); el("openingPanel").innerHTML="";
+  S.turn=2;
+  refreshForbidden(); updateUI(); render();
+  openingAITick();
+}
+function openingAITick(){
+  if(!S.opening || S.over) return;
+  var st=S.opening.stage;
+  if(st==="swap"){
+    // 临时白方决定是否交换：双人时等白方玩家点按钮；人机时若白方是 AI 则自动决定
+    var whiteOwner = S.opp==="2p" ? "human" : (S.humanColor===2?"ai":"human");
+    // 说明：临时黑方=先落三手方。约定人机模式下玩家为临时黑方（由玩家选开局），AI 为临时白方。
+    if(S.opp==="ai"){
+      S.thinking=true; updateUI();
+      setTimeout(function(){
+        S.thinking=false;
+        // AI 简单策略：随机偏向不交换
+        doSwap(Math.random()<0.35);
+      },500);
+    }
+    return;
+  }
+  if(st==="move4" || st==="move6"){
+    if(ownerOf(S.turn)==="ai"){
+      S.thinking=true; updateUI();
+      setTimeout(function(){ S.thinking=false; var mv=gomokuAI(); if(mv) openingPlace(mv[0],mv[1]); },350);
+    }
+    return;
+  }
+  if(st==="propose5"){
+    if(ownerOf(1)==="ai"){
+      S.thinking=true; updateUI();
+      setTimeout(function(){
+        S.thinking=false;
+        var cands=gomokuCandidates(S.board,3).filter(function(c){
+          var a=analyzeGomoku(S.board,c[0],c[1],1,1); return !a.forbidden && !S.board[idx(c[0],c[1])];
+        });
+        cands.sort(function(p,q){ return pointScore(S.board,q[0],q[1],1)-pointScore(S.board,p[0],p[1],1); });
+        S.opening.cand=[cands[0], cands[1]||cands[0]];
+        S.opening.stage="pick5"; S.turn=2;
+        updateUI(); render(); openingAITick();
+      },350);
+    }
+    return;
+  }
+  if(st==="pick5"){
+    if(ownerOf(2)==="ai"){
+      S.thinking=true; updateUI();
+      setTimeout(function(){
+        S.thinking=false;
+        // 白方选对自己更有利（对黑更差）的候选
+        var c0=S.opening.cand[0], c1=S.opening.cand[1];
+        var pick = pointScore(S.board,c0[0],c0[1],1) <= pointScore(S.board,c1[0],c1[1],1) ? c0 : c1;
+        pickCandidate(pick);
+      },350);
+    }
+    return;
+  }
+}
+function doSwap(swap){
+  if(swap){
+    // 交换执子：人机模式下玩家与 AI 互换颜色
+    if(S.opp==="ai") S.humanColor = 3 - S.humanColor;
+    syncSeg("segColor", String(S.humanColor));
+  }
+  S.opening.stage="move4"; S.turn=2;
+  el("openingPanel").classList.add("hidden"); el("openingPanel").innerHTML="";
+  refreshForbidden(); updateUI(); render(); openingAITick();
+}
+function openingPlace(x,y){
+  var st=S.opening.stage, color=S.turn;
+  if(st==="move4" || st==="move6"){
+    if(!gomokuLegal(x,y).ok) return false;
+    S.board[idx(x,y)]=color; pushHistory(x,y,color);
+    if(st==="move4"){ S.opening.stage="propose5"; S.turn=1; }
+    else { S.opening.stage="done"; S.opening=null; S.turn=1; }
+    refreshForbidden(); updateUI(); render(); openingAITick();
+    return true;
+  }
+  if(st==="propose5"){
+    if(color!==1) return false;
+    if(S.board[idx(x,y)]!==0) return false;
+    var a=analyzeGomoku(S.board,x,y,1,1);
+    if(a.forbidden){ flashStatus("候选第五手不能落在禁手点（"+a.why+"）"); return false; }
+    if(S.opening.cand.some(function(c){ return c[0]===x&&c[1]===y; })) return false;
+    S.opening.cand.push([x,y]);
+    if(S.opening.cand.length>=2){ S.opening.stage="pick5"; S.turn=2; }
+    updateUI(); render(); openingAITick();
+    return true;
+  }
+  return false;
+}
+function pickCandidate(c){
+  S.board[idx(c[0],c[1])]=1; pushHistory(c[0],c[1],1);
+  S.opening.cand=[]; S.opening.stage="move6"; S.turn=2;
+  refreshForbidden(); updateUI(); render(); openingAITick();
+}
+
+/* ============================================================
+   UI
+   ============================================================ */
+function flashStatus(msg){
+  el("subStatus").innerHTML="<span class='warn'>"+msg+"</span>";
+}
+function updateUI(){
+  el("winB").textContent=S.stats[1]; el("winW").textContent=S.stats[2]; el("winD").textContent=S.stats.draw;
+  el("capB").textContent=S.caps[1]; el("capW").textContent=S.caps[2];
+  el("moveCount").textContent=S.history.filter(function(h){ return h[0]>=0; }).length;
+  el("btnPass").classList.toggle("hidden", S.game!=="go");
+  el("capWrap").style.visibility = S.game==="go"?"visible":"hidden";
+  var st=el("status"), sub=el("subStatus");
+  var turnName = S.turn===1?"黑棋":"白棋";
+  var dot = S.turn===1?"dot-b":"dot-w";
+  if(S.replayIdx>=0){
+    st.innerHTML="回放中：第 "+(S.replayIdx+1)+" / "+S.history.length+" 手（点任意方向键继续，落子退出回放）";
+    sub.textContent="回放为只读查看。";
+  } else if(S.over){
+    if(S.winner===0) st.textContent="对局结束：和棋";
+    else st.innerHTML="对局结束：<span class='turn-dot "+(S.winner===1?"dot-b":"dot-w")+"'></span>"+(S.winner===1?"黑棋":"白棋")+"获胜";
+    sub.textContent=S.winReason||"";
+  } else if(S.opening && S.opening.stage==="pickOpening"){
+    st.textContent="正式开局：请在右侧面板选择开局形状";
+    sub.textContent="26 种规定开局（13 直接 + 13 间接），选后自动落前三手。";
+  } else if(S.opening && S.opening.stage==="swap"){
+    st.textContent="开局「"+S.opening.openingName+"」已落三手";
+    sub.innerHTML = S.opp==="ai" ? "等待临时白方（AI）决定是否交换黑白…" :
+      "临时白方请选择：<button type='button' id='btnSwapYes' style='min-height:32px'>交换黑白</button> <button type='button' id='btnSwapNo' style='min-height:32px'>不交换</button>";
+    var y=el("btnSwapYes"), n=el("btnSwapNo");
+    if(y) y.addEventListener("click", function(){ doSwap(true); });
+    if(n) n.addEventListener("click", function(){ doSwap(false); });
+  } else if(S.opening && S.opening.stage==="move4"){
+    st.innerHTML="<span class='turn-dot "+dot+"'></span>开局第四手：白方自由落子";
+    sub.textContent="落子后进入第五手双候选阶段。";
+  } else if(S.opening && S.opening.stage==="propose5"){
+    st.innerHTML="<span class='turn-dot dot-b'></span>开局第五手：黑方提出两个候选点（已选 "+S.opening.cand.length+" / 2）";
+    sub.textContent="点击棋盘选择候选点，候选须通过禁手检测。";
+  } else if(S.opening && S.opening.stage==="pick5"){
+    st.innerHTML="<span class='turn-dot dot-w'></span>开局第五手：白方从红圈候选中选择一个";
+    sub.textContent="点击带编号的候选点即定为第五手。";
+  } else if(S.opening && S.opening.stage==="move6"){
+    st.innerHTML="<span class='turn-dot dot-w'></span>开局第六手：白方落子，之后进入正常对弈";
+    sub.textContent="";
+  } else if(S.thinking){
+    st.innerHTML="<span class='turn-dot "+dot+"'></span>"+turnName+"思考中…";
+    sub.textContent = S.game==="gomoku"&&S.diff===5 ? "极难档搜索中，单手可能需要数秒。" : "";
+  } else {
+    var who = S.opp==="ai" ? (S.turn===S.humanColor?"轮到你（":"轮到 AI（") : "轮到";
+    st.innerHTML="<span class='turn-dot "+dot+"'></span>"+who+turnName+(S.opp==="ai"?"）":"");
+    if(S.game==="gomoku"&&S.renju) sub.textContent = S.turn===1 ? "黑方禁手点已以红叉标记（三三 / 四四 / 长连）。" : "白方无禁手限制。";
+    else if(S.game==="go") sub.textContent = S.ko ? "劫争中：红框处一手内不可回提。" : "提子、禁着点、劫争规则生效中。";
+    else sub.textContent="普通五子棋：无禁手，五连或以上获胜。";
+  }
+  el("btnUndo").disabled = S.thinking || S.history.length===0 || !!(S.opening&&S.opening.stage!=="done");
+  el("btnResign").disabled = S.over || S.thinking;
+  el("btnPass").disabled = S.over || S.thinking || !isHumanTurn();
+  cv.classList.toggle("no-turn", !isHumanTurn());
+}
+function syncSeg(id, val){
+  el(id).querySelectorAll("button").forEach(function(b){
+    b.setAttribute("aria-pressed", b.getAttribute("data-v")===val?"true":"false");
+  });
+}
+function bindSeg(id, fn){
+  el(id).querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click", function(){
+      syncSeg(id, b.getAttribute("data-v"));
+      fn(b.getAttribute("data-v"));
+    });
+  });
+}
+bindSeg("segGame", function(v){
+  S.game=v;
+  el("gomokuOpts").classList.toggle("hidden", v!=="gomoku");
+  el("goOpts").classList.toggle("hidden", v!=="go");
+  newGame();
+});
+bindSeg("segRule", function(v){
+  S.renju = (v==="renju");
+  el("segOpening").style.opacity = S.renju? "1":"0.4";
+  el("segOpening").style.pointerEvents = S.renju? "auto":"none";
+  if(!S.renju) S.openingMode="free";
+  newGame();
+});
+bindSeg("segOpening", function(v){ S.openingMode=v; newGame(); });
+bindSeg("segGoSize", function(v){ S.goSize=parseInt(v,10); if(S.game==="go") newGame(); });
+bindSeg("segOpp", function(v){ S.opp=v; newGame(); });
+bindSeg("segDiff", function(v){ S.diff=parseInt(v,10); });
+bindSeg("segColor", function(v){ S.humanColor=parseInt(v,10); newGame(); });
+
+el("btnNew").addEventListener("click", newGame);
+el("btnResign").addEventListener("click", function(){
+  if(S.over) return;
+  endGame(3-S.turn, (S.turn===1?"黑棋":"白棋")+"认输");
+});
+el("btnPass").addEventListener("click", function(){ if(isHumanTurn()) doPass(false); });
+el("btnUndo").addEventListener("click", function(){
+  if(S.thinking || !S.history.length) return;
+  var steps = (S.opp==="ai") ? Math.min(2, S.history.length) : 1;
+  // 开局已落子阶段不允许悔棋穿过开局（简化：正式开局进行中禁用，updateUI 已处理）
+  for(var i=0;i<steps;i++){
+    var h=S.history.pop(); S.snaps.pop();
+    if(h && h[0]>=0 && S.game==="go"){
+      // 围棋悔棋：直接用快照恢复并重算提子不可行，改用重演
+    }
+  }
+  // 用快照恢复棋盘（快照含落子后状态）
+  S.board = S.snaps[S.snaps.length-1].slice();
+  S.over=false; S.winner=0; S.winReason=""; S.winLine=null; S.ko=null; S.passes=0;
+  S.lastMove = S.history.length? (S.history[S.history.length-1][0]>=0?[S.history[S.history.length-1][0],S.history[S.history.length-1][1]]:null):null;
+  // 手数决定轮次：黑先，手数为偶数轮到黑
+  var played=S.history.length;
+  S.turn = (played%2===0)?1:2;
+  if(S.game==="go"){
+    // 重演计算提子数
+    S.caps={1:0,2:0};
+    var rb=newBoard(S.size), ko2=null;
+    S.history.forEach(function(h){
+      if(h[0]<0) return;
+      var t=goTryMove(rb,h[0],h[1],h[2],ko2);
+      if(t){ rb=t.board; ko2=t.ko; S.caps[h[2]]+=t.captured; }
+    });
+    S.ko=ko2;
+  }
+  S.replayIdx=-1;
+  refreshForbidden(); updateUI(); render(); startTimer();
+});
+el("btnReplayPrev").addEventListener("click", function(){
+  if(!S.history.length) return;
+  S.replayIdx = S.replayIdx<0 ? S.history.length-1 : Math.max(0, S.replayIdx-1);
+  updateUI(); render();
+});
+el("btnReplayNext").addEventListener("click", function(){
+  if(S.replayIdx<0) return;
+  S.replayIdx++;
+  if(S.replayIdx>=S.history.length) S.replayIdx=-1;
+  updateUI(); render();
+});
+el("btnRules").addEventListener("click", function(){ el("rulesDlg").showModal(); });
+el("btnCloseRules").addEventListener("click", function(){ el("rulesDlg").close(); });
+el("btnDownload").addEventListener("click", function(){
+  var html="<!doctype html>\n"+document.documentElement.outerHTML;
+  var blob=new Blob([html],{type:"text/html;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download="Gridfall-wood-ceramic.html";
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+});
+
+/* ---------- 棋盘点击 / 悬停 ---------- */
+function eventCell(ev){
+  var rect=cv.getBoundingClientRect();
+  var px=(ev.clientX-rect.left)/rect.width*W, py=(ev.clientY-rect.top)/rect.height*W;
+  var cell=cellPx();
+  var x=Math.round((px-PAD)/cell), y=Math.round((py-PAD)/cell);
+  if(!inB(x,y)) return null;
+  if(Math.abs(px-(PAD+x*cell))>cell*0.5 || Math.abs(py-(PAD+y*cell))>cell*0.5) return null;
+  return [x,y];
+}
+cv.addEventListener("mousemove", function(ev){
+  var c=eventCell(ev);
+  hoverPos=c;
+  render();
+});
+cv.addEventListener("mouseleave", function(){ hoverPos=null; render(); });
+cv.addEventListener("click", function(ev){
+  var c=eventCell(ev); if(!c) return;
+  if(S.replayIdx>=0){ S.replayIdx=-1; updateUI(); render(); return; }
+  if(S.over || S.thinking) return;
+  var x=c[0], y=c[1];
+  // 开局阶段
+  if(S.opening && S.opening.stage!=="done"){
+    var st=S.opening.stage;
+    if(st==="pickOpening"||st==="swap") return;
+    if(st==="pick5"){
+      if(ownerOf(2)!=="ai" || S.opp==="2p"){
+        var hit=S.opening.cand.filter(function(cd){ return cd[0]===x&&cd[1]===y; })[0];
+        if(hit) pickCandidate(hit);
+      }
+      return;
+    }
+    if(!isHumanTurn() && S.opp==="ai") return;
+    openingPlace(x,y);
+    return;
+  }
+  if(!isHumanTurn()) return;
+  if(S.game==="gomoku"){
+    var leg=gomokuLegal(x,y);
+    if(!leg.ok){
+      if(leg.why) flashStatus("禁手："+leg.why+"，黑棋不能落在此处。");
+      render(); return;
+    }
+    placeGomoku(x,y);
+  } else {
+    if(!goTryMove(S.board,x,y,S.turn,S.ko)){
+      if(S.ko && S.ko[0]===x&&S.ko[1]===y) flashStatus("劫争：此点一手内不可回提。");
+      else if(S.board[idx(x,y)]===0) flashStatus("禁着点：落子后无气（自杀手），不可落。");
+      render(); return;
+    }
+    placeGo(x,y);
+  }
+});
+
+/* ---------- 初始化 ---------- */
+S.renju=false; // 默认普通五子棋（与 segRule 默认一致）
+newGame();
+</script>
+</body>
+</html>
