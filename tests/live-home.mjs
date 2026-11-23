@@ -26,7 +26,7 @@ const waitFor = async (expr, ms = 12000) => {
 try {
   await t('livehome.loads', async () => {
     const r = await b.evaluate(`({ title: document.title, live: document.querySelectorAll('.game-card[data-status="live"]').length, cards: document.querySelectorAll('.game-card').length })`);
-    if (!r.title.includes('游戏大厅') || r.live !== 1 || r.cards !== 9) return JSON.stringify(r);
+    if (!r.title.includes('游戏大厅') || r.live !== 2 || r.cards !== 9) return JSON.stringify(r);
     return true;
   });
   await b.screenshot(path.join(SHOTS, 'live-home.png'));
@@ -46,6 +46,18 @@ try {
     await b.clickSel('.hall-link');
     const ok = await waitFor(`document.title.includes('游戏大厅')`, 10000);
     if (!ok) return 'no back';
+    return true;
+  });
+
+  await t('livehome.xiangqi_card', async () => {
+    await waitFor(`document.title.includes('游戏大厅') && document.querySelectorAll('.game-card').length === 9`, 12000);
+    await b.evaluate(`document.querySelectorAll('.game-card[data-status="live"] .play-link')[1].click()`);
+    const ok = await waitFor(`document.title.includes('中国象棋') && location.pathname === '/ZGXQ' && typeof state !== 'undefined'`, 12000);
+    if (!ok) return 'did not open /ZGXQ: ' + await b.evaluate('location.href');
+    const r = await b.evaluate(`({ title: document.title, mode: state.mode, online: [...document.querySelectorAll('#modeSeg .seg-btn')].some(b=>b.dataset.mode==='online') })`);
+    if (r.mode !== 'ai' || !r.online) return JSON.stringify(r);
+    await b.clickSel('.hall-link');
+    await waitFor(`document.title.includes('游戏大厅')`, 10000);
     return true;
   });
 

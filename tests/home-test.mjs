@@ -39,7 +39,7 @@ try {
       err: window.__qaErrors || []
     })`);
     if (!r.title.includes('游戏大厅')) return 'title ' + r.title;
-    if (r.cards !== 9 || r.live !== 1 || r.soon !== 8) return 'cards ' + JSON.stringify(r);
+    if (r.cards !== 9 || r.live !== 2 || r.soon !== 7) return 'cards ' + JSON.stringify(r);
     if (r.err.length) return 'errors ' + JSON.stringify(r.err);
     return true;
   });
@@ -63,7 +63,7 @@ try {
     await b.evaluate(`[...document.querySelectorAll('.chip')].find(c=>c.dataset.filter==='soon').click()`);
     await sleep(200);
     let r = await b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').length`);
-    if (r !== 8) return 'soon filter ' + r;
+    if (r !== 7) return 'soon filter ' + r;
     await b.evaluate(`[...document.querySelectorAll('.chip')].find(c=>c.dataset.filter==='all').click()`);
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value='围棋'; i.dispatchEvent(new Event('input')); })()`);
     await sleep(200);
@@ -72,7 +72,7 @@ try {
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value='联机'; i.dispatchEvent(new Event('input')); })()`);
     await sleep(200);
     r = await b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').length`);
-    if (r !== 1) return 'search online ' + r;
+    if (r !== 2) return 'search online ' + r;
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value=''; i.dispatchEvent(new Event('input')); })()`);
     return true;
   });
@@ -92,6 +92,17 @@ try {
     await sleep(900);
     const r = await b.evaluate(`({title:document.title, hall:!!document.querySelector('.game-card')})`);
     return r.title.includes('游戏大厅') && r.hall ? true : 'back failed ' + JSON.stringify(r);
+  });
+
+  await t('home.xiangqiLink', async () => {
+    await b.evaluate(`document.querySelectorAll('.game-card[data-status="live"] .play-link')[1].click()`);
+    const ok = await waitFor('document.title.includes("中国象棋") && typeof state !== "undefined"');
+    if (!ok) return 'did not open xiangqi: ' + await b.evaluate('location.href');
+    const r = await b.evaluate(`({ mode: state.mode, canvas: !!document.getElementById('board'), hall: !!document.querySelector('.hall-link'), online: [...document.querySelectorAll('#modeSeg .seg-btn')].some(b=>b.dataset.mode==='online') })`);
+    if (r.mode !== 'ai' || !r.canvas || !r.hall || !r.online) return JSON.stringify(r);
+    await b.clickSel('.hall-link');
+    await sleep(900);
+    return (await b.evaluate('document.title')).includes('游戏大厅') ? true : 'back failed';
   });
 
   await t('home.renjuFormalLink', async () => {

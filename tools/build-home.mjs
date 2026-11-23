@@ -184,5 +184,76 @@ must('</body>', `<script>
 </script>
 </body>`);
 
+
+/* ---------- Xiangqi 中国象棋（/ZGXQ） ---------- */
+must(`      <a href="./HBQS?online=1&amp;game=gomoku" data-local="./play.html?online=1&amp;game=gomoku">联机开房</a>
+      <a href="#games" data-jump="2048">2048</a>`,
+`      <a href="./HBQS?online=1&amp;game=gomoku" data-local="./play.html?online=1&amp;game=gomoku">联机开房</a>
+      <a href="./ZGXQ" data-local="./xiangqi.html">中国象棋</a>
+      <a href="#games" data-jump="2048">2048</a>`);
+must('名字叫 Gridfall，装的却不只是棋盘。五子棋、连珠、围棋已经合并为「黑白棋社」一个入口，三张棋盘都能开房联机；2048、扫雷、卡牌这些完全不同的游戏也会陆续搬进来——不用下载、不用注册，点开任意一局就开玩。',
+'名字叫 Gridfall，装的却不只是棋盘。五子棋、连珠、围棋已经合并为「黑白棋社」一个入口，三张棋盘都能开房联机；中国象棋也已上线，同样支持人机、双人与联机。2048、扫雷、卡牌这些完全不同的游戏也会陆续搬进来——不用下载、不用注册，点开任意一局就开玩。');
+must('黑白棋社已就绪 · 联机房间已开放 · 益智与卡牌在路上 · <b>5 档难度</b>任选 · 打开即玩',
+'黑白棋社与中国象棋已就绪 · 联机房间已开放 · 益智与卡牌在路上 · <b>5 档难度</b>任选 · 打开即玩');
+must('<span>黑白棋社 <i>●</i></span>', '<span>黑白棋社 <i>●</i></span><span>中国象棋 <i>●</i></span>');
+must('「黑白棋社」把五子棋、连珠、围棋三张棋盘收进同一个入口，而且都能开房联机；下面还留着规划中的位置——益智、卡牌这些不同品类的游戏，上线后会直接摆进这张货架。',
+'「黑白棋社」把五子棋、连珠、围棋收进同一个入口；中国象棋也带着人机、双人和联机进场。下面还留着规划中的位置——益智、卡牌这些不同品类的游戏，上线后会直接摆进这张货架。');
+
+must(`        <!-- 即将推出（样板占位，明确标注） -->
+        <article class="game-card" data-status="soon" data-name="中国象棋 象棋 xiangqi">
+          <div class="game-visual gv-soon">
+            <span class="gv-badge soon">规划中</span>
+            <span class="gv-q" aria-hidden="true">象</span>
+          </div>
+          <div class="game-body">
+            <h3>中国象棋<span class="en">XIANGQI</span></h3>
+            <p>大厅的下一张桌子。楚河汉界正在划线，规则与对弈引擎筹备中，上线后会出现在这里。</p>
+            <div class="tags"><span>筹备中</span></div>
+            <div class="game-foot">
+              <span class="meta">敬请期待</span>
+              <a class="play-link disabled" href="#soon" aria-disabled="true">尚未开局</a>
+            </div>
+          </div>
+        </article>`,
+`        <article class="game-card" data-status="live" data-name="中国象棋 象棋 联机 xiangqi">
+          <div class="game-visual gv-xiangqi">
+            <span class="gv-badge">已上线</span>
+            <div class="gv-board light" aria-hidden="true">
+              <span class="stone b" style="left:20%;top:20%"></span>
+              <span class="stone w" style="left:50%;top:50%"></span>
+              <span class="stone b" style="left:80%;top:20%"></span>
+              <span class="stone w" style="left:20%;top:80%"></span>
+            </div>
+          </div>
+          <div class="game-body">
+            <h3>中国象棋<span class="en">XIANGQI</span></h3>
+            <p>楚河汉界，将死或困毙即负；人机、双人与联机开房都已就位，落子是木质棋子拍在棋盘上的声音。</p>
+            <div class="tags"><span>人机 / 双人</span><span>联机开房</span><span>将死 / 困毙</span></div>
+            <div class="game-foot">
+              <span class="meta">入口 /ZGXQ · 3 档难度</span>
+              <a class="play-link" href="./ZGXQ" data-local="./xiangqi.html">进入对弈 →</a>
+            </div>
+          </div>
+        </article>`);
+must('<div class="soon-card"><div class="glyph">象</div><h4>中国象棋</h4><p>楚河汉界，马走日、象走田，国民棋盘继续排队。</p><span class="st">规划中</span></div>',
+'<div class="soon-card"><div class="glyph">跳</div><h4>跳棋</h4><p>隔着棋子连跳的经典棋类，正在排队进场。</p><span class="st">规划中</span></div>');
+must('Gridfall 游戏大厅：黑白棋社（五子棋 / 国际连珠 / 围棋）已上线，支持单机、双人与联机；2048、扫雷、卡牌类、中国象棋、国际象棋等为后续扩建规划，标注「规划中」者尚未开放游玩。',
+'Gridfall 游戏大厅：黑白棋社（五子棋 / 国际连珠 / 围棋）与中国象棋已上线，均支持单机、双人与联机；2048、扫雷、卡牌类、国际象棋等为后续扩建规划，标注「规划中」者尚未开放游玩。');
+must('  .gv-club .gv-board.light{ background:#eecf8f; border-color:#8a6a2f; color:#8a6a2f; box-shadow:0 12px 26px rgba(0,0,0,.34); }',
+'  .gv-club .gv-board.light{ background:#eecf8f; border-color:#8a6a2f; color:#8a6a2f; box-shadow:0 12px 26px rgba(0,0,0,.34); }\n  .gv-xiangqi{ background:linear-gradient(135deg,#3a2410 0%,#20304f 100%); }\n  .gv-xiangqi .gv-board.light{ background:#eecf8f; border-color:#8a6a2f; color:#8a6a2f; box-shadow:0 12px 26px rgba(0,0,0,.4); }');
+must(`  if (/(^|\.)github\.io$/.test(location.hostname)) {
+    document.querySelectorAll('a[href^="./HBQS"]').forEach(function(a){
+      a.setAttribute('href', a.getAttribute('href').replace('./HBQS', './HBQS/'));
+    });
+  }`,
+`  if (/(^|\.)github\.io$/.test(location.hostname)) {
+    document.querySelectorAll('a[href^="./HBQS"], a[href^="./ZGXQ"]').forEach(function(a){
+      var h = a.getAttribute('href');
+      if (h.indexOf('./HBQS') === 0) h = h.replace('./HBQS', './HBQS/');
+      else if (h.indexOf('./ZGXQ') === 0) h = h.replace('./ZGXQ', './ZGXQ/');
+      a.setAttribute('href', h);
+    });
+  }`);
+
 fs.writeFileSync(path.join(ROOT, 'index.html'), html, 'utf8');
 console.log('built homepage', Buffer.byteLength(html), 'bytes');

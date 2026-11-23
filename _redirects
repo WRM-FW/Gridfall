@@ -1,3 +1,6 @@
 # 黑白棋社统一入口：地址保持 /HBQS，内容由对局页提供
 /HBQS /play 200
 /HBQS/ /HBQS 301
+# 中国象棋统一入口
+/ZGXQ /xiangqi 200
+/ZGXQ/ /ZGXQ 301

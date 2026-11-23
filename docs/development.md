@@ -25,14 +25,16 @@
 - 源在 `tools/`：
   - `tools/design/home-reference.html`：大厅视觉参考
   - `tools/design/board-reference.html`：木质陶瓷对局视觉参考
+  - `tools/design/xiangqi-reference.html`：中国象棋视觉与引擎参考
   - `tools/src/legacy.html`：旧单页，作为引擎提取来源
-  - `tools/src/markup.html`、`extra.css`、`visual.js`、`online.js`、`deeplink.js`
-  - `tools/build-page.mjs`、`tools/build-home.mjs`、`tools/build-dist.mjs`
+  - `tools/src/markup.html`、`extra.css`、`visual.js`、`online.js`、`deeplink.js`、`xiangqi-online.js`
+  - `tools/build-page.mjs`、`tools/build-home.mjs`、`tools/build-xiangqi.mjs`、`tools/build-dist.mjs`
 - 修改界面请改 `tools/src` 或 `tools/design` 后重新构建，不要只手改生成文件；如果确实直接修了生成文件，下一次构建会覆盖。
 - 构建：
   ```bash
   node tools/build-page.mjs   # 生成 play.html
   node tools/build-home.mjs   # 生成 index.html
+  node tools/build-xiangqi.mjs # 生成 xiangqi.html
   node tools/build-dist.mjs   # 生成 dist/（部署用）
   ```
 - `dist/` 不入库；部署：
@@ -73,8 +75,7 @@
 - 预留命名（后续上线时按同一规则创建入口与 `_redirects`）：
   | 游戏 | 路径 |
   | --- | --- |
-  | 中国象棋 | `/ZGXQ` |
-  | 国际象棋 | `/GJXQ` |
+    | 国际象棋 | `/GJXQ` |
   | 跳棋 | `/TQ` |
   | 军棋 | `/JQ` |
   | 扫雷 | `/SL` |
