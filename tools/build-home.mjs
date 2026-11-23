@@ -429,7 +429,45 @@ must('  .gv-junqi .gv-q{ color:#e0b77a; }',
   .co-build-row .k{flex:0 0 74px;color:#7c8db1;font-weight:800;letter-spacing:.02em;white-space:nowrap;}
   .co-build-row a{color:#1748c4;font-weight:800;text-decoration:none;word-break:break-all;}
   .co-build-row a:hover{text-decoration:underline;}
-  .co-note{margin:2px 0 0;font-size:12.5px;line-height:1.6;color:#5b6a8c;}`);
+  .co-note{margin:2px 0 0;font-size:12.5px;line-height:1.6;color:#5b6a8c;}
+  .game-visual.gv-cover{background:#1b2438;}
+  .gv-cover-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}`);
+
+/* ---------- 游戏封面：统一换成 1200x600 插画 ---------- */
+function setCover(name, file, alt, badgeClass, badgeText) {
+  var marker = 'data-name="' + name;
+  var at = html.indexOf(marker);
+  if (at < 0) throw new Error('cover target missing: ' + name);
+  var cardStart = html.lastIndexOf('<article class="game-card', at);
+  var cardEnd = html.indexOf('</article>', at) + '</article>'.length;
+  var vStart = html.indexOf('<div class="game-visual', cardStart);
+  if (vStart < 0 || vStart > cardEnd) throw new Error('visual missing: ' + name);
+  var depth = 0, p = vStart, vEnd = -1;
+  while (p < cardEnd) {
+    var no = html.indexOf('<div', p);
+    var nc = html.indexOf('</div>', p);
+    if (nc < 0) break;
+    if (no >= 0 && no < nc) { depth += 1; p = no + 4; }
+    else { depth -= 1; p = nc + 6; if (depth === 0) { vEnd = p; break; } }
+  }
+  if (vEnd < 0) throw new Error('visual end missing: ' + name);
+  var badge = 'gv-badge' + (badgeClass ? ' ' + badgeClass : '');
+  var visual = '<div class="game-visual gv-cover">\n' +
+    '            <img class="gv-cover-img" src="./assets/covers/' + file + '.png" alt="' + alt + '" width="1200" height="600" decoding="async">\n' +
+    '            <span class="' + badge + '">' + badgeText + '</span>\n' +
+    '          </div>';
+  html = html.slice(0, vStart) + visual + html.slice(vEnd);
+}
+
+setCover('黑白棋社 五子棋', 'hbqs', '黑白棋社游戏封面', '', '已上线');
+setCover('中国象棋 象棋 联机', 'xiangqi', '中国象棋游戏封面', '', '已上线');
+setCover('2048 数字', 'game2048', '2048 游戏封面', '', '已上线');
+setCover('扫雷 minesweeper', 'saolei', '扫雷游戏封面', '', '已上线');
+setCover('跳棋 棋类', 'tiaoqi', '跳棋游戏封面', '', '已上线');
+setCover('军棋 棋类', 'junqi', '军棋游戏封面', '', '已上线');
+setCover('国际象棋 chess', 'chess', '国际象棋游戏封面', 'soon', '规划中');
+setCover('卡牌 纸牌', 'cards', '卡牌类游戏封面', 'soon', '规划中');
+setCover('更多游戏 新游戏 点单 社区共建', 'next-game', '下一款游戏点单与社区共建封面', 'soon', '持续上新');
 
 fs.writeFileSync(path.join(ROOT, 'index.html'), html, 'utf8');
 console.log('built homepage', Buffer.byteLength(html), 'bytes');

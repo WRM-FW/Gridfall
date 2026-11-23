@@ -315,6 +315,8 @@
   .co-build-row a{color:#1748c4;font-weight:800;text-decoration:none;word-break:break-all;}
   .co-build-row a:hover{text-decoration:underline;}
   .co-note{margin:2px 0 0;font-size:12.5px;line-height:1.6;color:#5b6a8c;}
+  .game-visual.gv-cover{background:#1b2438;}
+  .gv-cover-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
   .gv-xiangqi .gv-board.light{ background:#eecf8f; border-color:#8a6a2f; color:#8a6a2f; box-shadow:0 12px 26px rgba(0,0,0,.4); }
   @media (max-width:900px){
     .hero-grid{grid-template-columns:1fr}
@@ -438,15 +440,9 @@
       <div class="games" id="gameGrid">
 
 <article class="game-card game-card-club" data-status="live" data-name="黑白棋社 五子棋 连珠 围棋 联机 gomoku renju go">
-          <div class="game-visual gv-club">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/hbqs.png" alt="黑白棋社游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
-            <div class="gv-board light" aria-hidden="true">
-              <span class="stone b" style="left:10%;top:10%"></span>
-              <span class="stone w" style="left:35%;top:35%"></span>
-              <span class="stone b" style="left:60%;top:10%"></span>
-              <span class="stone w" style="left:85%;top:60%"></span>
-              <span class="stone b win" style="left:35%;top:60%"></span>
-            </div>
           </div>
           <div class="game-body">
             <h3>黑白棋社<span class="en">BOARD CLUB</span></h3>
@@ -460,14 +456,9 @@
         </article>
 
 <article class="game-card" data-status="live" data-name="中国象棋 象棋 联机 xiangqi">
-          <div class="game-visual gv-xiangqi">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/xiangqi.png" alt="中国象棋游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
-            <div class="gv-board light" aria-hidden="true">
-              <span class="stone b" style="left:20%;top:20%"></span>
-              <span class="stone w" style="left:50%;top:50%"></span>
-              <span class="stone b" style="left:80%;top:20%"></span>
-              <span class="stone w" style="left:20%;top:80%"></span>
-            </div>
           </div>
           <div class="game-body">
             <h3>中国象棋<span class="en">XIANGQI</span></h3>
@@ -481,9 +472,9 @@
         </article>
 
 <article class="game-card" data-status="live" data-name="2048 数字 益智 合成 puzzle">
-          <div class="game-visual gv-2048">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/game2048.png" alt="2048 游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
-            <span class="gv-q" aria-hidden="true">2048</span>
           </div>
           <div class="game-body">
             <h3>2048<span class="en">PUZZLE</span></h3>
@@ -497,9 +488,9 @@
         </article>
 
 <article class="game-card" data-status="live" data-name="扫雷 minesweeper 推理">
-          <div class="game-visual gv-mine">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/saolei.png" alt="扫雷游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
-            <span class="gv-q" aria-hidden="true">雷</span>
           </div>
           <div class="game-body">
             <h3>扫雷<span class="en">MINESWEEPER</span></h3>
@@ -513,9 +504,9 @@
         </article>
 
 <article class="game-card" data-status="live" data-name="跳棋 棋类 tiaoqi checkers">
-          <div class="game-visual gv-tiaoqi">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/tiaoqi.png" alt="跳棋游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
-            <span class="gv-q" aria-hidden="true">跳</span>
           </div>
           <div class="game-body">
             <h3>跳棋<span class="en">CHECKERS</span></h3>
@@ -529,9 +520,9 @@
         </article>
 
 <article class="game-card" data-status="live" data-name="军棋 棋类 junqi">
-          <div class="game-visual gv-junqi">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/junqi.png" alt="军棋游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
-            <span class="gv-q" aria-hidden="true">军</span>
           </div>
           <div class="game-body">
             <h3>军棋<span class="en">JUNQI</span></h3>
@@ -545,9 +536,9 @@
         </article>
 
 <article class="game-card" data-status="soon" data-name="国际象棋 chess">
-          <div class="game-visual gv-soon">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/chess.png" alt="国际象棋游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge soon">规划中</span>
-            <span class="gv-q" aria-hidden="true">♞</span>
           </div>
           <div class="game-body">
             <h3>国际象棋<span class="en">CHESS</span></h3>
@@ -561,9 +552,9 @@
         </article>
 
 <article class="game-card" data-status="soon" data-name="卡牌 纸牌 接龙 cards solitaire">
-          <div class="game-visual gv-soon">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/cards.png" alt="卡牌类游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge soon">规划中</span>
-            <span class="gv-q" aria-hidden="true">♠</span>
           </div>
           <div class="game-body">
             <h3>卡牌类<span class="en">CARDS</span></h3>
@@ -577,9 +568,9 @@
         </article>
 
         <article class="game-card" data-status="soon" data-name="更多游戏 新游戏 点单 社区共建 PR 邮箱 联系开发者">
-          <div class="game-visual gv-soon">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/next-game.png" alt="下一款游戏点单与社区共建封面" width="1200" height="600" decoding="async">
             <span class="gv-badge soon">持续上新</span>
-            <span class="gv-q" aria-hidden="true">+ ?</span>
           </div>
           <div class="game-body">
             <h3>下一款游戏，由你点单<span class="en">NEXT GAME</span></h3>

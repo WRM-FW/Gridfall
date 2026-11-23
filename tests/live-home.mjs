@@ -31,6 +31,16 @@ try {
   });
   await b.screenshot(path.join(SHOTS, 'live-home.png'));
 
+  await t('livehome.covers', async () => {
+    const ok = await waitFor(`document.querySelectorAll('.game-card .gv-cover-img').length === 9 && [...document.querySelectorAll('.game-card .gv-cover-img')].every(i => i.complete && i.naturalWidth > 0)`, 15000);
+    if (!ok) return JSON.stringify(await b.evaluate(`[...document.querySelectorAll('.game-card .gv-cover-img')].map(i => ({src:i.getAttribute('src'), ok:i.complete && i.naturalWidth>0}))`));
+    const bad = await b.evaluate(`[...document.querySelectorAll('.game-card .gv-cover-img')].filter(i => i.naturalWidth !== 1200 || i.naturalHeight !== 600).map(i => i.getAttribute('src'))`);
+    return bad.length ? 'bad size ' + JSON.stringify(bad) : true;
+  });
+  await b.evaluate(`document.getElementById('games').scrollIntoView({ block: 'start', behavior: 'instant' })`);
+  await sleep(400);
+  await b.screenshot(path.join(SHOTS, 'live-home-covers.png'));
+
   await t('livehome.gomoku_card', async () => {
     await b.clickSel('.game-card[data-status="live"] .play-link');
     const ok = await waitFor('typeof G !== "undefined" && !document.getElementById("secGomoku").classList.contains("hidden")');

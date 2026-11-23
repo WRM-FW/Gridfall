@@ -22,6 +22,7 @@
 ## 源文件与生成文件
 
 - `index.html`（游戏大厅）和 `play.html`（对局页）是生成文件，同时是部署产物，必须提交。
+- 大厅封面在 `assets/covers/`（1200×600 PNG）；新增或替换封面后重新构建 `index.html` 与 `dist/`，并确认 `tools/build-dist.mjs` 已复制该目录。
 - 源在 `tools/`：
   - `tools/design/home-reference.html`：大厅视觉参考
   - `tools/design/board-reference.html`：木质陶瓷对局视觉参考

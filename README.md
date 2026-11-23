@@ -33,6 +33,7 @@
 | `junqi.html` | 军棋：暗棋陆战棋，人机/双人 |
 | `saolei.html` | 扫雷：单人，三档难度/自定义 |
 | `_redirects` | Cloudflare Pages 路由：六个游戏入口 200 代理，尾斜杠 301 |
+| `assets/covers/` | 大厅游戏封面（1200×600 PNG；`connect4.png` 为四子棋预留） |
 | `CONTRIBUTING.md` | 点单与社区共建：AI Agent 开发、PR 流程、开发者邮箱 |
 | `HBQS/index.html` | GitHub Pages 的入口回退，跳转到 `play.html` |
 | `ZGXQ/index.html` | GitHub Pages 的入口回退，跳转到 `xiangqi.html` |
@@ -64,6 +65,7 @@ GitHub Pages：从 `main` 分支根目录发布，推送后自动更新。
 ## 视觉
 
 - 游戏大厅直接复用项目素材库 `00_Gridfall首页.html` 的蓝色街机大厅设计，并替换为当前真实游戏与联机入口。
+- 大厅游戏封面统一使用 `assets/covers/` 下的 1200×600 插画，`.gv-cover-img` 以 `object-fit: cover` 填充 168px 高的封面区；“已上线 / 规划中 / 持续上新”徽标仍由页面叠加。
 - 黑白棋社对局页复用 `01_木质棋盘陶瓷棋子以及配套UI.html` 的木质棋盘、陶瓷棋子与瓷白/深木 UI，Canvas 绘制。
 - 中国象棋复用 `03_中国象棋.html` 的深色 Canvas 棋盘与面板；落子音效改为 Web Audio 合成的木质拍盘声。
 - 跳棋、2048、军棋、扫雷直接复用素材库同名文件，仅加固定返回大厅入口与路由，不改动游戏本体视觉。

@@ -45,6 +45,21 @@ try {
   });
   await b.screenshot(path.join(SHOTS, 'home-desktop.png'));
 
+  await t('home.covers', async () => {
+    const ok = await waitFor(`document.querySelectorAll('.game-card .gv-cover-img').length === 9 && [...document.querySelectorAll('.game-card .gv-cover-img')].every(i => i.complete && i.naturalWidth > 0)`, 10000);
+    if (!ok) return 'covers not loaded';
+    const r = await b.evaluate(`[...document.querySelectorAll('.game-card .gv-cover-img')].map(i => ({ src: i.getAttribute('src'), w: i.naturalWidth, h: i.naturalHeight }))`);
+    const bad = r.filter(i => i.w !== 1200 || i.h !== 600 || i.src.indexOf('./assets/covers/') !== 0);
+    if (bad.length) return JSON.stringify(bad);
+    if (new Set(r.map(i => i.src)).size !== 9) return 'duplicate cover';
+    return true;
+  });
+  await b.evaluate(`document.getElementById('games').scrollIntoView({ block: 'start', behavior: 'instant' })`);
+  await sleep(400);
+  await b.screenshot(path.join(SHOTS, 'home-covers.png'));
+  await b.evaluate(`window.scrollTo({ top: 0, behavior: 'instant' })`);
+  await sleep(200);
+
   await t('home.miniBoard', async () => {
     const before = await b.evaluate(`document.querySelectorAll('#cells button').length`);
     if (before !== 81) return 'cells ' + before;

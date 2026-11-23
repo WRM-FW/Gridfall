@@ -13,8 +13,8 @@ node online-core.mjs       # 双浏览器联机核心，7 项
 node online-extra.mjs      # 正式连珠/围棋/重连，5 项
 node online-swap.mjs       # 正式开局交换分支，4 项
 node online-colors.mjs     # 房主/客端申请换方与同意/拒绝，6 项
-node home-test.mjs         # 大厅首页与深链接，9 项
-node live-home.mjs         # 线上首页，5 项
+node home-test.mjs         # 大厅首页、封面与深链接，13 项
+node live-home.mjs         # 线上首页与封面，7 项
 node live-online.mjs       # 线上整局，4 项
 node route-test.mjs        # /HBQS 路由、刷新、查询、尾斜杠、前进后退，7 项
 node xiangqi-route.mjs     # /ZGXQ 路由、刷新、尾斜杠、首页卡片，4 项
