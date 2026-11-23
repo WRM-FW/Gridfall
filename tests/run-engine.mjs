@@ -3,7 +3,7 @@ import path from 'node:path';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
-const url = pathToFileURL(path.join(import.meta.dirname, '..', 'play.html')).href;
+const url = pathToFileURL(path.join(import.meta.dirname, '..', 'games', 'board-club', 'index.html')).href;
 const src = readFileSync(path.join(import.meta.dirname, 'engine-tests.js'), 'utf8');
 const outDir = path.join(import.meta.dirname, 'results');
 mkdirSync(outDir, { recursive: true });

@@ -719,5 +719,66 @@ must('  @media (max-width:900px){',
   }
   @media (max-width:900px){`);
 
+/* ---------- 20261123 目录重构：游戏统一迁入 games/，英文 URL ---------- */
+var oldGh = `document.querySelectorAll('a[href^="./HBQS"], a[href^="./ZGXQ"], a[href^="./TQ"], a[href^="./2048"], a[href^="./JQ"], a[href^="./SL"]').forEach(function(a){
+      var h = a.getAttribute('href'), keys = ['./HBQS','./ZGXQ','./TQ','./2048','./JQ','./SL'];
+      for (var k = 0; k < keys.length; k++) if (h.indexOf(keys[k]) === 0) { h = h.replace(keys[k], keys[k] + '/'); break; }
+      a.setAttribute('href', h);
+    });`;
+var newGh = `document.querySelectorAll('a[href]').forEach(function(a){
+      var h=a.getAttribute('href');
+      var map={'./board-club':'./games/board-club/','./chinese-chess':'./games/chinese-chess/','./chinese-checkers':'./games/chinese-checkers/','./2048':'./games/2048/','./army-chess':'./games/army-chess/','./minesweeper':'./games/minesweeper/','./snake':'./games/snake/','./sokoban':'./games/sokoban/','./tetris':'./games/tetris/'};
+      for (var k in map) if (h.indexOf(k) === 0) { a.setAttribute('href', map[k]+h.slice(k.length)); break; }
+    });`;
+if (!html.includes(oldGh)) throw new Error('old GH fallback missing');
+html = html.replace(oldGh, newGh);
+
+/* data-local：本地 file:// 直接指向 games/<dir>/index.html */
+var localMap = {
+  'data-local="./play.html': 'data-local="./games/board-club/index.html',
+  'data-local="./xiangqi.html': 'data-local="./games/chinese-chess/index.html',
+  'data-local="./tiaoqi.html': 'data-local="./games/chinese-checkers/index.html',
+  'data-local="./game2048.html': 'data-local="./games/2048/index.html',
+  'data-local="./junqi.html': 'data-local="./games/army-chess/index.html',
+  'data-local="./saolei.html': 'data-local="./games/minesweeper/index.html',
+  'data-local="./snake.html': 'data-local="./games/snake/index.html',
+  'data-local="./sokoban.html': 'data-local="./games/sokoban/index.html',
+  'data-local="./tetris.html': 'data-local="./games/tetris/index.html'
+};
+Object.keys(localMap).forEach(function(k){ html = html.split(k).join(localMap[k]); });
+
+/* 站内链接与文案路径 */
+var routeMap = {
+  './HBQS': './board-club',
+  './ZGXQ': './chinese-chess',
+  './TQ': './chinese-checkers',
+  './JQ': './army-chess',
+  './SL': './minesweeper',
+  './TCS': './snake',
+  './TXZ': './sokoban',
+  './ELSFK': './tetris'
+};
+Object.keys(routeMap).forEach(function(k){ html = html.split(k).join(routeMap[k]); });
+var textMap = {
+  '/HBQS': '/board-club',
+  '/ZGXQ': '/chinese-chess',
+  '/TQ': '/chinese-checkers',
+  '/JQ': '/army-chess',
+  '/SL': '/minesweeper',
+  '/TCS': '/snake',
+  '/TXZ': '/sokoban',
+  '/ELSFK': '/tetris',
+  '/play.html': '/board-club',
+  '/xiangqi.html': '/chinese-chess',
+  '/tiaoqi.html': '/chinese-checkers',
+  '/game2048.html': '/2048',
+  '/junqi.html': '/army-chess',
+  '/saolei.html': '/minesweeper',
+  '/snake.html': '/snake',
+  '/sokoban.html': '/sokoban',
+  '/tetris.html': '/tetris'
+};
+Object.keys(textMap).forEach(function(k){ html = html.split(k).join(textMap[k]); });
+
 fs.writeFileSync(path.join(ROOT, 'index.html'), html, 'utf8');
 console.log('built homepage', Buffer.byteLength(html), 'bytes');

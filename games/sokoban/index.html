@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>推箱子 · Gridfall</title>
-<link rel="canonical" href="./TXZ" />
+<link rel="canonical" href="../../sokoban" />
 <style>
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#2B1D12;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
 header{text-align:center;margin-bottom:12px}header h1{font-size:28px}header p{color:#D8BFA3;font-size:13px;margin-top:4px}
@@ -16,7 +16,7 @@ button{background:#63E63A}button:active{transform:translate(2px,2px);box-shadow:
 .tip{color:#D8BFA3;font-size:12px;text-align:center;margin-top:12px;line-height:1.7;max-width:540px}
 .banner{display:none;margin-top:12px;background:#63E63A;color:#0B1220;border:2px solid #000;box-shadow:4px 4px 0 #000;border-radius:12px;padding:12px 18px;font-weight:800}.banner.show{display:block}
 </style></head><body>
-<a href="./index.html" title="返回 Gridfall 游戏大厅" style="position:fixed;right:16px;top:16px;z-index:2147483647;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:999px;background:rgba(10,14,22,.84);color:#fff;text-decoration:none;font:600 13px/1 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(0,0,0,.35);backdrop-filter:blur(8px)">← 游戏大厅</a>
+<a href="../../index.html" title="返回 Gridfall 游戏大厅" style="position:fixed;right:16px;top:16px;z-index:2147483647;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:999px;background:rgba(10,14,22,.84);color:#fff;text-decoration:none;font:600 13px/1 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(0,0,0,.35);backdrop-filter:blur(8px)">← 游戏大厅</a>
 <header><h1>推箱子</h1><p>SOKOBAN · Gridfall 推理类 · 本地单机 · 共 30 关（21 关起为大图多箱高难度）</p></header>
 <div class="stats"><div class="card"><small>关卡</small><b id="lv">1 / 30</b></div><div class="card"><small>步数</small><b id="steps">0</b></div><div class="card"><small>推动</small><b id="pushes">0</b></div><div class="card"><small>已到位</small><b id="done">0 / 0</b></div></div>
 <div class="board-wrap"><canvas id="cv"></canvas></div>

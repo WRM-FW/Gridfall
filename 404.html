@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>页面跳转 | Gridfall</title>
+<script>
+(function () {
+  var base = location.pathname.indexOf('/Gridfall/') === 0 ? '/Gridfall' : '';
+  var path = location.pathname.slice(base.length) || '/';
+  path = path.replace(/\/index\.html$/, '/').replace(/\/+$/, '') || '/';
+  var map = {
+    '/board-club': '/games/board-club/',
+    '/chinese-chess': '/games/chinese-chess/',
+    '/chinese-checkers': '/games/chinese-checkers/',
+    '/2048': '/games/2048/',
+    '/army-chess': '/games/army-chess/',
+    '/minesweeper': '/games/minesweeper/',
+    '/snake': '/games/snake/',
+    '/sokoban': '/games/sokoban/',
+    '/tetris': '/games/tetris/',
+    '/HBQS': '/games/board-club/',
+    '/ZGXQ': '/games/chinese-chess/',
+    '/TQ': '/games/chinese-checkers/',
+    '/JQ': '/games/army-chess/',
+    '/SL': '/games/minesweeper/',
+    '/TCS': '/games/snake/',
+    '/TXZ': '/games/sokoban/',
+    '/ELSFK': '/games/tetris/',
+    '/play': '/games/board-club/',
+    '/play.html': '/games/board-club/',
+    '/xiangqi': '/games/chinese-chess/',
+    '/xiangqi.html': '/games/chinese-chess/',
+    '/tiaoqi.html': '/games/chinese-checkers/',
+    '/game2048.html': '/games/2048/',
+    '/junqi.html': '/games/army-chess/',
+    '/saolei.html': '/games/minesweeper/',
+    '/snake.html': '/games/snake/',
+    '/sokoban.html': '/games/sokoban/',
+    '/tetris.html': '/games/tetris/'
+  };
+  var target = map[path];
+  if (target) {
+    location.replace(base + target + location.search + location.hash);
+    return;
+  }
+  if (path.indexOf('/games/') === 0) return;
+  document.documentElement.className = 'missing';
+})();
+</script>
+<style>
+  body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#1e5bf0;color:#fff;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .box{max-width:520px;background:#0b1220;border:2px solid #000;box-shadow:8px 9px 0 rgba(0,0,0,.35);border-radius:16px;padding:28px}
+  h1{font-size:24px;margin:0 0 10px}p{line-height:1.7;color:#c9d9ff;margin:0 0 18px}
+  a{color:#63e63a;font-weight:800;text-decoration:none}a:hover{text-decoration:underline}
+  .links{display:flex;flex-wrap:wrap;gap:10px}
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>这局没有落在这里</h1>
+    <p>Gridfall 的游戏已经整理到统一目录；如果页面没有自动跳转，请从大厅重新进入。</p>
+    <div class="links"><a id="lobby" href="/">返回游戏大厅 →</a><a id="club" href="/games/board-club/">黑白棋社 →</a>
+<script>(function(){var b=location.pathname.indexOf("/Gridfall/")===0?"/Gridfall":"";document.getElementById("lobby").href=b+"/";document.getElementById("club").href=b+"/games/board-club/";})();</script></div>
+  </div>
+</body>
+</html>

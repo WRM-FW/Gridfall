@@ -2,7 +2,7 @@ import { launch } from './cdp.mjs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const url = process.env.APP_URL || pathToFileURL(path.join(import.meta.dirname, '..', 'play.html')).href;
+const url = process.env.APP_URL || pathToFileURL(path.join(import.meta.dirname, '..', 'games', 'board-club', 'index.html')).href;
 const A = await launch(url, { port: 9531 });
 const B = await launch(url, { port: 9532 });
 const R = [];

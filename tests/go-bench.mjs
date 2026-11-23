@@ -10,7 +10,7 @@ const low = Number(args.low || 1);
 const high = Number(args.high || 2);
 const games = Number(args.games || 20);
 const port = Number(args.port || 9460);
-const play = pathToFileURL(path.resolve(import.meta.dirname, '..', 'play.html')).href;
+const play = pathToFileURL(path.resolve(import.meta.dirname, '..', 'games', 'board-club', 'index.html')).href;
 
 const b = await launch(play, { port });
 try {

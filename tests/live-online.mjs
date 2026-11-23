@@ -4,7 +4,7 @@ mkdirSync(SHOTS, { recursive: true });
 import path from 'node:path';
 import { mkdirSync } from 'node:fs';
 
-const URL = process.env.APP_URL || 'https://play-gridfall.pages.dev/play.html';
+const URL = process.env.APP_URL || 'https://play-gridfall.pages.dev/board-club';
 const A = await launch(URL, { port: 9441 });
 const B = await launch(URL, { port: 9442 });
 const R = [];

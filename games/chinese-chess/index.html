@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>中国象棋 · Xiangqi | Gridfall</title>
-<link rel="canonical" href="./ZGXQ" />
+<link rel="canonical" href="../../chinese-chess" />
 <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
 <style>
   :root{
@@ -185,7 +185,7 @@
   <header class="head">
     <div class="brand"><h1>中国象棋</h1><span class="tag">xiangqi</span></div>
     <div class="head-actions">
-      <a class="hall-link" href="./index.html" title="返回 Gridfall 游戏大厅">← 游戏大厅</a>
+      <a class="hall-link" href="../../index.html" title="返回 Gridfall 游戏大厅">← 游戏大厅</a>
       <button class="icon-btn" id="soundBtn" title="音效开关">🔔</button>
     </div>
   </header>
@@ -1384,9 +1384,9 @@ function xEnsureLibs(){
   if (window.supabase && window.GRIDFALL_SUPABASE) return Promise.resolve();
   if (XNET.loading) return XNET.loading;
   XNET.loading = Promise.resolve().then(function(){
-    if (!window.GRIDFALL_SUPABASE) return xLoadScript("supabase-config.js");
+    if (!window.GRIDFALL_SUPABASE) return xLoadScript("../../shared/supabase-config.js");
   }).then(function(){
-    if (!window.supabase) return xLoadScript("supabase.js");
+    if (!window.supabase) return xLoadScript("../../shared/supabase.js");
   }).catch(function(err){ XNET.loading = null; throw err; });
   return XNET.loading;
 }

@@ -128,7 +128,7 @@ const html = `<!doctype html>
 <meta name="theme-color" content="#2e1e0d" />
 <link rel="icon" href="data:," />
 <title>黑白棋社 · Gridfall</title>
-<link rel="canonical" href="./HBQS" />
+<link rel="canonical" href="../../board-club" />
 <style>
 ${designCss}
 ${extraCss}
@@ -154,6 +154,7 @@ ${d2}</script>
 </html>
 `;
 
-fs.writeFileSync(path.join(REPO, 'play.html'), html, 'utf8');
+fs.mkdirSync(path.join(REPO, 'games', 'board-club'), { recursive: true });
+fs.writeFileSync(path.join(REPO, 'games', 'board-club', 'index.html'), html, 'utf8');
 
-console.log('done: play.html (supabase.js / supabase-config.js are tracked in the repo)');
+console.log('done: games/board-club/index.html');

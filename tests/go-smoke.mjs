@@ -3,7 +3,7 @@ import { launch } from './cdp.mjs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const play = pathToFileURL(path.resolve(import.meta.dirname, '..', 'play.html')).href;
+const play = pathToFileURL(path.resolve(import.meta.dirname, '..', 'games', 'board-club', 'index.html')).href;
 const b = await launch(play, { port: 9461 });
 try {
   const r = await b.evaluate(`(() => {

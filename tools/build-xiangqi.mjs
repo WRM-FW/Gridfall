@@ -10,7 +10,7 @@ function must(old, neu) {
   html = html.split(old).join(neu);
 }
 
-must('<title>中国象棋 · Xiangqi</title>', '<title>中国象棋 · Xiangqi | Gridfall</title>\n<link rel="canonical" href="./ZGXQ" />');
+must('<title>中国象棋 · Xiangqi</title>', '<title>中国象棋 · Xiangqi | Gridfall</title>\n<link rel="canonical" href="../../chinese-chess" />');
 
 must(`  <header class="head">
     <div class="brand"><h1>中国象棋</h1><span class="tag">xiangqi</span></div>
@@ -19,7 +19,7 @@ must(`  <header class="head">
 `  <header class="head">
     <div class="brand"><h1>中国象棋</h1><span class="tag">xiangqi</span></div>
     <div class="head-actions">
-      <a class="hall-link" href="./index.html" title="返回 Gridfall 游戏大厅">← 游戏大厅</a>
+      <a class="hall-link" href="../../index.html" title="返回 Gridfall 游戏大厅">← 游戏大厅</a>
       <button class="icon-btn" id="soundBtn" title="音效开关">🔔</button>
     </div>
   </header>`);
@@ -169,5 +169,6 @@ must(`  state.flip = (state.mode === 'ai' && state.humanSide === BLACK);`,
 
 must('</body>', `<script>\n${online}\n</script>\n</body>`);
 
-fs.writeFileSync(path.join(ROOT, 'xiangqi.html'), html, 'utf8');
-console.log('built xiangqi.html', Buffer.byteLength(html), 'bytes');
+fs.mkdirSync(path.join(ROOT, 'games', 'chinese-chess'), { recursive: true });
+fs.writeFileSync(path.join(ROOT, 'games', 'chinese-chess', 'index.html'), html, 'utf8');
+console.log('built games/chinese-chess/index.html', Buffer.byteLength(html), 'bytes');

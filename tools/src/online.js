@@ -79,9 +79,9 @@ function netEnsureLibs(){
   if (window.supabase && window.GRIDFALL_SUPABASE) return Promise.resolve();
   if (NET.loading) return NET.loading;
   NET.loading = Promise.resolve().then(function(){
-    if (!window.GRIDFALL_SUPABASE) return netLoadScript("supabase-config.js");
+    if (!window.GRIDFALL_SUPABASE) return netLoadScript("../../shared/supabase-config.js");
   }).then(function(){
-    if (!window.supabase) return netLoadScript("supabase.js");
+    if (!window.supabase) return netLoadScript("../../shared/supabase.js");
   }).catch(function(err){
     NET.loading = null;
     throw err;
@@ -246,7 +246,7 @@ function netCreateRoom(){
     netSetStatus("等待对手加入…", "把房间码发给对手，对手加入后自动开局。");
     netUpdateLobby();
     netConnect();
-  }).catch(function(){ netSetStatus("联机组件加载失败", "需要网络与 supabase.js / supabase-config.js。单机功能不受影响。"); });
+  }).catch(function(){ netSetStatus("联机组件加载失败", "需要网络与 shared/supabase.js / shared/supabase-config.js。单机功能不受影响。"); });
 }
 
 function netJoinRoom(){
@@ -260,7 +260,7 @@ function netJoinRoom(){
     netSetStatus("正在加入房间 " + code + "…", "");
     netUpdateLobby();
     netConnect();
-  }).catch(function(){ netSetStatus("联机组件加载失败", "需要网络与 supabase.js / supabase-config.js。单机功能不受影响。"); });
+  }).catch(function(){ netSetStatus("联机组件加载失败", "需要网络与 shared/supabase.js / shared/supabase-config.js。单机功能不受影响。"); });
 }
 
 function netLeave(){

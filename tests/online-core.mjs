@@ -5,7 +5,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { writeFileSync, mkdirSync } from 'node:fs';
 
-const url = pathToFileURL(path.join(import.meta.dirname, '..', 'play.html')).href;
+const url = pathToFileURL(path.join(import.meta.dirname, '..', 'games', 'board-club', 'index.html')).href;
 const A = await launch(url, { port: 9411 });
 const B = await launch(url, { port: 9412 });
 const R = [];

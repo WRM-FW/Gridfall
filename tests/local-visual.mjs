@@ -5,7 +5,7 @@ import path from 'node:path';
 import { mkdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
-const url = pathToFileURL(path.join(import.meta.dirname, '..', 'play.html')).href;
+const url = pathToFileURL(path.join(import.meta.dirname, '..', 'games', 'board-club', 'index.html')).href;
 const b = await launch(url);
 const R = [];
 const t = async (id, fn) => {

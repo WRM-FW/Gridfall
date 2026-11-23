@@ -49,9 +49,9 @@ function xEnsureLibs(){
   if (window.supabase && window.GRIDFALL_SUPABASE) return Promise.resolve();
   if (XNET.loading) return XNET.loading;
   XNET.loading = Promise.resolve().then(function(){
-    if (!window.GRIDFALL_SUPABASE) return xLoadScript("supabase-config.js");
+    if (!window.GRIDFALL_SUPABASE) return xLoadScript("../../shared/supabase-config.js");
   }).then(function(){
-    if (!window.supabase) return xLoadScript("supabase.js");
+    if (!window.supabase) return xLoadScript("../../shared/supabase.js");
   }).catch(function(err){ XNET.loading = null; throw err; });
   return XNET.loading;
 }

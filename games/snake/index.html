@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>贪吃蛇 · Gridfall</title>
-<link rel="canonical" href="./TCS" />
+<link rel="canonical" href="../../snake" />
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -23,7 +23,7 @@ select{padding:9px;border:2px solid #000;border-radius:10px;font-weight:700;back
 @media(max-height:700px){.tip{display:none}header p{display:none}}
 @media(max-width:380px){.pad{grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,46px)}}
 </style></head><body>
-<a href="./index.html" title="返回 Gridfall 游戏大厅" style="position:fixed;right:16px;top:16px;z-index:2147483647;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:999px;background:rgba(10,14,22,.84);color:#fff;text-decoration:none;font:600 13px/1 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(0,0,0,.35);backdrop-filter:blur(8px)">← 游戏大厅</a>
+<a href="../../index.html" title="返回 Gridfall 游戏大厅" style="position:fixed;right:16px;top:16px;z-index:2147483647;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:999px;background:rgba(10,14,22,.84);color:#fff;text-decoration:none;font:600 13px/1 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(0,0,0,.35);backdrop-filter:blur(8px)">← 游戏大厅</a>
 <header><h1>贪吃蛇</h1><p>SNAKE · Gridfall 经典休闲 · 打开即玩</p></header>
 <div class="stats"><div class="card"><small>分数</small><b id="score">0</b></div><div class="card"><small>长度</small><b id="len">3</b></div><div class="card"><small>最高分（本机）</small><b id="best">0</b></div></div>
 <div class="board-wrap"><canvas id="cv" width="420" height="420"></canvas></div>

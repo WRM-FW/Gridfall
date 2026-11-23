@@ -5,7 +5,7 @@ import { mkdirSync } from 'node:fs';
 
 const SHOTS = path.join(import.meta.dirname, 'shots');
 mkdirSync(SHOTS, { recursive: true });
-const url = process.env.APP_URL || pathToFileURL(path.join(import.meta.dirname, '..', 'xiangqi.html')).href;
+const url = process.env.APP_URL || pathToFileURL(path.join(import.meta.dirname, '..', 'games', 'chinese-chess', 'index.html')).href;
 const A = await launch(url, { port: 9551 });
 const B = await launch(url, { port: 9552 });
 const R = [];

@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const home = pathToFileURL(path.join(ROOT, 'index.html')).href;
-const play = pathToFileURL(path.join(ROOT, 'play.html')).href;
+const play = pathToFileURL(path.join(ROOT, 'games', 'board-club', 'index.html')).href;
 const b = await launch(home, { port: 9461 });
 const R = [];
 const t = async (id, fn) => {
@@ -149,13 +149,13 @@ try {
 
   await t('home.minigameLinks', async () => {
     const games = [
-      ['./game2048.html', '2048 · 游戏'],
-      ['./saolei.html', '扫雷'],
-      ['./tiaoqi.html', '跳棋'],
-      ['./junqi.html', '军棋 · 陆战棋'],
-      ['./snake.html', '贪吃蛇 · Gridfall'],
-      ['./sokoban.html', '推箱子 · Gridfall'],
-      ['./tetris.html', '俄罗斯方块 · Gridfall']
+      ['./games/2048/index.html', '2048 · 游戏'],
+      ['./games/minesweeper/index.html', '扫雷'],
+      ['./games/chinese-checkers/index.html', '跳棋'],
+      ['./games/army-chess/index.html', '军棋 · 陆战棋'],
+      ['./games/snake/index.html', '贪吃蛇 · Gridfall'],
+      ['./games/sokoban/index.html', '推箱子 · Gridfall'],
+      ['./games/tetris/index.html', '俄罗斯方块 · Gridfall']
     ];
     for (const [local, title] of games) {
       await goto(home);

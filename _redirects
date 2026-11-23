@@ -1,27 +1,48 @@
-# 黑白棋社统一入口：地址保持 /HBQS，内容由对局页提供
-/HBQS /play 200
-/HBQS/ /HBQS 301
-# 中国象棋统一入口
-/ZGXQ /xiangqi 200
-/ZGXQ/ /ZGXQ 301
-# 跳棋
-/TQ /tiaoqi 200
-/TQ/ /TQ 301
-# 2048
-/2048 /game2048 200
+# 新版英文入口：地址保持无扩展、无尾斜杠，内容由 games/<dir>/index.html 提供
+/board-club /games/board-club/ 200
+/board-club/ /board-club 301
+/chinese-chess /games/chinese-chess/ 200
+/chinese-chess/ /chinese-chess 301
+/chinese-checkers /games/chinese-checkers/ 200
+/chinese-checkers/ /chinese-checkers 301
+/2048 /games/2048/ 200
 /2048/ /2048 301
-# 军棋
-/JQ /junqi 200
-/JQ/ /JQ 301
-# 扫雷
-/SL /saolei 200
-/SL/ /SL 301
-# 贪吃蛇
-/TCS /snake 200
-/TCS/ /TCS 301
-# 推箱子
-/TXZ /sokoban 200
-/TXZ/ /TXZ 301
-# 俄罗斯方块
-/ELSFK /tetris 200
-/ELSFK/ /ELSFK 301
+/army-chess /games/army-chess/ 200
+/army-chess/ /army-chess 301
+/minesweeper /games/minesweeper/ 200
+/minesweeper/ /minesweeper 301
+/snake /games/snake/ 200
+/snake/ /snake 301
+/sokoban /games/sokoban/ 200
+/sokoban/ /sokoban 301
+/tetris /games/tetris/ 200
+/tetris/ /tetris 301
+
+# 旧拼音 / 旧文件入口：永久跳转到新地址
+/HBQS /board-club 301
+/HBQS/ /board-club 301
+/ZGXQ /chinese-chess 301
+/ZGXQ/ /chinese-chess 301
+/TQ /chinese-checkers 301
+/TQ/ /chinese-checkers 301
+/JQ /army-chess 301
+/JQ/ /army-chess 301
+/SL /minesweeper 301
+/SL/ /minesweeper 301
+/TCS /snake 301
+/TCS/ /snake 301
+/TXZ /sokoban 301
+/TXZ/ /sokoban 301
+/ELSFK /tetris 301
+/ELSFK/ /tetris 301
+/play /board-club 301
+/play.html /board-club 301
+/xiangqi /chinese-chess 301
+/xiangqi.html /chinese-chess 301
+/tiaoqi.html /chinese-checkers 301
+/game2048.html /2048 301
+/junqi.html /army-chess 301
+/saolei.html /minesweeper 301
+/snake.html /snake 301
+/sokoban.html /sokoban 301
+/tetris.html /tetris 301
