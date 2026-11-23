@@ -2,19 +2,10 @@
 
 黑白棋社（五子棋 / 国际连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块。黑白棋社与中国象棋支持单机/本地/联机；其余为本地或单人。首页是平台大厅，后续继续接入更多游戏。
 
-- 游戏大厅（Cloudflare Pages，主站）：https://play-gridfall.pages.dev/
-- 黑白棋社：https://play-gridfall.pages.dev/board-club
-- 中国象棋：https://play-gridfall.pages.dev/chinese-chess
-- 跳棋：https://play-gridfall.pages.dev/chinese-checkers
-- 2048：https://play-gridfall.pages.dev/2048
-- 军棋：https://play-gridfall.pages.dev/army-chess
-- 扫雷：https://play-gridfall.pages.dev/minesweeper
-- 贪吃蛇：https://play-gridfall.pages.dev/snake
-- 推箱子：https://play-gridfall.pages.dev/sokoban
-- 俄罗斯方块：https://play-gridfall.pages.dev/tetris
-- GitHub Pages：https://wrm-fw.github.io/Gridfall/ ；新/旧入口由根目录 `404.html` 回退到 `games/<英文名>/`
+- 主站（Cloudflare Pages，游戏大厅）：https://play-gridfall.pages.dev/
+- GitHub Pages 访问入口：https://wrm-fw.github.io/Gridfall/
 
-`index.html` 是平台首页。所有游戏统一放在 `games/` 下；Cloudflare Pages 由 `_redirects` 把无扩展 URL 200 代理到 `games/<英文名>/`，地址保持 `/chinese-chess` 这类无斜杠路径；尾斜杠 301 回收。`gridfall.pages.dev` 已被其他项目占用，因此主站使用 `play-gridfall.pages.dev`。
+`index.html` 是平台首页。所有游戏统一放在 `games/` 下；Cloudflare Pages 由 `_redirects` 把无扩展 URL 200 代理到 `games/<英文名>/`，地址保持无扩展、无尾斜杠；尾斜杠 301 回收。`gridfall.pages.dev` 已被其他项目占用，因此主站使用 `play-gridfall.pages.dev`。
 
 ## 目录结构
 
@@ -47,24 +38,9 @@ dist/                       部署产物（不入库）
 - 单机与本地双人：离线可用。
 - 联机：需要网络；页面进入联机模式时才懒加载 `shared/supabase.js` 与 `shared/supabase-config.js`。
 
-## 路由
+## 路由与兼容
 
-| 游戏 | 新 URL | 旧 URL（301 到新地址） |
-| --- | --- | --- |
-| 黑白棋社 | `/board-club` | `/HBQS`、`/play`、`/play.html` |
-| 中国象棋 | `/chinese-chess` | `/ZGXQ`、`/xiangqi`、`/xiangqi.html` |
-| 跳棋 | `/chinese-checkers` | `/TQ`、`/tiaoqi.html` |
-| 2048 | `/2048` | —（保留数字名） |
-| 军棋 | `/army-chess` | `/JQ`、`/junqi.html` |
-| 扫雷 | `/minesweeper` | `/SL`、`/saolei.html` |
-| 贪吃蛇 | `/snake` | `/TCS`、`/snake.html` |
-| 推箱子 | `/sokoban` | `/TXZ`、`/sokoban.html` |
-| 俄罗斯方块 | `/tetris` | `/ELSFK`、`/tetris.html` |
-
-- 新路径统一小写英文 + 连字符；黑白棋社用 `board-club`，不改成 Gomoku。
-- Cloudflare Pages：`_redirects` 200 代理到 `games/<dir>/`，地址保持无扩展、无尾斜杠；旧路径 301。
-- GitHub Pages：根目录 `404.html` 读取当前路径，把新/旧入口跳到 `games/<dir>/`；查询串与 hash 会保留。
-- 旧收藏链接不会直接 404：Cloudflare 上 301，GitHub Pages 上由 404 回退页跳转。
+游戏页统一在 `games/<英文短名>/`；对外路径使用小写英文 + 连字符（2048 保留数字名，黑白棋社使用 `/board-club`）。Cloudflare Pages 由 `_redirects` 200 代理到对应目录，地址保持无扩展、无尾斜杠；GitHub Pages 由根目录 `404.html` 回退到 `games/<dir>/`。旧的拼音入口与旧 `.html` 文件保留 301 / 回退兼容，查询串与 hash 不丢。
 
 ## 构建与部署
 
@@ -92,7 +68,7 @@ GitHub Pages：从 `main` 分支根目录发布，推送后自动更新。
 - 游戏大厅直接复用项目素材库 `00_Gridfall首页.html` 的蓝色街机大厅设计，并替换为当前真实游戏与联机入口。
 - 大厅游戏封面统一使用 `assets/covers/` 下的 1200×600 插画（`snake/sokoban/tetris` 为项目内 SVG），`.gv-cover-img` 以 `object-fit: cover` 填充 168px 高的封面区。
 - 黑白棋社对局页复用 `01_木质棋盘陶瓷棋子以及配套UI.html` 的木质棋盘、陶瓷棋子与瓷白/深木 UI，Canvas 绘制。
-- 中国象棋复用 `03_中国象棋.html` 的深色 Canvas 棋盘与面板；落子音效改为 Web Audio 合成的木质拍盘声。
+- 中国象棋复用 `03_中国象棋.html` 的深色 Canvas 棋盘与面板；音效开关与音效代码已移除。
 - 跳棋、2048、军棋、扫雷、贪吃蛇、推箱子、俄罗斯方块直接复用素材库同名文件，仅加固定返回大厅入口与路由，不改动游戏本体视觉。
 
 ## 点单 / 共建
@@ -118,17 +94,18 @@ node xiangqi-route.mjs
 node xiangqi-online.mjs
 node minigames-smoke.mjs
 node minigames-route.mjs
+node hall-buttons.mjs
 ```
 
 详见 `tests/README.md`。
 
 ## 已验证
 
-- 目录重构后：首页 14/14、线上首页 7/7、`/board-club` 路由 9/9（含旧入口 301）、`/chinese-chess` 路由 4/4、七款小游戏路由 15/15、线上联机整局 4/4、引擎 36/36、本地界面 6/6。
+- 目录重构后：首页 14/14、线上首页 7/7、`/board-club` 路由 9/9（含旧入口 301）、`/chinese-chess` 路由 4/4、七款小游戏路由 15/15、返回大厅按钮 18/18（桌面 + 390px）、线上联机整局 4/4、引擎 36/36、本地界面 6/6。
 - Cloudflare：九个新 URL 直接访问/刷新、尾斜杠 301、旧 URL 301 均已实测；`/board-club` 的查询参数与联机深链接保持。
 - GitHub Pages：首页 9 张卡片、`games/<dir>/` 目录访问、旧/新入口的 404 回退均已实测。
 - 贪吃蛇、推箱子、俄罗斯方块本地冒烟通过；三款游戏共用 `../../index.html` 回大厅。
-- 中国象棋联机已实测：房主红/客端黑、双向落子同步、换方、认输、再来一局、音效开关。
+- 中国象棋联机已实测：房主红/客端黑、双向落子同步、换方、认输、再来一局；音效已移除。
 - GitHub Pages 联机也实测 4/4：`/Gridfall/games/board-club/` 加载 `shared/supabase.js` 后完成整局同步。
 
 ## 已知限制

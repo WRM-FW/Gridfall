@@ -34,11 +34,6 @@
   .brand{display:flex;align-items:baseline;gap:12px;}
   .brand h1{font-size:25px;font-weight:700;letter-spacing:.14em;font-family:"Noto Serif SC","Songti SC","KaiTi",serif;}
   .brand .tag{font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;}
-  .icon-btn{
-    width:38px;height:38px;border-radius:11px;border:1px solid rgba(255,255,255,.12);
-    background:rgba(255,255,255,.06);color:#dfe3ea;font-size:16px;cursor:pointer;transition:.18s;
-  }
-  .icon-btn:hover{background:rgba(255,255,255,.13);}
 
   /* ---------- 主体 ---------- */
   main{display:flex;gap:24px;align-items:flex-start;}
@@ -147,11 +142,15 @@
 
   .head-actions{display:flex;align-items:center;gap:10px;}
   .hall-link{
-    display:inline-flex;align-items:center;gap:4px;min-height:38px;padding:0 13px;border-radius:11px;
-    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#dfe3ea;
-    text-decoration:none;font-size:12.5px;letter-spacing:.04em;
+    display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:0 15px;border-radius:11px;
+    border:1px solid rgba(224,85,70,.45);
+    background:linear-gradient(180deg,rgba(224,85,70,.20),rgba(224,85,70,.08));
+    color:#f0d9b5;text-decoration:none;font-family:"Noto Serif SC","Songti SC","KaiTi",serif;
+    font-size:13px;font-weight:600;letter-spacing:.08em;
+    box-shadow:0 4px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08);
   }
-  .hall-link:hover{background:rgba(255,255,255,.13);}
+  .hall-link:hover{background:rgba(224,85,70,.26);border-color:rgba(224,85,70,.68);}
+  @media (max-width:640px){.hall-link{min-height:34px;padding:0 11px;font-size:12px;}}
   .hidden{display:none !important;}
   .x-room-row{display:flex;gap:8px;margin-bottom:8px;}
   .x-room-row .btn{flex:0 0 auto;padding:9px 14px;}
@@ -186,7 +185,6 @@
     <div class="brand"><h1>中国象棋</h1><span class="tag">xiangqi</span></div>
     <div class="head-actions">
       <a class="hall-link" href="../../index.html" title="返回 Gridfall 游戏大厅">← 游戏大厅</a>
-      <button class="icon-btn" id="soundBtn" title="音效开关">🔔</button>
     </div>
   </header>
 
@@ -710,7 +708,6 @@ var state = {
   result: '',
   reason: '',
   thinking: false,
-  sound: true,
   epoch: 0
 };
 
@@ -980,68 +977,6 @@ function drawPiece(i, p) {
   ctx.fillText(NAMES[colorOf(p)][typeOf(p)], x, y + S * 0.012);
 }
 
-// ---------- 音效 ----------
-var actx = null;
-function ensureAudio() {
-  if (!actx) {
-    try {
-      var AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) actx = new AC();
-    } catch (e) { actx = null; }
-  }
-  if (actx && actx.state === 'suspended') { try { actx.resume(); } catch (e) {} }
-}
-function woodClack(strong, low) {
-  var t = actx.currentTime;
-  var dur = strong ? 0.20 : 0.14;
-  var n = Math.floor(actx.sampleRate * 0.05);
-  var buf = actx.createBuffer(1, n, actx.sampleRate);
-  var data = buf.getChannelData(0);
-  for (var i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.4);
-  var src = actx.createBufferSource(); src.buffer = buf;
-  var bp = actx.createBiquadFilter(); bp.type = 'bandpass';
-  bp.frequency.value = low ? 700 : 1350; bp.Q.value = 0.9;
-  var ng = actx.createGain();
-  ng.gain.setValueAtTime(0.0001, t);
-  ng.gain.exponentialRampToValueAtTime(strong ? 0.55 : 0.38, t + 0.004);
-  ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.075);
-  src.connect(bp); bp.connect(ng); ng.connect(actx.destination);
-  src.start(t); src.stop(t + 0.08);
-
-  var o = actx.createOscillator(); o.type = 'triangle';
-  o.frequency.setValueAtTime(low ? 150 : 210, t);
-  o.frequency.exponentialRampToValueAtTime(low ? 95 : 130, t + dur);
-  var og = actx.createGain();
-  og.gain.setValueAtTime(0.0001, t);
-  og.gain.exponentialRampToValueAtTime(strong ? 0.30 : 0.22, t + 0.006);
-  og.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(og); og.connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
-
-  var o2 = actx.createOscillator(); o2.type = 'sine';
-  o2.frequency.setValueAtTime(low ? 620 : 820, t);
-  var g2 = actx.createGain();
-  g2.gain.setValueAtTime(0.0001, t);
-  g2.gain.exponentialRampToValueAtTime(strong ? 0.16 : 0.10, t + 0.003);
-  g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
-  o2.connect(g2); g2.connect(actx.destination); o2.start(t); o2.stop(t + 0.06);
-}
-function playSound(kind) {
-  if (!state.sound) return;
-  ensureAudio();
-  if (!actx) return;
-  try {
-    if (kind === 'move') woodClack(false, false);
-    else if (kind === 'cap') woodClack(true, true);
-    else if (kind === 'check') {
-      woodClack(false, false);
-      setTimeout(function () { if (state.sound && actx) { try { woodClack(true, true); } catch (e) {} } }, 130);
-    } else if (kind === 'win') {
-      woodClack(true, true);
-      setTimeout(function () { if (state.sound && actx) { try { woodClack(true, false); } catch (e) {} } }, 180);
-    }
-  } catch (e) {}
-}
-
 // ---------- 交互 ----------
 function onPoint(r, c) {
   if (state.over || state.thinking) return;
@@ -1087,8 +1022,6 @@ function attemptMove(from, to) {
   state.targets = [];
   state.epoch++;
 
-  playSound(cap ? 'cap' : 'move');
-
   var chk = inCheck(b, state.turn);
   var legal = genLegalMoves(b, state.turn);
   if (legal.length === 0) {
@@ -1100,7 +1033,6 @@ function attemptMove(from, to) {
     showOverlay();
     return;
   }
-  if (chk) playSound('check');
 
   draw();
   updatePanel();
@@ -1189,7 +1121,6 @@ function showOverlay() {
   title.className = 'ov-title ' + (state.result.charAt(0) === '红' ? 'red' : 'black');
   document.getElementById('ovSub').textContent = state.reason;
   ov.classList.add('show');
-  playSound('win');
 }
 
 function hideOverlay() {
@@ -1271,13 +1202,6 @@ canvas.addEventListener('click', function (e) {
 document.getElementById('undoBtn').addEventListener('click', undo);
 document.getElementById('restartBtn').addEventListener('click', resetGame);
 document.getElementById('ovRestart').addEventListener('click', resetGame);
-
-document.getElementById('soundBtn').addEventListener('click', function () {
-  state.sound = !state.sound;
-  this.textContent = state.sound ? '🔔' : '🔕';
-  this.style.opacity = state.sound ? '1' : '.55';
-  if (state.sound) playSound('move');
-});
 
 document.getElementById('modeSeg').addEventListener('click', function (e) {
   var btn = e.target.closest ? e.target.closest('.seg-btn') : null;
@@ -1535,7 +1459,6 @@ function xGuestState(p){
   draw(); updatePanel();
   if (p.history.length > prevLen && p.last) {
     var h = p.history[p.history.length - 1];
-    playSound(h && h.cap ? "cap" : "move");
   }
   if (state.over && !wasOver) { showOverlay(); xNoteResult(); }
   else if (!state.over) hideOverlay();

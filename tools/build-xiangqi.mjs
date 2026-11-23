@@ -20,7 +20,6 @@ must(`  <header class="head">
     <div class="brand"><h1>中国象棋</h1><span class="tag">xiangqi</span></div>
     <div class="head-actions">
       <a class="hall-link" href="../../index.html" title="返回 Gridfall 游戏大厅">← 游戏大厅</a>
-      <button class="icon-btn" id="soundBtn" title="音效开关">🔔</button>
     </div>
   </header>`);
 
@@ -66,11 +65,15 @@ must(`      <div class="card">
 const css = `
   .head-actions{display:flex;align-items:center;gap:10px;}
   .hall-link{
-    display:inline-flex;align-items:center;gap:4px;min-height:38px;padding:0 13px;border-radius:11px;
-    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#dfe3ea;
-    text-decoration:none;font-size:12.5px;letter-spacing:.04em;
+    display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:0 15px;border-radius:11px;
+    border:1px solid rgba(224,85,70,.45);
+    background:linear-gradient(180deg,rgba(224,85,70,.20),rgba(224,85,70,.08));
+    color:#f0d9b5;text-decoration:none;font-family:"Noto Serif SC","Songti SC","KaiTi",serif;
+    font-size:13px;font-weight:600;letter-spacing:.08em;
+    box-shadow:0 4px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08);
   }
-  .hall-link:hover{background:rgba(255,255,255,.13);}
+  .hall-link:hover{background:rgba(224,85,70,.26);border-color:rgba(224,85,70,.68);}
+  @media (max-width:640px){.hall-link{min-height:34px;padding:0 11px;font-size:12px;}}
   .hidden{display:none !important;}
   .x-room-row{display:flex;gap:8px;margin-bottom:8px;}
   .x-room-row .btn{flex:0 0 auto;padding:9px 14px;}
@@ -99,62 +102,23 @@ const css = `
 `;
 must('</style>', css + '\n</style>');
 
-const soundStart = html.indexOf('function beep(freq, dur, type, vol) {');
+html = html.replace(/  \.icon-btn\{[\s\S]*?\}\n  \.icon-btn:hover\{[^}]*\}\n/, '');
+const soundStart = html.indexOf('// ---------- 音效 ----------');
 const soundEnd = html.indexOf('// ---------- 交互 ----------', soundStart);
 if (soundStart < 0 || soundEnd < 0) throw new Error('sound block not found');
-const newSound = `function woodClack(strong, low) {
-  var t = actx.currentTime;
-  var dur = strong ? 0.20 : 0.14;
-  var n = Math.floor(actx.sampleRate * 0.05);
-  var buf = actx.createBuffer(1, n, actx.sampleRate);
-  var data = buf.getChannelData(0);
-  for (var i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.4);
-  var src = actx.createBufferSource(); src.buffer = buf;
-  var bp = actx.createBiquadFilter(); bp.type = 'bandpass';
-  bp.frequency.value = low ? 700 : 1350; bp.Q.value = 0.9;
-  var ng = actx.createGain();
-  ng.gain.setValueAtTime(0.0001, t);
-  ng.gain.exponentialRampToValueAtTime(strong ? 0.55 : 0.38, t + 0.004);
-  ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.075);
-  src.connect(bp); bp.connect(ng); ng.connect(actx.destination);
-  src.start(t); src.stop(t + 0.08);
+html = html.slice(0, soundStart) + html.slice(soundEnd);
+must('  sound: true,\n', '');
+must(`document.getElementById('soundBtn').addEventListener('click', function () {
+  state.sound = !state.sound;
+  this.textContent = state.sound ? '🔔' : '🔕';
+  this.style.opacity = state.sound ? '1' : '.55';
+  if (state.sound) playSound('move');
+});
 
-  var o = actx.createOscillator(); o.type = 'triangle';
-  o.frequency.setValueAtTime(low ? 150 : 210, t);
-  o.frequency.exponentialRampToValueAtTime(low ? 95 : 130, t + dur);
-  var og = actx.createGain();
-  og.gain.setValueAtTime(0.0001, t);
-  og.gain.exponentialRampToValueAtTime(strong ? 0.30 : 0.22, t + 0.006);
-  og.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(og); og.connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
-
-  var o2 = actx.createOscillator(); o2.type = 'sine';
-  o2.frequency.setValueAtTime(low ? 620 : 820, t);
-  var g2 = actx.createGain();
-  g2.gain.setValueAtTime(0.0001, t);
-  g2.gain.exponentialRampToValueAtTime(strong ? 0.16 : 0.10, t + 0.003);
-  g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
-  o2.connect(g2); g2.connect(actx.destination); o2.start(t); o2.stop(t + 0.06);
-}
-function playSound(kind) {
-  if (!state.sound) return;
-  ensureAudio();
-  if (!actx) return;
-  try {
-    if (kind === 'move') woodClack(false, false);
-    else if (kind === 'cap') woodClack(true, true);
-    else if (kind === 'check') {
-      woodClack(false, false);
-      setTimeout(function () { if (state.sound && actx) { try { woodClack(true, true); } catch (e) {} } }, 130);
-    } else if (kind === 'win') {
-      woodClack(true, true);
-      setTimeout(function () { if (state.sound && actx) { try { woodClack(true, false); } catch (e) {} } }, 180);
-    }
-  } catch (e) {}
-}
-
-`;
-html = html.slice(0, soundStart) + newSound + html.slice(soundEnd);
+`, '');
+must("  playSound(cap ? 'cap' : 'move');\n\n", '');
+must("  if (chk) playSound('check');\n", '');
+must("  playSound('win');\n", '');
 
 must(`    if (state.targets.indexOf(i) >= 0) { attemptMove(state.sel, i); return; }`,
 `    if (state.targets.indexOf(i) >= 0) {

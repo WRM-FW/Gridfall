@@ -200,7 +200,6 @@ function xGuestState(p){
   draw(); updatePanel();
   if (p.history.length > prevLen && p.last) {
     var h = p.history[p.history.length - 1];
-    playSound(h && h.cap ? "cap" : "move");
   }
   if (state.over && !wasOver) { showOverlay(); xNoteResult(); }
   else if (!state.over) hideOverlay();

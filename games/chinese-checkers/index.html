@@ -88,13 +88,22 @@
       .hintline{ font-size:13px; color:var(--accent); min-height:1.4em; margin-top:6px; font-weight:600; }
       @media (prefers-reduced-motion: reduce){ .prog .fill{ transition:none; } }
     </style>
-  </head>
+  <style>
+.gf-hall{display:inline-flex;align-items:center;gap:4px;min-height:34px;text-decoration:none;font:700 13px/1 "Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;white-space:nowrap;transition:transform .15s ease,filter .15s ease;box-sizing:border-box;}
+.gf-hall:hover{filter:brightness(1.05);transform:translateY(-1px);}
+.gf-hall:active{transform:translateY(1px);}
+.gf-hall-fixed{position:fixed;right:16px;top:16px;z-index:2147483647;}
+.gf-hallbar{display:flex;justify-content:flex-end;align-items:center;}
+@media (max-width:560px){.gf-hall-fixed{right:8px;top:8px;padding:6px 9px;font-size:12px;min-height:30px;}}
+</style>
+</head>
   <body>
-<a href="../../index.html" title="返回 Gridfall 游戏大厅" style="position:fixed;right:16px;top:16px;z-index:2147483647;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:999px;background:rgba(10,14,22,.84);color:#fff;text-decoration:none;font:600 13px/1 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(0,0,0,.35);backdrop-filter:blur(8px)">← 游戏大厅</a>
     <div class="wrap">
       <header class="top">
         <h1>跳棋</h1>
         <span class="sub">六角星棋盘 · 先把 10 枚棋子全部跳进对面营地的一方获胜</span>
+      
+        <a class="gf-hall" href="../../index.html" title="返回 Gridfall 游戏大厅" style="margin-left:auto;align-self:center;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:7px 14px;box-shadow:0 2px 6px rgba(0,0,0,.12);">← 游戏大厅</a>
       </header>
 
       <div class="layout">

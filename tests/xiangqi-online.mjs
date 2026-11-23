@@ -95,12 +95,14 @@ try {
     return true;
   });
 
-  await t('xq.sound_toggle', async () => {
-    await A.clickSel('#soundBtn');
-    const s1 = await A.evaluate('state.sound');
-    await A.clickSel('#soundBtn');
-    const s2 = await A.evaluate('state.sound');
-    return s1 === false && s2 === true ? true : JSON.stringify([s1, s2]);
+  await t('xq.sound_removed', async () => {
+    const r = await A.evaluate(`({
+      btn: !!document.getElementById('soundBtn'),
+      iconBtns: document.querySelectorAll('.icon-btn').length,
+      hasSoundState: Object.prototype.hasOwnProperty.call(state, 'sound'),
+      hasPlaySound: typeof playSound !== 'undefined'
+    })`);
+    return (!r.btn && r.iconBtns === 0 && !r.hasSoundState && !r.hasPlaySound) ? true : JSON.stringify(r);
   });
 
   const fail = R.filter(r => !r.pass);

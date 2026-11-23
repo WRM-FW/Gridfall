@@ -320,10 +320,18 @@
         .seg { margin-left: 0; }
       }
     </style>
-  </head>
+  <style>
+.gf-hall{display:inline-flex;align-items:center;gap:4px;min-height:34px;text-decoration:none;font:700 13px/1 "Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;white-space:nowrap;transition:transform .15s ease,filter .15s ease;box-sizing:border-box;}
+.gf-hall:hover{filter:brightness(1.05);transform:translateY(-1px);}
+.gf-hall:active{transform:translateY(1px);}
+.gf-hall-fixed{position:fixed;right:16px;top:16px;z-index:2147483647;}
+.gf-hallbar{display:flex;justify-content:flex-end;align-items:center;}
+@media (max-width:560px){.gf-hall-fixed{right:8px;top:8px;padding:6px 9px;font-size:12px;min-height:30px;}}
+</style>
+</head>
   <body>
-<a href="../../index.html" title="返回 Gridfall 游戏大厅" style="position:fixed;right:16px;top:16px;z-index:2147483647;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:999px;background:rgba(10,14,22,.84);color:#fff;text-decoration:none;font:600 13px/1 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(0,0,0,.35);backdrop-filter:blur(8px)">← 游戏大厅</a>
     <main class="wrap">
+      <div class="gf-hallbar" style="margin:0 0 10px;"><a class="gf-hall" href="../../index.html" title="返回 Gridfall 游戏大厅" style="background:var(--cell-face);color:var(--ink);border:2px solid var(--panel-edge);border-radius:6px;padding:6px 11px;box-shadow:2px 2px 0 var(--panel-edge);">← 游戏大厅</a></div>
       <section class="deck" aria-label="扫雷对局">
         <div class="statusbar">
           <div class="led" aria-label="剩余雷数"><span id="mineCount">010</span><small>MINES</small></div>
