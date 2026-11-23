@@ -39,7 +39,7 @@ try {
       err: window.__qaErrors || []
     })`);
     if (!r.title.includes('游戏大厅')) return 'title ' + r.title;
-    if (r.cards !== 9 || r.live !== 3 || r.soon !== 6) return 'cards ' + JSON.stringify(r);
+    if (r.cards !== 9 || r.live !== 1 || r.soon !== 8) return 'cards ' + JSON.stringify(r);
     if (r.err.length) return 'errors ' + JSON.stringify(r.err);
     return true;
   });
@@ -63,7 +63,7 @@ try {
     await b.evaluate(`[...document.querySelectorAll('.chip')].find(c=>c.dataset.filter==='soon').click()`);
     await sleep(200);
     let r = await b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').length`);
-    if (r !== 6) return 'soon filter ' + r;
+    if (r !== 8) return 'soon filter ' + r;
     await b.evaluate(`[...document.querySelectorAll('.chip')].find(c=>c.dataset.filter==='all').click()`);
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value='围棋'; i.dispatchEvent(new Event('input')); })()`);
     await sleep(200);
@@ -72,7 +72,7 @@ try {
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value='联机'; i.dispatchEvent(new Event('input')); })()`);
     await sleep(200);
     r = await b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').length`);
-    if (r !== 3) return 'search online ' + r;
+    if (r !== 1) return 'search online ' + r;
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value=''; i.dispatchEvent(new Event('input')); })()`);
     return true;
   });

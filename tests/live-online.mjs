@@ -44,7 +44,7 @@ try {
       const d = c.getContext('2d').getImageData(92, 620, 1, 1).data;
       return { title: document.title, canvas: [c.width, c.height], px: [d[0], d[1], d[2], d[3]], status: document.getElementById('gStatus').textContent };
     })()`);
-    if (r.title !== '棋盘 · Gridfall') return 'title ' + r.title;
+    if (r.title !== '黑白棋社 · Gridfall') return 'title ' + r.title;
     if (!r.px[3]) return 'canvas not drawn';
     return true;
   });

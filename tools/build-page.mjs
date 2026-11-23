@@ -127,7 +127,8 @@ const html = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#2e1e0d" />
 <link rel="icon" href="data:," />
-<title>棋盘 · Gridfall</title>
+<title>黑白棋社 · Gridfall</title>
+<link rel="canonical" href="./HBQS" />
 <style>
 ${designCss}
 ${extraCss}

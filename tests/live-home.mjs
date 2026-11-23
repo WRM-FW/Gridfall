@@ -26,7 +26,7 @@ const waitFor = async (expr, ms = 12000) => {
 try {
   await t('livehome.loads', async () => {
     const r = await b.evaluate(`({ title: document.title, live: document.querySelectorAll('.game-card[data-status="live"]').length, cards: document.querySelectorAll('.game-card').length })`);
-    if (!r.title.includes('游戏大厅') || r.live !== 3 || r.cards !== 9) return JSON.stringify(r);
+    if (!r.title.includes('游戏大厅') || r.live !== 1 || r.cards !== 9) return JSON.stringify(r);
     return true;
   });
   await b.screenshot(path.join(SHOTS, 'live-home.png'));
@@ -35,7 +35,8 @@ try {
     await b.clickSel('.game-card[data-status="live"] .play-link');
     const ok = await waitFor('typeof G !== "undefined" && !document.getElementById("secGomoku").classList.contains("hidden")');
     if (!ok) return 'did not navigate: ' + await b.evaluate('location.href');
-    const r = await b.evaluate(`({ url: location.href, rule: G.rule, opp: G.opp })`);
+    const r = await b.evaluate(`({ url: location.href, path: location.pathname, rule: G.rule, opp: G.opp })`);
+    if (r.path !== '/HBQS') return 'entry path ' + JSON.stringify(r);
     if (r.rule !== 'free' || r.opp !== 'ai') return JSON.stringify(r);
     return true;
   });
@@ -48,15 +49,16 @@ try {
     return true;
   });
 
-  await t('livehome.renju_card', async () => {
-    await b.evaluate(`document.querySelectorAll('.game-card[data-status="live"] .play-link')[1].click()`);
+  await t('livehome.renju_deeplink', async () => {
+    await b.evaluate(`location.href = './HBQS?game=gomoku&rule=renju&opening=formal'`);
     const ok = await waitFor('typeof G !== "undefined" && G.rule === "renju" && G.phase === "select"');
     if (!ok) return 'state ' + JSON.stringify(await b.evaluate(`({rule:G.rule,phase:G.phase,url:location.href})`));
-    return true;
+    const p = await b.evaluate('location.pathname');
+    return p === '/HBQS' ? true : 'path ' + p;
   });
 
   await t('livehome.online_entry', async () => {
-    await b.evaluate(`location.href = './play.html?online=1&game=gomoku'`);
+    await b.evaluate(`location.href = './HBQS?online=1&game=gomoku'`);
     const ok = await waitFor('typeof NET !== "undefined" && !document.getElementById("secOnline").classList.contains("hidden")');
     if (!ok) return 'online not open';
     const r = await b.evaluate(`({ game: NET.settings.game, status: document.getElementById('nStatus').textContent })`);

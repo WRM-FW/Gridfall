@@ -139,7 +139,7 @@ try {
     await b.evaluate(`(() => { window.__dl=null; const orig=URL.createObjectURL.bind(URL); URL.createObjectURL=function(blob){ blob.text().then(t=>window.__dl=t); return orig(blob); }; })()`);
     await b.clickSel('#btnDownload');
     if (!await waitFor('window.__dl !== null', 4000)) return 'no download';
-    const r = await b.evaluate(`(() => { const t=window.__dl; return {len:t.length, title:t.includes('<title>棋盘 · Gridfall</title>'), sup:/<script[^>]*data-online|<script[^>]+src="supabase/.test(t), tail:t.slice(-8)}; })()`);
+    const r = await b.evaluate(`(() => { const t=window.__dl; return {len:t.length, title:t.includes('<title>黑白棋社 · Gridfall</title>'), sup:/<script[^>]*data-online|<script[^>]+src="supabase/.test(t), tail:t.slice(-8)}; })()`);
     if (!r.title) return 'title';
     if (r.sup) return 'online lib tag not stripped';
     if (!r.tail.includes('</html>')) return 'tail ' + r.tail;

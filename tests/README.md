@@ -15,6 +15,7 @@ node online-swap.mjs       # 正式开局交换分支，4 项
 node home-test.mjs         # 大厅首页与深链接，9 项
 node live-home.mjs         # 线上首页，5 项
 node live-online.mjs       # 线上整局，4 项
+node route-test.mjs        # /HBQS 路由、刷新、查询、尾斜杠、前进后退，7 项
 ```
 
 - 本地测试读取仓库根目录的 `index.html` / `play.html`。

@@ -3,9 +3,10 @@
 五子棋、国际连珠、围棋三张棋盘，支持单机人机、本地双人和联机开房。首页是平台大厅，后续会继续接入更多不同类型的游戏。
 
 - 游戏大厅（Cloudflare Pages，主站）：https://play-gridfall.pages.dev/
-- GitHub Pages：https://wrm-fw.github.io/Gridfall/
+- 黑白棋社统一入口：https://play-gridfall.pages.dev/HBQS
+- GitHub Pages：https://wrm-fw.github.io/Gridfall/ （`/Gridfall/HBQS` 回退到 `play.html`）
 
-两处部署的是同一份文件：`index.html` 是首页，`play.html` 是对局页。`gridfall.pages.dev` 已被其他项目占用，因此主站使用 `play-gridfall.pages.dev`。
+`index.html` 是平台首页；`/HBQS` 是黑白棋社的固定入口（Cloudflare Pages 200 代理到 `play.html`，地址保持 `/HBQS`）；`play.html` 是对局页实现。`gridfall.pages.dev` 已被其他项目占用，因此主站使用 `play-gridfall.pages.dev`。
 
 ## 本地运行
 
@@ -19,7 +20,10 @@
 | 文件 | 说明 |
 | --- | --- |
 | `index.html` | 游戏大厅首页：品牌入口、迷你棋盘、游戏卡片、筛选/搜索、玩法一览、后续游戏规划 |
-| `play.html` | 对局页：五子棋（普通/连珠，含 RIF 正式开局）、围棋（9/13/19 路）、联机 |
+| `/HBQS` | 黑白棋社的固定入口（`_redirects` 200 代理到 `play.html`） |
+| `play.html` | 对局页实现：五子棋（普通/连珠，含 RIF 正式开局）、围棋（9/13/19 路）、联机 |
+| `_redirects` | Cloudflare Pages 路由：`/HBQS` 200 代理、`/HBQS/` 301 |
+| `HBQS/index.html` | GitHub Pages 的入口回退，跳转到 `play.html` |
 | `supabase.js` | 内置 `@supabase/supabase-js` UMD，仅联机时加载 |
 | `supabase-config.js` | Supabase URL 与 publishable key（客户端公开 key，不含 service_role） |
 
@@ -46,6 +50,23 @@ GitHub Pages：从 `main` 分支根目录发布，推送后自动更新。
 - 游戏大厅直接复用项目素材库 `00_Gridfall首页.html` 的蓝色街机大厅设计，并替换为当前真实游戏与联机入口。
 - 对局页复用 `01_木质棋盘陶瓷棋子以及配套UI.html` 的木质棋盘、陶瓷棋子与瓷白/深木 UI，Canvas 绘制。
 
+## 入口命名
+
+游戏中文名的汉语拼音首字母大写，直接追加在主域名后；不使用子域名。当前线上与预留：
+
+| 游戏 | 路径 |
+| --- | --- |
+| 黑白棋社 | `/HBQS`（已上线） |
+| 中国象棋 | `/ZGXQ` |
+| 国际象棋 | `/GJXQ` |
+| 跳棋 | `/TQ` |
+| 军棋 | `/JQ` |
+| 扫雷 | `/SL` |
+| 卡牌 | `/KP` |
+| 2048 | `/2048`（数字名特例） |
+
+新增游戏时：首页加一张卡片，创建对应入口并加同样规则的路由；详见 `docs/development.md`。
+
 ## 测试
 
 ```bash
@@ -58,6 +79,7 @@ node online-swap.mjs
 node home-test.mjs
 node live-home.mjs
 node live-online.mjs
+node route-test.mjs
 ```
 
 详见 `tests/README.md`。
@@ -66,6 +88,7 @@ node live-online.mjs
 
 - 引擎规则测试 31/31；本地界面 5/5；联机核心 7/7；联机扩展 5/5；线上核心 4/4；线上正式连珠交换 4/4；首页与深链接 9/9。
 - 线上用两个独立浏览器实例完成整局五子棋、Renju 正式开局（不交换/交换）、围棋 9 路双停数子、再来一局、认输、掉线重连。
+- `/HBQS` 入口已实测：直接访问、刷新、查询参数、尾斜杠 301、首页进入与浏览器前进/后退。
 
 ## 已知限制
 
