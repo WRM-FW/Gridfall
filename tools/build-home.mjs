@@ -35,7 +35,7 @@ must('    <a class="btn btn-green btn-sm nav-cta" href="https://wrm-fw.github.io
 '    <a class="btn btn-green btn-sm nav-cta" href="./HBQS" data-local="./play.html">进入棋社 →</a>');
 
 /* ---------- hero ---------- */
-must('落子无悔，<br />一局入魂。', '坐下就开，<br />想玩就来。');
+must('落子无悔，<br />一局入魂。', '想玩就来，<br />坐下就开。');
 must('名字叫 Gridfall，装的却不只是棋盘。五子棋、连珠、围棋已经先行入驻，2048、扫雷、卡牌这些完全不同的游戏也会陆续搬进来——不用下载、不用注册，点开任意一局就开玩。',
 '名字叫 Gridfall，装的却不只是棋盘。五子棋、连珠、围棋已经合并为「黑白棋社」一个入口，三张棋盘都能开房联机；2048、扫雷、卡牌这些完全不同的游戏也会陆续搬进来——不用下载、不用注册，点开任意一局就开玩。');
 must(`          <a class="btn btn-green" href="https://wrm-fw.github.io/Gridfall/" target="_blank" rel="noopener">进入棋盘对弈 →</a>
