@@ -125,6 +125,20 @@ try {
     return true;
   });
 
+  await t('home.coBuildCard', async () => {
+    const r = await b.evaluate(`({
+      mails: [...document.querySelectorAll('.game-card a[href^="mailto:"]')].map(a => a.getAttribute('href')),
+      pr: !!document.querySelector('.game-card a[href*="CONTRIBUTING.md"]'),
+      note: document.querySelector('.co-note') ? document.querySelector('.co-note').textContent : '',
+      card: !!document.querySelector('.game-card[data-name*="社区共建"]')
+    })`);
+    if (!r.card) return 'co-build card missing';
+    if (!r.mails.includes('mailto:3391792088@qq.com')) return 'email link missing ' + JSON.stringify(r.mails);
+    if (!r.pr) return 'PR link missing';
+    if (!r.note.includes('AI Agent') || !r.note.includes('PR')) return 'note ' + r.note;
+    return true;
+  });
+
   await t('home.renjuFormalLink', async () => {
     await goto(play + '?game=gomoku&rule=renju&opening=formal');
     const ok = await waitFor('typeof G !== "undefined" && G.rule === "renju" && G.openingMode === "formal" && G.phase === "select"');

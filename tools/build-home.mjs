@@ -400,5 +400,36 @@ must('  .gv-xiangqi{ background:linear-gradient(135deg,#3a2410 0%,#20304f 100%);
   .gv-junqi{ background:linear-gradient(135deg,#3a2a1a,#513a22); }
   .gv-junqi .gv-q{ color:#e0b77a; }`);
 
+
+/* ---------- 下一款游戏：点单 / 社区共建 ---------- */
+replaceCard('更多游戏 新游戏 点单', `        <article class="game-card" data-status="soon" data-name="更多游戏 新游戏 点单 社区共建 PR 邮箱 联系开发者">
+          <div class="game-visual gv-soon">
+            <span class="gv-badge soon">持续上新</span>
+            <span class="gv-q" aria-hidden="true">+ ?</span>
+          </div>
+          <div class="game-body">
+            <h3>下一款游戏，由你点单<span class="en">NEXT GAME</span></h3>
+            <p>跳棋、军棋、四子棋，或是任何你想玩的小游戏……大厅的桌子会一直加下去，不限品类。</p>
+            <div class="co-build">
+              <div class="co-build-row"><span class="k">联系开发者</span><a href="mailto:3391792088@qq.com">3391792088@qq.com</a></div>
+              <div class="co-build-row"><span class="k">自主共建</span><a href="https://github.com/WRM-FW/Gridfall/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">用 AI Agent 开发，提交 PR →</a></div>
+              <p class="co-note">有想做的玩法，可以让 AI Agent 按开发说明做一个单文件小游戏，提交 PR；通过后会摆进大厅。</p>
+            </div>
+            <div class="tags"><span>持续上新</span><span>社区共建</span></div>
+            <div class="game-foot">
+              <span class="meta">大厅扩建中 · 点单 / 共建</span>
+              <a class="play-link" href="mailto:3391792088@qq.com">写信点单 →</a>
+            </div>
+          </div>
+        </article>`);
+must('  .gv-junqi .gv-q{ color:#e0b77a; }',
+`  .gv-junqi .gv-q{ color:#e0b77a; }
+  .co-build{display:flex;flex-direction:column;gap:5px;margin-top:2px;padding-top:9px;border-top:1px dashed #c4cfe4;}
+  .co-build-row{display:flex;gap:8px;align-items:baseline;font-size:12.5px;line-height:1.55;}
+  .co-build-row .k{flex:0 0 74px;color:#7c8db1;font-weight:800;letter-spacing:.02em;white-space:nowrap;}
+  .co-build-row a{color:#1748c4;font-weight:800;text-decoration:none;word-break:break-all;}
+  .co-build-row a:hover{text-decoration:underline;}
+  .co-note{margin:2px 0 0;font-size:12.5px;line-height:1.6;color:#5b6a8c;}`);
+
 fs.writeFileSync(path.join(ROOT, 'index.html'), html, 'utf8');
 console.log('built homepage', Buffer.byteLength(html), 'bytes');
