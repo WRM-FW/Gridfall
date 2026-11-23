@@ -84,6 +84,19 @@ try {
     return true;
   });
 
+  await t('route.legacy_HBQS_query', async () => {
+    await b.send('Page.navigate', { url: 'https://play-gridfall.pages.dev/HBQS?game=go' });
+    const ok = await waitFor(`typeof W !== "undefined" && location.pathname === '/board-club' && location.search.includes('game=go')`, 15000);
+    if (!ok) return JSON.stringify(await b.evaluate(`({path:location.pathname,search:location.search,size:typeof W!=='undefined'?W.size:null})`));
+    return true;
+  });
+
+  await t('route.legacy_play_html', async () => {
+    await b.send('Page.navigate', { url: 'https://play-gridfall.pages.dev/play.html' });
+    const ok = await waitFor(`typeof G !== "undefined" && location.pathname === '/board-club'`, 15000);
+    return ok ? true : 'path ' + await b.evaluate('location.pathname');
+  });
+
   const fail = R.filter(r => !r.pass);
   console.log(`ROUTE TOTAL ${R.length} PASS ${R.length - fail.length} FAIL ${fail.length}`);
   R.forEach(r => console.log((r.pass ? 'PASS ' : 'FAIL ') + r.id + (r.detail ? ' :: ' + r.detail : '')));
