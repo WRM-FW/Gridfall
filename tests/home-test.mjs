@@ -39,26 +39,43 @@ try {
       err: window.__qaErrors || []
     })`);
     if (!r.title.includes('游戏大厅')) return 'title ' + r.title;
-    if (r.cards !== 9 || r.live !== 6 || r.soon !== 3) return 'cards ' + JSON.stringify(r);
+    if (r.cards !== 6 || r.live !== 6 || r.soon !== 0) return 'cards ' + JSON.stringify(r);
     if (r.err.length) return 'errors ' + JSON.stringify(r.err);
     return true;
   });
   await b.screenshot(path.join(SHOTS, 'home-desktop.png'));
 
   await t('home.covers', async () => {
-    const ok = await waitFor(`document.querySelectorAll('.game-card .gv-cover-img').length === 9 && [...document.querySelectorAll('.game-card .gv-cover-img')].every(i => i.complete && i.naturalWidth > 0)`, 10000);
+    const sel = '.gv-cover-img, .roadmap-cover img, .co-build-art img';
+    const ok = await waitFor(`document.querySelectorAll('${sel}').length === 10 && [...document.querySelectorAll('${sel}')].every(i => i.complete && i.naturalWidth > 0)`, 10000);
     if (!ok) return 'covers not loaded';
-    const r = await b.evaluate(`[...document.querySelectorAll('.game-card .gv-cover-img')].map(i => ({ src: i.getAttribute('src'), w: i.naturalWidth, h: i.naturalHeight }))`);
+    const r = await b.evaluate(`[...document.querySelectorAll('${sel}')].map(i => ({ src: i.getAttribute('src'), w: i.naturalWidth, h: i.naturalHeight }))`);
     const bad = r.filter(i => i.w !== 1200 || i.h !== 600 || i.src.indexOf('./assets/covers/') !== 0);
     if (bad.length) return JSON.stringify(bad);
-    if (new Set(r.map(i => i.src)).size !== 9) return 'duplicate cover';
+    if (new Set(r.map(i => i.src)).size !== 10) return 'duplicate cover';
     return true;
   });
   await b.evaluate(`document.getElementById('games').scrollIntoView({ block: 'start', behavior: 'instant' })`);
   await sleep(400);
   await b.screenshot(path.join(SHOTS, 'home-covers.png'));
+  await b.evaluate(`document.getElementById('soon').scrollIntoView({ block: 'start', behavior: 'instant' })`);
+  await sleep(400);
+  await b.screenshot(path.join(SHOTS, 'home-roadmap.png'));
   await b.evaluate(`window.scrollTo({ top: 0, behavior: 'instant' })`);
   await sleep(200);
+
+  await t('home.roadmap', async () => {
+    const r = await b.evaluate(`({
+      n: document.querySelectorAll('.roadmap-card').length,
+      names: [...document.querySelectorAll('.roadmap-card h3')].map(h => h.textContent.replace(/\\s+/g, ' ').trim()),
+      panel: !!document.querySelector('.co-build-panel'),
+      img: !!document.querySelector('.co-build-art img')
+    })`);
+    if (r.n !== 3) return 'roadmap cards ' + r.n;
+    if (!r.names.some(n => n.includes('四子棋'))) return 'no connect4 ' + JSON.stringify(r.names);
+    if (!r.panel || !r.img) return 'co-build panel ' + JSON.stringify(r);
+    return true;
+  });
 
   await t('home.miniBoard', async () => {
     const before = await b.evaluate(`document.querySelectorAll('#cells button').length`);
@@ -75,18 +92,25 @@ try {
   });
 
   await t('home.filterSearch', async () => {
-    await b.evaluate(`[...document.querySelectorAll('.chip')].find(c=>c.dataset.filter==='soon').click()`);
-    await sleep(200);
-    let r = await b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').length`);
-    if (r !== 3) return 'soon filter ' + r;
-    await b.evaluate(`[...document.querySelectorAll('.chip')].find(c=>c.dataset.filter==='all').click()`);
+    const clickChip = f => b.evaluate(`[...document.querySelectorAll('.chip')].find(c=>c.dataset.filter==='${f}').click()`);
+    const visible = () => b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').length`);
+    await clickChip('online'); await sleep(200);
+    let r = await visible();
+    if (r !== 2) return 'online filter ' + r;
+    await clickChip('board'); await sleep(200);
+    r = await visible();
+    if (r !== 4) return 'board filter ' + r;
+    await clickChip('puzzle'); await sleep(200);
+    r = await visible();
+    if (r !== 2) return 'puzzle filter ' + r;
+    await clickChip('all');
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value='围棋'; i.dispatchEvent(new Event('input')); })()`);
     await sleep(200);
-    r = await b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').length`);
+    r = await visible();
     if (r !== 1) return 'search go ' + r;
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value='联机'; i.dispatchEvent(new Event('input')); })()`);
     await sleep(200);
-    r = await b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').length`);
+    r = await visible();
     if (r !== 2) return 'search online ' + r;
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value=''; i.dispatchEvent(new Event('input')); })()`);
     return true;
@@ -129,7 +153,7 @@ try {
     ];
     for (const [local, title] of games) {
       await goto(home);
-      await waitFor(`document.querySelectorAll('.game-card').length === 9`, 8000);
+      await waitFor(`document.querySelectorAll('.game-card').length === 6`, 8000);
       const clicked = await b.evaluate(`(() => { const a = document.querySelector('.game-card a[data-local="${local}"]'); if (!a) return false; a.click(); return true; })()`);
       if (!clicked) return 'card missing ' + local;
       if (!await waitFor(`document.title.includes(${JSON.stringify(title)})`, 8000)) return 'did not open ' + local;
@@ -142,12 +166,12 @@ try {
 
   await t('home.coBuildCard', async () => {
     const r = await b.evaluate(`({
-      mails: [...document.querySelectorAll('.game-card a[href^="mailto:"]')].map(a => a.getAttribute('href')),
-      pr: !!document.querySelector('.game-card a[href*="CONTRIBUTING.md"]'),
-      note: document.querySelector('.co-note') ? document.querySelector('.co-note').textContent : '',
-      card: !!document.querySelector('.game-card[data-name*="社区共建"]')
+      mails: [...document.querySelectorAll('.co-build-panel a[href^="mailto:"]')].map(a => a.getAttribute('href')),
+      pr: !!document.querySelector('.co-build-panel a[href*="CONTRIBUTING.md"]'),
+      note: document.querySelector('.co-build-panel .co-note') ? document.querySelector('.co-build-panel .co-note').textContent : '',
+      card: !!document.querySelector('.co-build-panel')
     })`);
-    if (!r.card) return 'co-build card missing';
+    if (!r.card) return 'co-build panel missing';
     if (!r.mails.includes('mailto:3391792088@qq.com')) return 'email link missing ' + JSON.stringify(r.mails);
     if (!r.pr) return 'PR link missing';
     if (!r.note.includes('AI Agent') || !r.note.includes('PR')) return 'note ' + r.note;

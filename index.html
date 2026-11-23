@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
 <link rel="icon" href="data:," />
-<title>Gridfall 游戏大厅 · 黑白棋社</title>
-<meta name="description" content="Gridfall 游戏大厅：黑白棋社收录五子棋、国际连珠、围棋，支持单机、双人与联机开房；打开即玩，更多游戏持续上新。" />
+<title>Gridfall 游戏大厅 · 六个入口，八种玩法</title>
+<meta name="description" content="Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷，共 6 个入口、8 种玩法；棋社与中国象棋支持联机开房，免下载、免注册。" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b1220'/%3E%3Crect x='5' y='5' width='10' height='10' fill='%23fff'/%3E%3Crect x='17' y='5' width='10' height='10' fill='%2363e63a'/%3E%3Crect x='5' y='17' width='10' height='10' fill='%2363e63a'/%3E%3Crect x='17' y='17' width='10' height='10' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -318,6 +318,38 @@
   .game-visual.gv-cover{background:#1b2438;}
   .gv-cover-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
   .gv-xiangqi .gv-board.light{ background:#eecf8f; border-color:#8a6a2f; color:#8a6a2f; box-shadow:0 12px 26px rgba(0,0,0,.4); }
+  .roadmap-row{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
+  .roadmap-card{border:2px dashed rgba(255,255,255,.5);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.06);display:flex;flex-direction:column}
+  .roadmap-cover{position:relative;height:150px;background:#1b2438;overflow:hidden}
+  .roadmap-cover img{display:block;width:100%;height:100%;object-fit:cover}
+  .roadmap-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,15,40,.35),transparent 55%)}
+  .roadmap-cover .st{position:absolute;top:12px;left:12px;z-index:1;font-size:12px;font-weight:800;color:var(--yellow);background:rgba(11,18,32,.78);border:1px solid rgba(255,216,61,.65);border-radius:999px;padding:3px 10px}
+  .roadmap-body{padding:17px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .roadmap-body h3{margin:0;font-size:19px;font-weight:900;color:#fff}
+  .roadmap-body h3 .en{font-family:"Barlow Condensed",sans-serif;font-size:12.5px;letter-spacing:.1em;color:#9fb2dd;font-weight:600;margin-left:6px}
+  .roadmap-body p{margin:0;font-size:13px;line-height:1.65;color:var(--paper-dim);flex:1}
+  .roadmap-body a{margin-top:4px;color:var(--yellow);font-weight:900;font-size:14px;text-decoration:none}
+  .roadmap-body a:hover{text-decoration:underline}
+  .co-build-panel{margin-top:20px;border:2px solid rgba(255,255,255,.65);border-radius:16px;overflow:hidden;display:grid;grid-template-columns:1.15fr .85fr;background:rgba(255,255,255,.09);box-shadow:8px 9px 0 rgba(6,24,74,.25)}
+  .co-build-copy{padding:28px 30px;display:flex;flex-direction:column;gap:10px;justify-content:center}
+  .co-kicker{font-family:"Barlow Condensed",sans-serif;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--yellow)}
+  .co-build-copy h3{margin:0;font-size:clamp(21px,2.2vw,27px);line-height:1.25;font-weight:900;color:#fff}
+  .co-build-copy p{margin:0;font-size:14px;line-height:1.7;color:var(--paper-dim);max-width:36em}
+  .co-build-copy p a{color:var(--yellow);font-weight:800;text-decoration:none}
+  .co-build-copy p a:hover{text-decoration:underline}
+  .co-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+  .co-actions .btn{font-size:14.5px;min-height:2.6rem}
+  .co-build-art{position:relative;min-height:240px;background:#1b2438}
+  .co-build-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  @media (max-width:900px){
+    .roadmap-row{grid-template-columns:1fr 1fr}
+    .co-build-panel{grid-template-columns:1fr}
+    .co-build-art{min-height:180px;order:-1}
+  }
+  @media (max-width:560px){
+    .roadmap-row{grid-template-columns:1fr}
+    .co-build-copy{padding:22px 20px}
+  }
   @media (max-width:900px){
     .hero-grid{grid-template-columns:1fr}
     .board-zone{max-width:480px}
@@ -356,7 +388,7 @@
       <a href="./2048" data-local="./game2048.html">2048</a>
       <a href="./SL" data-local="./saolei.html">扫雷</a>
       <a href="#features">玩法一览</a>
-      <a href="#soon">即将推出</a>
+      <a href="#soon">下一批游戏</a>
     </nav>
     <a class="btn btn-green btn-sm nav-cta" href="./HBQS" data-local="./play.html">进入棋社 →</a>
   </div>
@@ -372,21 +404,21 @@
           <span class="en">GRIDFALL — EVERY GAME, ONE HALL.</span>
           想玩就来，<br />坐下就开。
         </h1>
-        <p class="hero-sub">名字叫 Gridfall，装的却不只是棋盘。黑白棋社、中国象棋、跳棋、军棋、2048、扫雷都已经入驻；黑白棋社与中国象棋还能开房联机，卡牌与其他游戏也会陆续搬进来——不用下载、不用注册，点开任意一局就开玩。</p>
+        <p class="hero-sub">名字叫 Gridfall，装的却不只是棋盘。六个入口、八种玩法：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷。棋社与中国象棋可以开房联机，其余随时坐下就玩——不用下载、不用注册。</p>
         <div class="hero-ctas">
           <a class="btn btn-green" href="./HBQS" data-local="./play.html">进入黑白棋社 →</a>
           <a class="btn btn-ghost" href="./HBQS?online=1&amp;game=gomoku" data-local="./play.html?online=1&amp;game=gomoku">联机开房 →</a>
           <a class="btn btn-ghost" href="#games">先逛逛大厅</a>
         </div>
-        <p class="hero-note">六款游戏已就绪 · 联机房间已开放 · 卡牌与其他新游戏在路上 · <b>5 档难度</b>任选 · 打开即玩</p>
+        <p class="hero-note">6 个入口 · 8 种玩法 · 2 款支持联机 · 全部免费、免注册</p>
 
         <div class="ticket" aria-label="Gridfall 速览">
           <div class="ticket-head"><b>Gridfall 对局券</b><span>ADMIT ONE · FREE</span></div>
           <div class="ticket-grid">
             <div><label>平台 PLATFORM</label><strong>网页 · <em>免下载</em></strong></div>
-            <div><label>费用 PRICE</label><strong>免费</strong></div>
-            <div><label>对战 MODES</label><strong>单机 / 双人 / 联机</strong></div>
-            <div><label>难度 LEVELS</label><strong>简单 → 极难 <em>5 档</em></strong></div>
+            <div><label>费用 PRICE</label><strong>免费 · <em>免注册</em></strong></div>
+            <div><label>内容 CONTENT</label><strong>6 个入口 · <em>8 种玩法</em></strong></div>
+            <div><label>联机 ONLINE</label><strong>棋社 / 象棋</strong></div>
           </div>
         </div>
       </div>
@@ -405,7 +437,7 @@
         </div>
         <div class="float-chip">
           <b>这只是大厅门口。</b>
-          <span>黑白棋社里有禁手判定、棋谱回放、联机房间与计时对局；新游戏的桌子还在往里搬，进门右转。</span>
+          <span>黑白棋社有禁手判定、26 种连珠开局、棋谱回放和联机房间；中国象棋也能开房，房主执红。跳棋、军棋、2048、扫雷坐下就能玩。</span>
         </div>
       </div>
     </div>
@@ -414,7 +446,7 @@
   <!-- TICKER -->
   <div class="ticker" aria-hidden="true">
     <div class="ticker-track" id="tickerTrack">
-      <span>五子棋 <i>●</i></span><span>连珠 RENJU <i>●</i></span><span>围棋 <i>●</i></span><span>9 / 13 / 19 路 <i>●</i></span><span>五档难度 <i>●</i></span><span>黑白棋社 <i>●</i></span><span>中国象棋 <i>●</i></span><span>跳棋 <i>●</i></span><span>军棋 <i>●</i></span><span>2048 <i>●</i></span><span>扫雷 <i>●</i></span><span>联机开房 <i>●</i></span><span>Supabase 实时同步 <i>●</i></span><span>棋谱回放 <i>●</i></span><span>双人对弈 <i>●</i></span><span>2048 筹备中 <i>●</i></span><span>扫雷 筹备中 <i>●</i></span><span>卡牌 筹备中 <i>●</i></span><span>新游戏持续上新 <i>●</i></span>
+      <span>五子棋 <i>●</i></span><span>连珠 RENJU <i>●</i></span><span>围棋 <i>●</i></span><span>9 / 13 / 19 路 <i>●</i></span><span>黑白棋社 AI 5 档 <i>●</i></span><span>象棋 / 跳棋 3 档 <i>●</i></span><span>黑白棋社 <i>●</i></span><span>中国象棋 <i>●</i></span><span>跳棋 <i>●</i></span><span>军棋 <i>●</i></span><span>2048 <i>●</i></span><span>扫雷 <i>●</i></span><span>联机开房 <i>●</i></span><span>Supabase 实时同步 <i>●</i></span><span>棋谱回放 <i>●</i></span><span>双人对弈 <i>●</i></span><span>换方申请 <i>●</i></span><span>军棋布阵 <i>●</i></span><span>自定义雷区 <i>●</i></span><span>6 个入口 · 8 种玩法 <i>●</i></span>
     </div>
   </div>
 
@@ -422,14 +454,15 @@
   <section class="block" id="games">
     <div class="wrap">
       <h2 class="big"><span class="en">PLAY NOW</span>现在就能玩。</h2>
-      <p class="sec-sub">「黑白棋社」把五子棋、连珠、围棋收进同一个入口；中国象棋、跳棋、军棋、2048、扫雷也都已进场。下面还留着规划中的位置——卡牌与其他游戏上线后，会直接摆进这张货架。</p>
+      <p class="sec-sub">六个入口已经开桌：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷。棋社与中国象棋支持开房联机；下面可以按「可联机 / 棋类 / 益智」筛选。</p>
       <p class="sec-sub" style="margin-top:10px"><a class="hall-inline-link" href="./HBQS?online=1&amp;game=gomoku" data-local="./play.html?online=1&amp;game=gomoku">黑白棋社 · 联机开房 →</a></p>
 
       <div class="lobby-tools">
-        <div class="chips" role="group" aria-label="按状态筛选游戏">
+        <div class="chips" role="group" aria-label="按类型筛选游戏">
           <button class="chip" type="button" data-filter="all" aria-pressed="true">全部</button>
-          <button class="chip" type="button" data-filter="live" aria-pressed="false">已上线</button>
-          <button class="chip" type="button" data-filter="soon" aria-pressed="false">即将推出</button>
+          <button class="chip" type="button" data-filter="online" aria-pressed="false">可联机</button>
+          <button class="chip" type="button" data-filter="board" aria-pressed="false">棋类</button>
+          <button class="chip" type="button" data-filter="puzzle" aria-pressed="false">益智</button>
         </div>
         <div class="searchbox">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="#c9d9ff" stroke-width="2.4"/><path d="M20 20l-3.8-3.8" stroke="#c9d9ff" stroke-width="2.4" stroke-linecap="round"/></svg>
@@ -439,23 +472,23 @@
 
       <div class="games" id="gameGrid">
 
-<article class="game-card game-card-club" data-status="live" data-name="黑白棋社 五子棋 连珠 围棋 联机 gomoku renju go">
+<article class="game-card game-card-club" data-status="live" data-cat="board online" data-name="黑白棋社 五子棋 连珠 围棋 联机 gomoku renju go">
           <div class="game-visual gv-cover">
             <img class="gv-cover-img" src="./assets/covers/hbqs.png" alt="黑白棋社游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
           </div>
           <div class="game-body">
             <h3>黑白棋社<span class="en">BOARD CLUB</span></h3>
-            <p>五子棋（含国际连珠的禁手与 26 种正式开局）、围棋（9/13/19 路）收在同一个入口；单机、双人、联机开房都在里面。</p>
+            <p>五子棋（含国际连珠的禁手与 26 种正式开局）、围棋（9/13/19 路）收在同一个入口；人机五档、同屏双人、联机开房都在里面。</p>
             <div class="tags"><span>五子棋 / 连珠</span><span>围棋</span><span>单机 / 双人</span><span>联机开房</span></div>
             <div class="game-foot">
-              <span class="meta">入口 /HBQS · 三合一 · 5 档难度</span>
+              <span class="meta">入口 /HBQS · 三合一 · AI 5 档</span>
               <a class="play-link" href="./HBQS" data-local="./play.html">进入棋社 →</a>
             </div>
           </div>
         </article>
 
-<article class="game-card" data-status="live" data-name="中国象棋 象棋 联机 xiangqi">
+<article class="game-card" data-status="live" data-cat="board online" data-name="中国象棋 象棋 联机 xiangqi">
           <div class="game-visual gv-cover">
             <img class="gv-cover-img" src="./assets/covers/xiangqi.png" alt="中国象棋游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
@@ -471,7 +504,7 @@
           </div>
         </article>
 
-<article class="game-card" data-status="live" data-name="2048 数字 益智 合成 puzzle">
+<article class="game-card" data-status="live" data-cat="puzzle" data-name="2048 数字 益智 合成 puzzle">
           <div class="game-visual gv-cover">
             <img class="gv-cover-img" src="./assets/covers/game2048.png" alt="2048 游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
@@ -487,7 +520,7 @@
           </div>
         </article>
 
-<article class="game-card" data-status="live" data-name="扫雷 minesweeper 推理">
+<article class="game-card" data-status="live" data-cat="puzzle" data-name="扫雷 minesweeper 推理">
           <div class="game-visual gv-cover">
             <img class="gv-cover-img" src="./assets/covers/saolei.png" alt="扫雷游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
@@ -503,7 +536,7 @@
           </div>
         </article>
 
-<article class="game-card" data-status="live" data-name="跳棋 棋类 tiaoqi checkers">
+<article class="game-card" data-status="live" data-cat="board" data-name="跳棋 棋类 tiaoqi checkers">
           <div class="game-visual gv-cover">
             <img class="gv-cover-img" src="./assets/covers/tiaoqi.png" alt="跳棋游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
@@ -519,7 +552,7 @@
           </div>
         </article>
 
-<article class="game-card" data-status="live" data-name="军棋 棋类 junqi">
+<article class="game-card" data-status="live" data-cat="board" data-name="军棋 棋类 junqi">
           <div class="game-visual gv-cover">
             <img class="gv-cover-img" src="./assets/covers/junqi.png" alt="军棋游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
@@ -535,58 +568,11 @@
           </div>
         </article>
 
-<article class="game-card" data-status="soon" data-name="国际象棋 chess">
-          <div class="game-visual gv-cover">
-            <img class="gv-cover-img" src="./assets/covers/chess.png" alt="国际象棋游戏封面" width="1200" height="600" decoding="async">
-            <span class="gv-badge soon">规划中</span>
-          </div>
-          <div class="game-body">
-            <h3>国际象棋<span class="en">CHESS</span></h3>
-            <p>64 格的战场已列入大厅扩建计划。开局库与对弈体验打磨中，敬请期待它落座的那一天。</p>
-            <div class="tags"><span>筹备中</span></div>
-            <div class="game-foot">
-              <span class="meta">敬请期待</span>
-              <a class="play-link disabled" href="#soon" aria-disabled="true">尚未开局</a>
-            </div>
-          </div>
-        </article>
 
-<article class="game-card" data-status="soon" data-name="卡牌 纸牌 接龙 cards solitaire">
-          <div class="game-visual gv-cover">
-            <img class="gv-cover-img" src="./assets/covers/cards.png" alt="卡牌类游戏封面" width="1200" height="600" decoding="async">
-            <span class="gv-badge soon">规划中</span>
-          </div>
-          <div class="game-body">
-            <h3>卡牌类<span class="en">CARDS</span></h3>
-            <p>接龙等纸牌玩法正在排队进场。大厅不只放棋盘——一副牌，也能在这里开一桌。</p>
-            <div class="tags"><span>纸牌</span><span>筹备中</span></div>
-            <div class="game-foot">
-              <span class="meta">敬请期待</span>
-              <a class="play-link disabled" href="#soon" aria-disabled="true">尚未开局</a>
-            </div>
-          </div>
-        </article>
 
-        <article class="game-card" data-status="soon" data-name="更多游戏 新游戏 点单 社区共建 PR 邮箱 联系开发者">
-          <div class="game-visual gv-cover">
-            <img class="gv-cover-img" src="./assets/covers/next-game.png" alt="下一款游戏点单与社区共建封面" width="1200" height="600" decoding="async">
-            <span class="gv-badge soon">持续上新</span>
-          </div>
-          <div class="game-body">
-            <h3>下一款游戏，由你点单<span class="en">NEXT GAME</span></h3>
-            <p>跳棋、军棋、四子棋，或是任何你想玩的小游戏……大厅的桌子会一直加下去，不限品类。</p>
-            <div class="co-build">
-              <div class="co-build-row"><span class="k">联系开发者</span><a href="mailto:3391792088@qq.com">3391792088@qq.com</a></div>
-              <div class="co-build-row"><span class="k">自主共建</span><a href="https://github.com/WRM-FW/Gridfall/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">用 AI Agent 开发，提交 PR →</a></div>
-              <p class="co-note">有想做的玩法，可以让 AI Agent 按开发说明做一个单文件小游戏，提交 PR；通过后会摆进大厅。</p>
-            </div>
-            <div class="tags"><span>持续上新</span><span>社区共建</span></div>
-            <div class="game-foot">
-              <span class="meta">大厅扩建中 · 点单 / 共建</span>
-              <a class="play-link" href="mailto:3391792088@qq.com">写信点单 →</a>
-            </div>
-          </div>
-        </article>
+
+
+        
       </div>
       <p class="empty-msg" id="emptyMsg">没找到这款游戏——换个关键词试试，或看看「全部」。</p>
     </div>
@@ -596,26 +582,23 @@
   <section class="block" id="features">
     <div class="wrap">
       <h2 class="big"><span class="en">EVERYTHING IN THE HALL</span>从棋盘开始，不止于棋盘。</h2>
-      <p class="sec-sub">下面每一项都是大厅里真实可用的玩法，进门就能摸到；卡牌与其他游戏上线后，这里会继续按品类往下加。</p>
+      <p class="sec-sub">下面只写现在真实可用的功能；没有上线的玩法不往这里放。新游戏进场后，这张清单再跟着加。</p>
 
       <div class="contents">
         <div class="contents-head"><b>玩法一览 Contents</b><span>ALL FEATURES · FREE TO PLAY</span></div>
         <div class="contents-grid">
-          <div class="feat"><h4>五档难度 <span class="arr">→</span></h4><p>简单、一般、普通、困难、极难。新手热身和认真对弈之间，只差一次切换。</p></div>
-          <div class="feat"><h4>自选执黑执白 <span class="arr">→</span></h4><p>黑棋先行是规矩，坐哪一边由你定。想练后手防守，随时换边再来。</p></div>
-          <div class="feat"><h4>双人对弈 <span class="arr">→</span></h4><p>同一块屏幕，两个人轮流落子。不用账号，不用联网，面对面最直接。</p></div>
-          <div class="feat"><h4>禁手判定 <span class="arr">→</span></h4><p>连珠规则下，三三、四四与长连禁手自动判定，争议落子当场说清。</p></div>
-          <div class="feat"><h4>棋谱回放 <span class="arr">→</span></h4><p>连珠对局全程留谱，赛后一步步倒带复盘，看清输赢到底在哪一手。</p></div>
-          <div class="feat"><h4>计时对局 <span class="arr">→</span></h4><p>正式感拉满：连珠对局带计时，拖延和妙手都记在钟上。</p></div>
-          <div class="feat"><h4>提子与劫争 <span class="arr">→</span></h4><p>围棋的气、提子、禁着点与劫争完整实现，规则细节不打折。</p></div>
-          <div class="feat"><h4>三种棋盘尺寸 <span class="arr">→</span></h4><p>围棋 9 路快棋、13 路进阶、19 路正赛，按时间和心情选盘面。</p></div>
+          <div class="feat"><h4>联机开房 <span class="arr">→</span></h4><p>黑白棋社生成 6 位房间码，中国象棋同理；房主先行，未轮到的一方不能落子。</p></div>
+          <div class="feat"><h4>完整棋规 <span class="arr">→</span></h4><p>连珠禁手与 26 种正式开局、围棋提子与劫争、象棋将死困毙，都在本地判定。</p></div>
+          <div class="feat"><h4>三种下法 <span class="arr">→</span></h4><p>棋社与象棋有人机、同屏双人、联机开房；跳棋、军棋为人机或同屏双人。</p></div>
+          <div class="feat"><h4>换方申请 <span class="arr">→</span></h4><p>联机房主默认执黑（象棋执红）；开局前可申请换方，由对方同意或拒绝。</p></div>
+          <div class="feat"><h4>棋谱回放 <span class="arr">→</span></h4><p>五子棋 / 连珠全程留谱，赛后逐步回放；悔棋、认输、再来一局都在侧栏。</p></div>
+          <div class="feat"><h4>计时对局 <span class="arr">→</span></h4><p>五子棋 / 连珠与围棋分别记录黑方、白方用时，换手时自动切换。</p></div>
+          <div class="feat"><h4>分档 AI <span class="arr">→</span></h4><p>黑白棋社五档，象棋与跳棋三档；军棋电脑执蓝，不设难度档。</p></div>
+          <div class="feat"><h4>双人同屏 <span class="arr">→</span></h4><p>棋社、象棋、跳棋、军棋都能两个人轮流；不用账号，不用联网。</p></div>
           <div class="feat"><h4>打开即玩 <span class="arr">→</span></h4><p>纯网页运行，不下载、不注册。手机和电脑打开同一地址，就能落子。</p></div>
-          <div class="feat"><h4>联机开房 <span class="arr">→</span></h4><p>在黑白棋社创建房间、生成 6 位房间码，房主执黑先行；对手输入房间码即可加入同一局。</p></div>
-          <div class="feat"><h4>实时同步 <span class="arr">→</span></h4><p>基于 Supabase Realtime 广播完整盘面；未轮到的一方不能落子，双方盘面保持一致。</p></div>
-          <div class="feat"><h4>掉线重连 <span class="arr">→</span></h4><p>对手离开时房间保留，把房间码再发一次即可重连；房主离开则房间关闭。</p></div>
-          <div class="feat"><h4>跳棋与军棋 <span class="arr">→</span></h4><p>六角星跳棋与暗棋陆战棋，人机三档或本地双人；军棋支持布阵、铁路与夺旗。</p></div>
-          <div class="feat"><h4>2048 <span class="arr">→</span></h4><p>滑动合并数字，支持撤销、最高分与移动步数，一路合到 2048。</p></div>
-          <div class="feat"><h4>扫雷 <span class="arr">→</span></h4><p>初级、中级、高级与自定义雷区；第一击安全，支持插旗、计时与双击展开。</p></div>
+          <div class="feat"><h4>跳棋 / 军棋 <span class="arr">→</span></h4><p>跳棋三档 AI；军棋布阵后走铁路、工兵排雷、夺旗，电脑或双人都能开。</p></div>
+          <div class="feat"><h4>2048 <span class="arr">→</span></h4><p>滑动或方向键合并数字，撤销、步数与本次最高分都在侧栏。</p></div>
+          <div class="feat"><h4>扫雷 <span class="arr">→</span></h4><p>初级 / 中级 / 高级与自定义雷区；第一击安全，插旗、计时、双击展开。</p></div>
         </div>
       </div>
     </div>
@@ -624,13 +607,46 @@
   <!-- COMING SOON -->
   <section class="block" id="soon">
     <div class="wrap">
-      <h2 class="big"><span class="en">THE HALL KEEPS GROWING</span>大厅还在变大。</h2>
-      <p class="sec-sub">Gridfall 从棋盘起家，但扩建名单不限品类。下面这些已经排进队列，上线一款，这里就多一张能坐下的桌子。</p>
-      <div class="soon-row">
-        <div class="soon-card"><div class="glyph">♞</div><h4>国际象棋</h4><p>64 格战场，开局库与对弈体验打磨中。</p><span class="st">规划中</span></div>
-        <div class="soon-card"><div class="glyph">四</div><h4>四子棋</h4><p>竖着落子、横竖斜连成四子，正在排队进场。</p><span class="st">规划中</span></div>
-        <div class="soon-card"><div class="glyph">♠</div><h4>卡牌类</h4><p>接龙等纸牌玩法，一副牌也能在大厅里开一桌。</p><span class="st">规划中</span></div>
-        <div class="soon-card"><div class="glyph">+ ?</div><h4>下一款游戏</h4><p>新游戏的桌子会一直加下去，不限品类。</p><span class="st">规划中</span></div>
+      <h2 class="big"><span class="en">ON THE BENCH</span>下一批桌子。</h2>
+      <p class="sec-sub">大厅现在有六个入口。下面三款还在候选清单里，没有开发排期；想先玩哪一款，可以直接点单，或用 AI Agent 做好后提交 PR。</p>
+      <div class="roadmap-row">
+        <article class="roadmap-card">
+          <div class="roadmap-cover"><img src="./assets/covers/chess.png" alt="国际象棋规划封面" width="1200" height="600" decoding="async"><span class="st">规划中</span></div>
+          <div class="roadmap-body">
+            <h3>国际象棋 <span class="en">CHESS</span></h3>
+            <p>64 格、王车易位、将军与将死；列在候选清单里，代码尚未开工。</p>
+            <a href="mailto:3391792088@qq.com">点单这款 →</a>
+          </div>
+        </article>
+        <article class="roadmap-card">
+          <div class="roadmap-cover"><img src="./assets/covers/connect4.png" alt="四子棋规划封面" width="1200" height="600" decoding="async"><span class="st">规划中</span></div>
+          <div class="roadmap-body">
+            <h3>四子棋 <span class="en">CONNECT FOUR</span></h3>
+            <p>竖着落子，横竖斜连成四子；封面已经备好，代码还没开工。</p>
+            <a href="mailto:3391792088@qq.com">点单这款 →</a>
+          </div>
+        </article>
+        <article class="roadmap-card">
+          <div class="roadmap-cover"><img src="./assets/covers/cards.png" alt="卡牌类规划封面" width="1200" height="600" decoding="async"><span class="st">规划中</span></div>
+          <div class="roadmap-body">
+            <h3>卡牌类 <span class="en">CARDS</span></h3>
+            <p>接龙、纸牌对战等玩法；同样没有开发排期，接受点单或直接提交 PR。</p>
+            <a href="mailto:3391792088@qq.com">点单这款 →</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="co-build-panel">
+        <div class="co-build-copy">
+          <span class="co-kicker">OPEN SOURCE · 社区共建</span>
+          <h3>下一款游戏，由你点单，也可以由你来做。</h3>
+          <p class="co-note">写一封信告诉我们想玩什么；或者让 AI Agent 按 <a href="https://github.com/WRM-FW/Gridfall/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">开发说明</a> 做一个单文件小游戏，提交 PR。通过后会补上路由、封面和首页卡片，正式摆进大厅。</p>
+          <div class="co-actions">
+            <a class="btn btn-green" href="mailto:3391792088@qq.com">3391792088@qq.com</a>
+            <a class="btn btn-ghost" href="https://github.com/WRM-FW/Gridfall/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">查看共建说明 →</a>
+          </div>
+        </div>
+        <div class="co-build-art" aria-hidden="true"><img src="./assets/covers/next-game.png" alt="" width="1200" height="600" decoding="async"></div>
       </div>
     </div>
   </section>
@@ -639,7 +655,7 @@
   <div class="final">
     <div class="wrap">
       <h2>桌子已经摆好，<br />就差你开第一局。</h2>
-      <p>从黑白棋社的休闲五子棋、正式连珠，到 9 路围棋快棋、19 路正赛，也可以开一间房等朋友进来——先挑一局开打；2048、扫雷和卡牌，正在赶来的路上。</p>
+      <p>从黑白棋社的休闲五子棋、正式连珠，到 9 路围棋快棋、19 路正赛；也可以去中国象棋开一间房，或者一个人刷 2048、扫雷。全部免费，不用账号。</p>
       <div class="hero-ctas">
         <a class="btn btn-green" href="./HBQS" data-local="./play.html">进入黑白棋社 →</a>
         <a class="btn btn-ghost" href="./HBQS?online=1&amp;game=gomoku" data-local="./play.html?online=1&amp;game=gomoku">联机开房 →</a>
@@ -657,9 +673,9 @@
       <a href="./HBQS" data-local="./play.html">黑白棋社</a>
       <a href="./HBQS?online=1&amp;game=gomoku" data-local="./play.html?online=1&amp;game=gomoku">联机开房</a>
       <a href="#features">玩法一览</a>
-      <a href="#soon">即将推出</a>
+      <a href="#soon">下一批游戏</a>
     </nav>
-    <p class="fnote">Gridfall 游戏大厅：黑白棋社、中国象棋、跳棋、军棋、2048、扫雷已上线；黑白棋社与中国象棋支持联机，其余为本地/单人对弈。卡牌类、国际象棋等为后续扩建规划，标注「规划中」者尚未开放游玩。</p>
+    <p class="fnote">Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷已上线；棋社与中国象棋支持联机，其余为本地 / 单人。国际象棋、四子棋、卡牌为候选规划，尚未开放。</p>
   </div>
 </footer>
 
@@ -719,7 +735,8 @@
     var q = searchInput.value.trim().toLowerCase();
     var visible = 0;
     cards.forEach(function(card){
-      var okStatus = (activeFilter === 'all') || (card.getAttribute('data-status') === activeFilter);
+      var cat = ' ' + (card.getAttribute('data-cat') || '') + ' ';
+      var okStatus = (activeFilter === 'all') || cat.indexOf(' ' + activeFilter + ' ') !== -1;
       var okQuery = !q || (card.getAttribute('data-name') + ' ' + card.textContent).toLowerCase().indexOf(q) !== -1;
       var show = okStatus && okQuery;
       card.style.display = show ? '' : 'none';

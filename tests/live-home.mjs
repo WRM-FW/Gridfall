@@ -26,20 +26,24 @@ const waitFor = async (expr, ms = 12000) => {
 try {
   await t('livehome.loads', async () => {
     const r = await b.evaluate(`({ title: document.title, live: document.querySelectorAll('.game-card[data-status="live"]').length, cards: document.querySelectorAll('.game-card').length })`);
-    if (!r.title.includes('游戏大厅') || r.live !== 6 || r.cards !== 9) return JSON.stringify(r);
+    if (!r.title.includes('游戏大厅') || r.live !== 6 || r.cards !== 6) return JSON.stringify(r);
     return true;
   });
   await b.screenshot(path.join(SHOTS, 'live-home.png'));
 
   await t('livehome.covers', async () => {
-    const ok = await waitFor(`document.querySelectorAll('.game-card .gv-cover-img').length === 9 && [...document.querySelectorAll('.game-card .gv-cover-img')].every(i => i.complete && i.naturalWidth > 0)`, 15000);
-    if (!ok) return JSON.stringify(await b.evaluate(`[...document.querySelectorAll('.game-card .gv-cover-img')].map(i => ({src:i.getAttribute('src'), ok:i.complete && i.naturalWidth>0}))`));
-    const bad = await b.evaluate(`[...document.querySelectorAll('.game-card .gv-cover-img')].filter(i => i.naturalWidth !== 1200 || i.naturalHeight !== 600).map(i => i.getAttribute('src'))`);
+    const sel = '.gv-cover-img, .roadmap-cover img, .co-build-art img';
+    const ok = await waitFor(`document.querySelectorAll('${sel}').length === 10 && [...document.querySelectorAll('${sel}')].every(i => i.complete && i.naturalWidth > 0)`, 15000);
+    if (!ok) return JSON.stringify(await b.evaluate(`[...document.querySelectorAll('${sel}')].map(i => ({src:i.getAttribute('src'), ok:i.complete && i.naturalWidth>0}))`));
+    const bad = await b.evaluate(`[...document.querySelectorAll('${sel}')].filter(i => i.naturalWidth !== 1200 || i.naturalHeight !== 600).map(i => i.getAttribute('src'))`);
     return bad.length ? 'bad size ' + JSON.stringify(bad) : true;
   });
   await b.evaluate(`document.getElementById('games').scrollIntoView({ block: 'start', behavior: 'instant' })`);
   await sleep(400);
   await b.screenshot(path.join(SHOTS, 'live-home-covers.png'));
+  await b.evaluate(`document.getElementById('soon').scrollIntoView({ block: 'start', behavior: 'instant' })`);
+  await sleep(400);
+  await b.screenshot(path.join(SHOTS, 'live-home-roadmap.png'));
 
   await t('livehome.gomoku_card', async () => {
     await b.clickSel('.game-card[data-status="live"] .play-link');
@@ -60,7 +64,7 @@ try {
   });
 
   await t('livehome.xiangqi_card', async () => {
-    await waitFor(`document.title.includes('游戏大厅') && document.querySelectorAll('.game-card').length === 9`, 12000);
+    await waitFor(`document.title.includes('游戏大厅') && document.querySelectorAll('.game-card').length === 6`, 12000);
     await b.evaluate(`document.querySelectorAll('.game-card[data-status="live"] .play-link')[1].click()`);
     const ok = await waitFor(`document.title.includes('中国象棋') && location.pathname === '/ZGXQ' && typeof state !== 'undefined'`, 12000);
     if (!ok) return 'did not open /ZGXQ: ' + await b.evaluate('location.href');
