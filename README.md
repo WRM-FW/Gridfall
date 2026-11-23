@@ -3,8 +3,8 @@
 黑白棋社（五子棋 / 国际连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷。黑白棋社与中国象棋支持单机/本地/联机；跳棋、军棋为本地对弈；2048、扫雷为单人。首页是平台大厅，后续继续接入更多游戏。
 
 - 游戏大厅（Cloudflare Pages，主站）：https://play-gridfall.pages.dev/
-- 黑白棋社统一入口：https://play-gridfall.pages.dev/HBQS
-- 中国象棋入口：https://play-gridfall.pages.dev/ZGXQ
+- 黑白棋社：https://play-gridfall.pages.dev/HBQS
+- 中国象棋：https://play-gridfall.pages.dev/ZGXQ
 - 跳棋：https://play-gridfall.pages.dev/TQ
 - 2048：https://play-gridfall.pages.dev/2048
 - 军棋：https://play-gridfall.pages.dev/JQ
