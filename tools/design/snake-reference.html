@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>贪吃蛇 · Gridfall</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#0E2A1E;color:#fff;height:100dvh;overflow:hidden;overscroll-behavior:none;touch-action:none;display:flex;flex-direction:column;align-items:center;padding:10px 10px calc(10px + env(safe-area-inset-bottom))}
+header{text-align:center}header h1{font-size:22px}header p{color:#A8CBBB;font-size:11px;margin-top:2px}
+.stats{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.card{background:#fff;color:#0B1220;border:2px solid #000;box-shadow:3px 3px 0 #000;border-radius:10px;padding:6px 14px;min-width:92px;text-align:center}.card small{color:#666;letter-spacing:.08em;font-size:11px}.card b{font-size:20px;display:block;line-height:1.15}
+.board-wrap{flex:0 1 auto;min-height:0;background:#123B28;border:2px solid #000;box-shadow:5px 5px 0 #000;border-radius:12px;padding:8px;margin-top:10px;display:flex}
+canvas{background:#0A1F16;display:block;width:min(420px,92vw,calc(100dvh - 360px));height:auto;aspect-ratio:1;touch-action:none}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+button{cursor:pointer;border:2px solid #000;box-shadow:3px 3px 0 #000;border-radius:10px;padding:9px 14px;font-weight:700;background:#63E63A;color:#0B1220;font-size:14px;touch-action:none;user-select:none}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}button.sec{background:#FFD83D}
+select{padding:9px;border:2px solid #000;border-radius:10px;font-weight:700;background:#fff;font-size:14px}
+.pad{display:grid;grid-template-columns:repeat(3,62px);grid-template-rows:repeat(3,50px);gap:7px;margin-top:10px}
+.pad button{font-size:19px;background:#fff;padding:0}.pad .empty{visibility:hidden}.pad .mid{background:#FFD83D;font-size:12px}
+.tip{color:#A8CBBB;font-size:11px;text-align:center;margin-top:8px;line-height:1.6}
+.overlay{position:fixed;inset:0;background:rgba(5,10,8,.72);display:none;align-items:center;justify-content:center;z-index:9}.overlay.show{display:flex}
+.panel{background:#fff;color:#0B1220;border:2px solid #000;box-shadow:6px 6px 0 #000;border-radius:16px;padding:24px;text-align:center;max-width:320px;width:90%}
+@media(max-height:700px){.tip{display:none}header p{display:none}}
+@media(max-width:380px){.pad{grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,46px)}}
+</style></head><body>
+<header><h1>贪吃蛇</h1><p>SNAKE · Gridfall 经典休闲 · 打开即玩</p></header>
+<div class="stats"><div class="card"><small>分数</small><b id="score">0</b></div><div class="card"><small>长度</small><b id="len">3</b></div><div class="card"><small>最高分（本机）</small><b id="best">0</b></div></div>
+<div class="board-wrap"><canvas id="cv" width="420" height="420"></canvas></div>
+<div class="row">
+<select id="speed"><option value="170">慢速</option><option value="125" selected>正常</option><option value="90">快速</option><option value="65">极速</option></select>
+<select id="mode"><option value="wall" selected>撞墙结束</option><option value="wrap">穿墙模式</option></select>
+<button id="btnStart">开始 / 重开</button><button class="sec" id="btnPause">暂停</button>
+</div>
+<div class="pad">
+<button class="empty" tabindex="-1"></button><button data-d="up">↑</button><button class="empty" tabindex="-1"></button>
+<button data-d="left">←</button><button class="mid" id="btnPadPause">暂停</button><button data-d="right">→</button>
+<button class="empty" tabindex="-1"></button><button data-d="down">↓</button><button class="empty" tabindex="-1"></button>
+</div>
+<p class="tip">打开后先停在待开始状态，按任意方向键（或滑动棋盘）才出发，不会自己撞墙。不能直接掉头；吃红果 +10 分并微加速，金果限时 +30 分。</p>
+<div class="overlay" id="over"><div class="panel"><h2>游戏结束</h2><p style="margin:10px 0;color:#555">分数 <b id="fs">0</b> · 长度 <b id="fl">0</b></p><button id="btnAgain">再来一局</button></div></div>
+<script>
+const N=21,CELL=20,cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+function safeGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function safeSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+let snake,dir,queue,food,gold,goldTimer,score,best=+(safeGet('gridfall-snake-best')||0),timer=null,running=false,paused=false,waiting=false,intervalMs=125;
+document.getElementById('best').textContent=best;
+function randFree(){while(true){const p={x:Math.floor(Math.random()*N),y:Math.floor(Math.random()*N)};if(!snake.some(s=>s.x===p.x&&s.y===p.y)&&!(food&&food.x===p.x&&food.y===p.y)&&!(gold&&gold.x===p.x&&gold.y===p.y))return p}}
+function start(){snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];dir={x:1,y:0};queue=[];score=0;gold=null;goldTimer=0;food=null;food=randFree();intervalMs=+document.getElementById('speed').value;running=true;paused=false;waiting=true;document.getElementById('over').classList.remove('show');setPauseLabel();hud();draw();loop()}
+function loop(){clearInterval(timer);timer=setInterval(tick,intervalMs)}
+function tick(){if(!running||paused||waiting)return;
+if(queue.length)dir=queue.shift();
+let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+const wrap=document.getElementById('mode').value==='wrap';
+if(wrap){head.x=(head.x+N)%N;head.y=(head.y+N)%N}else if(head.x<0||head.x>=N||head.y<0||head.y>=N)return over();
+const ate=food&&head.x===food.x&&head.y===food.y, ateGold=gold&&head.x===gold.x&&head.y===gold.y;
+const body=(ate||ateGold)?snake:snake.slice(0,-1);
+if(body.some(s=>s.x===head.x&&s.y===head.y))return over();
+snake.unshift(head);
+if(ate){score+=10;food=randFree();if(Math.random()<0.28&&!gold){gold=randFree();goldTimer=45}if(intervalMs>55){intervalMs-=3;loop()}}
+else if(ateGold){score+=30;gold=null}
+else snake.pop();
+if(gold&&--goldTimer<=0)gold=null;
+hud();draw()}
+function hud(){document.getElementById('score').textContent=score;document.getElementById('len').textContent=snake?snake.length:3}
+function draw(){ctx.clearRect(0,0,420,420);ctx.strokeStyle='rgba(255,255,255,.05)';for(let i=1;i<N;i++){ctx.beginPath();ctx.moveTo(i*CELL,0);ctx.lineTo(i*CELL,420);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*CELL);ctx.lineTo(420,i*CELL);ctx.stroke()}
+if(food){ctx.fillStyle='#FF5A5A';ctx.beginPath();ctx.arc(food.x*CELL+10,food.y*CELL+10,8,0,7);ctx.fill();ctx.fillStyle='#63E63A';ctx.fillRect(food.x*CELL+9,food.y*CELL+1,3,5)}
+if(gold){ctx.fillStyle='#FFD83D';ctx.beginPath();ctx.arc(gold.x*CELL+10,gold.y*CELL+10,8,0,7);ctx.fill();ctx.strokeStyle='#000';ctx.stroke()}
+if(snake)snake.forEach((s,i)=>{ctx.fillStyle=i===0?'#63E63A':'#2FA84F';ctx.fillRect(s.x*CELL+1,s.y*CELL+1,CELL-2,CELL-2);if(i===0){ctx.fillStyle='#0B1220';const ex=dir.x,ey=dir.y;ctx.fillRect(s.x*CELL+10+ex*3-4,s.y*CELL+10+ey*3-1,3,3);ctx.fillRect(s.x*CELL+10+ex*3+2,s.y*CELL+10+ey*3-1,3,3)}});
+if(waiting){ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(0,150,420,110);ctx.fillStyle='#fff';ctx.font='bold 24px system-ui';ctx.textAlign='center';ctx.fillText('按任意方向键开始',210,198);ctx.font='14px system-ui';ctx.fillStyle='#A8CBBB';ctx.fillText('方向键 / 十字键 / 滑动棋盘',210,228)}
+if(paused){ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(0,0,420,420);ctx.fillStyle='#fff';ctx.font='bold 28px system-ui';ctx.textAlign='center';ctx.fillText('已暂停',210,215)}}
+function over(){running=false;waiting=false;clearInterval(timer);if(score>best){best=score;safeSet('gridfall-snake-best',best);document.getElementById('best').textContent=best}document.getElementById('fs').textContent=score;document.getElementById('fl').textContent=snake.length;document.getElementById('over').classList.add('show')}
+const DIRS={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};
+function setDir(name){const d=DIRS[name];if(!d)return;
+if(!running)start();
+if(paused)return;
+if(waiting){if(name==='left')return;dir=d;queue=[];waiting=false;draw();return}
+const last=queue.length?queue[queue.length-1]:dir;
+if(d.x===-last.x&&d.y===-last.y)return;      // 不能掉头（按队列末尾校验，快速连按也有效）
+if(d.x===last.x&&d.y===last.y)return;        // 同方向不重复入队
+if(queue.length<3)queue.push(d)}
+document.addEventListener('keydown',e=>{const map={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};if(map[e.key]){e.preventDefault();setDir(map[e.key])}if(e.key==='p'||e.key==='P'||e.key===' ') {e.preventDefault();togglePause()}});
+document.querySelectorAll('[data-d]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();setDir(b.dataset.d)})});
+function setPauseLabel(){const t=paused?'继续':'暂停';document.getElementById('btnPause').textContent=t;document.getElementById('btnPadPause').textContent=t}
+function togglePause(){if(!running||waiting)return;paused=!paused;setPauseLabel();draw()}
+document.getElementById('btnStart').onclick=start;document.getElementById('btnAgain').onclick=start;
+document.getElementById('btnPause').onclick=togglePause;document.getElementById('btnPadPause').addEventListener('pointerdown',e=>{e.preventDefault();togglePause()});
+document.getElementById('speed').onchange=()=>{if(running){intervalMs=+document.getElementById('speed').value;loop()}};
+let tx=0,ty=0;
+cv.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+cv.addEventListener('touchmove',e=>{e.preventDefault()},{passive:false});
+cv.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)<14&&Math.abs(dy)<14)return;setDir(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'))},{passive:true});
+document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+start();  // 打开即自动开始，不需要先点开始
+</script></body></html>

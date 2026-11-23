@@ -1,6 +1,6 @@
 # Gridfall — 棋盘 / 游戏大厅
 
-黑白棋社（五子棋 / 国际连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷。黑白棋社与中国象棋支持单机/本地/联机；跳棋、军棋为本地对弈；2048、扫雷为单人。首页是平台大厅，后续继续接入更多游戏。
+黑白棋社（五子棋 / 国际连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块。黑白棋社与中国象棋支持单机/本地/联机；其余为本地或单人。首页是平台大厅，后续继续接入更多游戏。
 
 - 游戏大厅（Cloudflare Pages，主站）：https://play-gridfall.pages.dev/
 - 黑白棋社：https://play-gridfall.pages.dev/HBQS
@@ -9,9 +9,12 @@
 - 2048：https://play-gridfall.pages.dev/2048
 - 军棋：https://play-gridfall.pages.dev/JQ
 - 扫雷：https://play-gridfall.pages.dev/SL
-- GitHub Pages：https://wrm-fw.github.io/Gridfall/ （`/Gridfall/HBQS/`→`play.html`，`/Gridfall/ZGXQ/`→`xiangqi.html`，`TQ/`、`2048/`、`JQ/`、`SL/` 各自回退到对应页面）
+- 贪吃蛇：https://play-gridfall.pages.dev/TCS
+- 推箱子：https://play-gridfall.pages.dev/TXZ
+- 俄罗斯方块：https://play-gridfall.pages.dev/ELSFK
+- GitHub Pages：https://wrm-fw.github.io/Gridfall/ （`/Gridfall/HBQS/`→`play.html`，`/Gridfall/ZGXQ/`→`xiangqi.html`，`TQ/`、`2048/`、`JQ/`、`SL/`、`TCS/`、`TXZ/`、`ELSFK/` 各自回退到对应页面）
 
-`index.html` 是平台首页；`/HBQS` 黑白棋社、`/ZGXQ` 中国象棋、`/TQ` 跳棋、`/2048` 2048、`/JQ` 军棋、`/SL` 扫雷均为固定入口，200 代理到各自页面；地址保持无扩展路径。`gridfall.pages.dev` 已被其他项目占用，因此主站使用 `play-gridfall.pages.dev`。
+`index.html` 是平台首页；`/HBQS` 黑白棋社、`/ZGXQ` 中国象棋、`/TQ` 跳棋、`/2048` 2048、`/JQ` 军棋、`/SL` 扫雷、`/TCS` 贪吃蛇、`/TXZ` 推箱子、`/ELSFK` 俄罗斯方块均为固定入口，200 代理到各自页面；地址保持无扩展路径。`gridfall.pages.dev` 已被其他项目占用，因此主站使用 `play-gridfall.pages.dev`。
 
 ## 本地运行
 
@@ -24,7 +27,7 @@
 
 | 文件 | 说明 |
 | --- | --- |
-| `index.html` | 游戏大厅首页：品牌入口、迷你棋盘、6 张已上线卡片（可联机 / 棋类 / 益智筛选）、玩法一览、下一批桌子与社区共建 |
+| `index.html` | 游戏大厅首页：品牌入口、迷你棋盘、9 张已上线卡片（可联机 / 棋类 / 益智 / 街机筛选）、玩法一览、下一批桌子与社区共建 |
 | `/HBQS` | 黑白棋社的固定入口（`_redirects` 200 代理到 `play.html`） |
 | `play.html` | 黑白棋社对局页：五子棋（普通/连珠，含 RIF 正式开局）、围棋（9/13/19 路）、联机 |
 | `xiangqi.html` | 中国象棋：人机、双人、联机，Canvas 棋盘与木质落子音效 |
@@ -32,12 +35,15 @@
 | `game2048.html` | 2048：单人数字合并 |
 | `junqi.html` | 军棋：暗棋陆战棋，人机/双人 |
 | `saolei.html` | 扫雷：单人，三档难度/自定义 |
+| `snake.html` | 贪吃蛇：21×21，四档速度、撞墙/穿墙 |
+| `sokoban.html` | 推箱子：30 关，撤销/重开 |
+| `tetris.html` | 俄罗斯方块：10×20，暂存/预览、四档速度 |
 | `_redirects` | Cloudflare Pages 路由：六个游戏入口 200 代理，尾斜杠 301 |
 | `assets/covers/` | 大厅游戏封面（1200×600 PNG；`connect4.png` 为四子棋预留） |
 | `CONTRIBUTING.md` | 点单与社区共建：自己开发或 AI 辅助、PR 流程、开发者邮箱 |
 | `HBQS/index.html` | GitHub Pages 的入口回退，跳转到 `play.html` |
 | `ZGXQ/index.html` | GitHub Pages 的入口回退，跳转到 `xiangqi.html` |
-| `TQ/2048/JQ/SL/index.html` | GitHub Pages 的入口回退 |
+| `TQ/2048/JQ/SL/TCS/TXZ/ELSFK/index.html` | GitHub Pages 的入口回退 |
 | `tools/` | 构建源、设计参考与构建脚本 |
 | `tests/` | 无头测试 |
 | `supabase.js` | 内置 `@supabase/supabase-js` UMD，仅联机时加载 |
@@ -68,7 +74,7 @@ GitHub Pages：从 `main` 分支根目录发布，推送后自动更新。
 - 大厅游戏封面统一使用 `assets/covers/` 下的 1200×600 插画，`.gv-cover-img` 以 `object-fit: cover` 填充 168px 高的封面区；“已上线 / 规划中 / 持续上新”徽标仍由页面叠加。
 - 黑白棋社对局页复用 `01_木质棋盘陶瓷棋子以及配套UI.html` 的木质棋盘、陶瓷棋子与瓷白/深木 UI，Canvas 绘制。
 - 中国象棋复用 `03_中国象棋.html` 的深色 Canvas 棋盘与面板；落子音效改为 Web Audio 合成的木质拍盘声。
-- 跳棋、2048、军棋、扫雷直接复用素材库同名文件，仅加固定返回大厅入口与路由，不改动游戏本体视觉。
+- 跳棋、2048、军棋、扫雷、贪吃蛇、推箱子、俄罗斯方块直接复用素材库同名文件，仅加固定返回大厅入口与路由，不改动游戏本体视觉。
 
 ## 入口命名
 
@@ -82,6 +88,9 @@ GitHub Pages：从 `main` 分支根目录发布，推送后自动更新。
 | 2048 | `/2048`（已上线） |
 | 军棋 | `/JQ`（已上线） |
 | 扫雷 | `/SL`（已上线） |
+| 贪吃蛇 | `/TCS`（已上线） |
+| 推箱子 | `/TXZ`（已上线） |
+| 俄罗斯方块 | `/ELSFK`（已上线） |
 | 国际象棋 | `/GJXQ` |
 | 卡牌 | `/KP` |
 | 四子棋 | `/SZQ` |
@@ -117,11 +126,11 @@ node minigames-route.mjs
 
 ## 已验证
 
-- 引擎规则测试 36/36（含围棋 AI 吃子、救子、星位开局、真眼避填与 19 路耗时）；本地界面 6/6；联机核心 7/7；联机扩展 5/5；线上核心 4/4；线上正式连珠交换 4/4；首页与深链接 14/14；线上首页 7/7；换方 6/6；/HBQS 路由 7/7；/ZGXQ 路由 4/4；象棋联机 7/7；跳棋/2048/军棋/扫雷路由 9/9。
+- 引擎规则测试 36/36（含围棋 AI 吃子、救子、星位开局、真眼避填与 19 路耗时）；本地界面 6/6；联机核心 7/7；联机扩展 5/5；线上核心 4/4；线上正式连珠交换 4/4；首页与深链接 14/14；线上首页 7/7；换方 6/6；/HBQS 路由 7/7；/ZGXQ 路由 4/4；象棋联机 7/7；跳棋/2048/军棋/扫雷/贪吃蛇/推箱子/俄罗斯方块路由 15/15。
 - 线上用两个独立浏览器实例完成整局五子棋、Renju 正式开局（不交换/交换）、围棋 9 路双停数子、再来一局、认输、掉线重连。
 - `/HBQS` 与 `/ZGXQ` 已实测：直接访问、刷新、尾斜杠 301、首页进入与浏览器前进/后退；`/HBQS` 的查询参数也已验证。
 - 中国象棋联机已实测：房主红/客端黑、双向落子同步、换方、认输、再来一局、音效开关。
-- 跳棋/军棋加载与布阵、2048 键盘移动、扫雷首击展开均已本地实测；四个入口线上已测直接访问/刷新/尾斜杠/首页卡片。
+- 跳棋/军棋加载与布阵、2048 键盘移动、扫雷首击展开、贪吃蛇方向键起步、推箱子移动/撤销、俄罗斯方块暂存/旋转均已本地实测；七个入口线上已测直接访问/刷新/尾斜杠/首页卡片。
 
 ## 已知限制
 

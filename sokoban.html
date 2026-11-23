@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>推箱子 · Gridfall</title>
+<link rel="canonical" href="./TXZ" />
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#2B1D12;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
+header{text-align:center;margin-bottom:12px}header h1{font-size:28px}header p{color:#D8BFA3;font-size:13px;margin-top:4px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+.card{background:#fff;color:#0B1220;border:2px solid #000;box-shadow:4px 4px 0 #000;border-radius:12px;padding:10px 16px;min-width:100px;text-align:center}.card small{color:#666;letter-spacing:.1em}.card b{font-size:22px;display:block}
+.board-wrap{background:#4A3220;border:2px solid #000;box-shadow:6px 6px 0 #000;border-radius:12px;padding:10px}
+canvas{background:#1E140C;display:block;width:min(480px,90vw);height:auto}
+.row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:center;align-items:center}
+button,select{cursor:pointer;border:2px solid #000;box-shadow:3px 3px 0 #000;border-radius:10px;padding:10px 14px;font-weight:700;background:#FFD83D;color:#0B1220;font-size:15px}
+button{background:#63E63A}button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}button.sec{background:#FFD83D}button.ghost{background:#fff}select{background:#fff;cursor:pointer}
+.pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,56px);gap:8px;margin-top:14px}.pad button{font-size:20px;background:#fff;padding:0}.pad .empty{visibility:hidden}
+.tip{color:#D8BFA3;font-size:12px;text-align:center;margin-top:12px;line-height:1.7;max-width:540px}
+.banner{display:none;margin-top:12px;background:#63E63A;color:#0B1220;border:2px solid #000;box-shadow:4px 4px 0 #000;border-radius:12px;padding:12px 18px;font-weight:800}.banner.show{display:block}
+</style></head><body>
+<a href="./index.html" title="返回 Gridfall 游戏大厅" style="position:fixed;right:16px;top:16px;z-index:2147483647;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:999px;background:rgba(10,14,22,.84);color:#fff;text-decoration:none;font:600 13px/1 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(0,0,0,.35);backdrop-filter:blur(8px)">← 游戏大厅</a>
+<header><h1>推箱子</h1><p>SOKOBAN · Gridfall 推理类 · 本地单机 · 共 30 关（21 关起为大图多箱高难度）</p></header>
+<div class="stats"><div class="card"><small>关卡</small><b id="lv">1 / 30</b></div><div class="card"><small>步数</small><b id="steps">0</b></div><div class="card"><small>推动</small><b id="pushes">0</b></div><div class="card"><small>已到位</small><b id="done">0 / 0</b></div></div>
+<div class="board-wrap"><canvas id="cv"></canvas></div>
+<div class="banner" id="banner">🎉 本关完成！ <button class="ghost" id="btnNext" style="margin-left:8px;padding:6px 12px">下一关 →</button></div>
+<div class="row">
+<select id="sel"></select>
+<button id="btnUndo">↩ 撤销</button><button class="sec" id="btnReset">重开本关</button><button class="ghost" id="btnPrev">上一关</button><button class="ghost" id="btnNext2">下一关</button>
+</div>
+<div class="pad"><button class="empty"></button><button data-d="up">↑</button><button class="empty"></button><button data-d="left">←</button><button data-d="down">↓</button><button data-d="right">→</button></div>
+<p class="tip">规则：把所有箱子推到目标点上，一次只能推一个，箱子不能拉、不能穿墙，推到墙角可能死局，用撤销或重开。<br>键盘：方向键 / WASD 移动 · Z 撤销 · R 重开。手机：方向键或在棋盘上滑动。</p>
+<script>
+// # 墙 . 目标 $ 箱子 * 箱子在目标 @ 人 + 人在目标 空格 地板
+const LEVELS=[
+["#####", "#   #", "# $ #", "# .@#", "#####"],
+["######", "#    #", "# $$ #", "# ..@#", "#    #", "######"],
+["#######", "#     #", "# $ $ #", "#  .  #", "# $.@ #", "#  .  #", "#######"],
+["########", "#      #", "# $##  #", "# $ . .#", "# @  $ #", "#   .  #", "########"],
+["#########", "#       #", "# $$    #", "#  ## . #", "# @  $. #", "#     . #", "#########"],
+["########", "#   #  #", "# $ # .#", "# $  . #", "# ##   #", "# @ $ .#", "#      #", "########"],
+["#########", "#       #", "# $ $ $ #", "#  ###  #", "# . . . #", "#   @   #", "#########"],
+["##########", "#        #", "# $$     #", "#  # ## .#", "# @   $. #", "#     $ .#", "#       .#", "##########"],
+["#########", "#       #", "# $$    #", "#  ..   #", "# $ . @ #", "#       #", "#########"],
+["##########", "#        #", "# $$     #", "#  ..    #", "# $$  @  #", "#  ..    #", "#        #", "##########"],
+["#########", "#       #", "# *.    #", "# ..#   #", "#   $   #", "# $$    #", "# @     #", "#########"],
+["#########", "#       #", "# $   * #", "# @   . #", "# $  #. #", "#    $. #", "#       #", "#########"],
+["##########", "#        #", "# $      #", "#  #     #", "# $   #  #", "# ..$@   #", "# *.     #", "##########"],
+["##########", "#   @    #", "#  $$#   #", "#    $ ..#", "#      ..#", "#    #  $#", "#        #", "##########"],
+["##########", "#        #", "# ..*. $ #", "#      $@#", "#   ## $ #", "#        #", "#        #", "#        #", "##########"],
+["##########", "#        #", "# $$     #", "#    # @ #", "#    $ $ #", "#    #   #", "# *..    #", "# ..     #", "##########"],
+["###########", "#         #", "#    $  ..#", "#       ..#", "#  #   #* #", "#     $   #", "# $     $ #", "# @       #", "###########"],
+["###########", "#         #", "# *. # $@ #", "# ..      #", "# *       #", "#  # $    #", "# $  #    #", "#         #", "###########"],
+["###########", "#         #", "#   @$    #", "#         #", "# $ # #   #", "#    $  . #", "#    #$ *.#", "#       ..#", "###########"],
+["###########", "#         #", "#      $@ #", "# *.      #", "# .. # $  #", "# .$ #    #", "#         #", "# $       #", "#         #", "###########"],
+["###########", "#         #", "#       $ #", "#  #      #", "#         #", "#    $ #  #", "# *..#$   #", "# ...$@$  #", "###########"],
+["############", "#          #", "#        .*#", "#     #  ..#", "# $#     ..#", "#     #    #", "# $ @$  $$ #", "#          #", "############"],
+["############", "#          #", "# *..      #", "# ... $@   #", "# $ #  #   #", "#          #", "#          #", "# $$$#     #", "#          #", "############"],
+["############", "#          #", "#     #    #", "#          #", "# $        #", "#  # $$ #$ #", "#    @   ..#", "#  $  #  *.#", "#        ..#", "############"],
+["############", "#          #", "#          #", "#        $ #", "#    ##  @ #", "#    ##  $ #", "# $  $     #", "# *..      #", "# *..      #", "############"],
+["############", "#   @      #", "# ..* $ $  #", "# *..   #  #", "# .        #", "#  $ # $   #", "#      #   #", "#  $       #", "#          #", "############"],
+["#############", "#           #", "#         $$#", "#    $   #  #", "#     #$    #", "# @$  #   . #", "#  #      ..#", "#  $     $..#", "#         ..#", "#############"],
+["#############", "#           #", "#     $     #", "#  $ #@#    #", "#     $     #", "#   $       #", "#     #     #", "# *.. #     #", "# *.*.      #", "#############"],
+["#############", "#           #", "#     #   *.#", "#         *.#", "#  #      ..#", "#     #    .#", "# $  $   #  #", "#    @      #", "# $    $  $ #", "#           #", "#############"],
+["#############", "#           #", "# **.  $@   #", "# ... #     #", "# .         #", "#   #   #   #", "#         $ #", "#     #     #", "#  $ #  $ $ #", "#           #", "#############"]
+];
+let lvIdx=0,walls,targets,boxes,player,steps,pushes,history,W,H;
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const sel=document.getElementById('sel');LEVELS.forEach((_,i)=>{const o=document.createElement('option');o.value=i;o.textContent='第 '+(i+1)+' 关';sel.appendChild(o)});
+function key(x,y){return x+','+y}
+function load(i){lvIdx=i;sel.value=i;const rows=LEVELS[i];H=rows.length;W=Math.max(...rows.map(r=>r.length));walls=new Set();targets=new Set();boxes=new Set();history=[];steps=0;pushes=0;
+rows.forEach((row,y)=>{[...row.padEnd(W,'#')].forEach((ch,x)=>{if(ch==='#')walls.add(key(x,y));if(ch==='.'||ch==='*'||ch==='+')targets.add(key(x,y));if(ch==='$'||ch==='*')boxes.add(key(x,y));if(ch==='@'||ch==='+')player={x,y}})});
+document.getElementById('banner').classList.remove('show');fit();hud();draw()}
+function fit(){const cell=Math.floor(Math.min(480/W,520/H));cv.width=W*cell;cv.height=H*cell;cv.dataset.cell=cell;cv.style.aspectRatio=W+'/'+H}
+function hud(){document.getElementById('lv').textContent=(lvIdx+1)+' / '+LEVELS.length;document.getElementById('steps').textContent=steps;document.getElementById('pushes').textContent=pushes;let d=0;boxes.forEach(b=>{if(targets.has(b))d++});document.getElementById('done').textContent=d+' / '+targets.size}
+function draw(){const s=+cv.dataset.cell;ctx.clearRect(0,0,cv.width,cv.height);
+for(let y=0;y<H;y++)for(let x=0;x<W;x++){const k=key(x,y);if(walls.has(k)){ctx.fillStyle='#8A5A2B';ctx.fillRect(x*s,y*s,s,s);ctx.fillStyle='#6E4520';ctx.fillRect(x*s,y*s,s,5)}else{ctx.fillStyle=(x+y)%2?'#EAD9BE':'#F2E4CB';ctx.fillRect(x*s,y*s,s,s);if(targets.has(k)){ctx.strokeStyle='#E0483E';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x*s+s/2,y*s+s/2,s*.22,0,7);ctx.stroke()}}}
+boxes.forEach(b=>{const[x,y]=b.split(',').map(Number);const on=targets.has(b);ctx.fillStyle=on?'#63B93A':'#C98A3A';ctx.fillRect(x*s+3,y*s+3,s-6,s-6);ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.strokeRect(x*s+3,y*s+3,s-6,s-6);ctx.strokeStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.moveTo(x*s+3,y*s+3);ctx.lineTo(x*s+s-3,y*s+s-3);ctx.moveTo(x*s+s-3,y*s+3);ctx.lineTo(x*s+3,y*s+s-3);ctx.stroke()});
+ctx.fillStyle='#1E5BF0';ctx.beginPath();ctx.arc(player.x*s+s/2,player.y*s+s/2,s*.34,0,7);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(player.x*s+s/2-5,player.y*s+s/2-3,2.5,0,7);ctx.arc(player.x*s+s/2+5,player.y*s+s/2-3,2.5,0,7);ctx.fill()}
+function snapshot(){return{boxes:new Set(boxes),player:{...player},steps,pushes}}
+function move(name){const m={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};const d=m[name];if(!d)return;const nx=player.x+d[0],ny=player.y+d[1],nk=key(nx,ny);if(walls.has(nk))return;
+let pushed=false;
+if(boxes.has(nk)){const bx=nx+d[0],by=ny+d[1],bk=key(bx,by);if(walls.has(bk)||boxes.has(bk))return;history.push(snapshot());boxes.delete(nk);boxes.add(bk);pushes++;pushed=true}
+if(!pushed)history.push(snapshot());
+player={x:nx,y:ny};steps++;hud();draw();checkWin()}
+function checkWin(){let ok=true;targets.forEach(t=>{if(!boxes.has(t))ok=false});if(ok)document.getElementById('banner').classList.add('show')}
+function undo(){const h=history.pop();if(!h)return;boxes=h.boxes;player=h.player;steps=h.steps;pushes=h.pushes;document.getElementById('banner').classList.remove('show');hud();draw()}
+document.addEventListener('keydown',e=>{const map={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};if(map[e.key]){e.preventDefault();move(map[e.key])}if(e.key==='z'||e.key==='Z')undo();if(e.key==='r'||e.key==='R')load(lvIdx)});
+document.querySelectorAll('[data-d]').forEach(b=>b.addEventListener('click',()=>move(b.dataset.d)));
+document.getElementById('btnUndo').onclick=undo;document.getElementById('btnReset').onclick=()=>load(lvIdx);
+function go(d){const n=Math.min(LEVELS.length-1,Math.max(0,lvIdx+d));load(n)}
+document.getElementById('btnPrev').onclick=()=>go(-1);document.getElementById('btnNext').onclick=()=>go(1);document.getElementById('btnNext2').onclick=()=>go(1);
+sel.onchange=()=>load(+sel.value);
+let tx=0,ty=0;cv.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+cv.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)<10&&Math.abs(dy)<10)return;move(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'))},{passive:true});
+load(0);
+</script></body></html>

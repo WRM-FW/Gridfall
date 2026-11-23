@@ -44,4 +44,36 @@ try {
   await b.clickSel('.cell'); await sleep(800);
   console.log('sl after', JSON.stringify(await b.evaluate(`({ opened:document.querySelectorAll('.cell.open').length, timer:document.getElementById('timer').textContent, msg:document.getElementById('msg').textContent })`)));
   await b.screenshot(path.join(SHOTS, 'saolei-page.png'));
+
+  await goto(page('snake.html'));
+  console.log('snake', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[href="./index.html"]'), canvas:!!document.getElementById('cv'), score:document.getElementById('score').textContent })`)));
+  await b.send('Input.dispatchKeyEvent', { type:'keyDown', key:'ArrowRight', code:'ArrowRight', windowsVirtualKeyCode:39 });
+  await b.send('Input.dispatchKeyEvent', { type:'keyUp', key:'ArrowRight', code:'ArrowRight', windowsVirtualKeyCode:39 });
+  await sleep(500);
+  console.log('snake after', JSON.stringify(await b.evaluate(`({ running:running, waiting:waiting, len:snake.length, over:document.getElementById('over').classList.contains('show') })`)));
+  await b.screenshot(path.join(SHOTS, 'snake-page.png'));
+
+  await goto(page('sokoban.html'));
+  console.log('sokoban', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[href="./index.html"]'), canvas:!!document.getElementById('cv'), lv:document.getElementById('lv').textContent, steps:document.getElementById('steps').textContent })`)));
+  await b.send('Input.dispatchKeyEvent', { type:'keyDown', key:'ArrowUp', code:'ArrowUp', windowsVirtualKeyCode:38 });
+  await b.send('Input.dispatchKeyEvent', { type:'keyUp', key:'ArrowUp', code:'ArrowUp', windowsVirtualKeyCode:38 });
+  await sleep(200);
+  console.log('sokoban after', JSON.stringify(await b.evaluate(`({ steps:document.getElementById('steps').textContent, boxes:boxes.size, player:player })`)));
+  await b.send('Input.dispatchKeyEvent', { type:'keyDown', key:'z', code:'KeyZ', windowsVirtualKeyCode:90 });
+  await b.send('Input.dispatchKeyEvent', { type:'keyUp', key:'z', code:'KeyZ', windowsVirtualKeyCode:90 });
+  await sleep(200);
+  console.log('sokoban undo', JSON.stringify(await b.evaluate(`({ steps:document.getElementById('steps').textContent })`)));
+  await b.screenshot(path.join(SHOTS, 'sokoban-page.png'));
+
+  await goto(page('tetris.html'));
+  console.log('tetris', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[href="./index.html"]'), canvas:!!document.getElementById('board'), score:document.getElementById('score').textContent })`)));
+  await b.evaluate(`document.getElementById('btnStart').click()`);
+  await sleep(300);
+  for (const [key, code, vk] of [['ArrowLeft','ArrowLeft',37],['ArrowUp','ArrowUp',38],[' ','Space',32]]) {
+    await b.send('Input.dispatchKeyEvent', { type:'keyDown', key, code, windowsVirtualKeyCode:vk });
+    await b.send('Input.dispatchKeyEvent', { type:'keyUp', key, code, windowsVirtualKeyCode:vk });
+    await sleep(150);
+  }
+  console.log('tetris after', JSON.stringify(await b.evaluate(`({ running:running, paused:paused, score:document.getElementById('score').textContent, over:document.getElementById('over').classList.contains('show') })`)));
+  await b.screenshot(path.join(SHOTS, 'tetris-page.png'));
 } finally { await b.close(); }

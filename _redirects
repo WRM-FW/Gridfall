@@ -16,3 +16,12 @@
 # 扫雷
 /SL /saolei 200
 /SL/ /SL 301
+# 贪吃蛇
+/TCS /snake 200
+/TCS/ /TCS 301
+# 推箱子
+/TXZ /sokoban 200
+/TXZ/ /TXZ 301
+# 俄罗斯方块
+/ELSFK /tetris 200
+/ELSFK/ /ELSFK 301

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>俄罗斯方块 · Gridfall</title>
+<link rel="canonical" href="./ELSFK" />
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#0B1220;color:#fff;height:100dvh;overflow:hidden;overscroll-behavior:none;touch-action:none;display:flex;flex-direction:column;align-items:center;padding:10px 10px calc(10px + env(safe-area-inset-bottom))}
+header{text-align:center;flex:0 0 auto}header h1{font-size:22px;letter-spacing:.06em}header p{color:#9FB0CC;font-size:11px;margin-top:2px}
+.wrap{flex:1 1 auto;min-height:0;display:flex;gap:12px;align-items:center;justify-content:center;width:100%;margin-top:8px}
+.board-wrap{background:#111A2E;border:2px solid #000;box-shadow:5px 5px 0 #000;padding:8px;border-radius:12px}
+canvas#board{background:#070B14;display:block;width:min(320px,56vw,calc((100dvh - 235px)/2));height:auto;aspect-ratio:1/2}
+.side{display:flex;flex-direction:column;gap:8px;width:132px}
+.card{background:#fff;color:#0B1220;border:2px solid #000;box-shadow:3px 3px 0 #000;border-radius:10px;padding:8px 10px}
+.card h3{font-size:11px;letter-spacing:.1em;color:#666;margin-bottom:4px}.big{font-size:24px;font-weight:800;line-height:1.1}
+.minirow{display:flex;gap:8px}.minirow .card{flex:1;padding:6px}
+canvas.mini{background:#F2F4F8;border-radius:6px;display:block;width:100%;height:auto}
+button{cursor:pointer;border:2px solid #000;box-shadow:3px 3px 0 #000;border-radius:10px;padding:9px 10px;font-weight:700;background:#63E63A;color:#0B1220;font-size:14px;touch-action:none;user-select:none}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}button.sec{background:#FFD83D}
+select{width:100%;padding:9px;border:2px solid #000;box-shadow:3px 3px 0 #000;border-radius:10px;font-weight:700;background:#FFD83D;color:#0B1220;font-size:14px}
+.btnrow{display:flex;gap:8px}.btnrow button{flex:1}
+.controls{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(480px,100%);margin-top:10px}
+.controls button{padding:15px 4px;font-size:17px;background:#fff;min-height:52px}
+.tip{flex:0 0 auto;color:#9FB0CC;font-size:11px;text-align:center;margin-top:8px;line-height:1.6}
+.overlay{position:fixed;inset:0;background:rgba(5,8,16,.72);display:none;align-items:center;justify-content:center;z-index:9}
+.overlay.show{display:flex}.panel{background:#fff;color:#0B1220;border:2px solid #000;box-shadow:6px 6px 0 #000;border-radius:16px;padding:24px;text-align:center;max-width:320px;width:90%}
+@media(max-height:640px){.tip{display:none}header p{display:none}}
+@media(min-width:700px){canvas#board{width:min(320px,calc((100dvh - 250px)/2))}.tip{display:block}}
+</style></head><body>
+<a href="./index.html" title="返回 Gridfall 游戏大厅" style="position:fixed;right:16px;top:16px;z-index:2147483647;display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:999px;background:rgba(10,14,22,.84);color:#fff;text-decoration:none;font:600 13px/1 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(0,0,0,.35);backdrop-filter:blur(8px)">← 游戏大厅</a>
+<header><h1>俄罗斯方块</h1><p>TETRIS · Gridfall 益智类 · 本地单机</p></header>
+<div class="wrap">
+<div class="board-wrap"><canvas id="board" width="300" height="600"></canvas></div>
+<div class="side">
+<div class="card"><h3>分数 SCORE</h3><div class="big" id="score">0</div><div style="font-size:12px;color:#666;margin-top:4px">等级 <b id="level">1</b> · 行数 <b id="lines">0</b></div></div>
+<div class="minirow">
+<div class="card"><h3>下一个</h3><canvas id="next" class="mini" width="120" height="90"></canvas></div>
+<div class="card"><h3>暂存 C</h3><canvas id="hold" class="mini" width="120" height="90"></canvas></div>
+</div>
+<div class="btnrow"><button id="btnStart">重开</button><button class="sec" id="btnPause">暂停</button></div>
+<div><div style="font-size:11px;color:#9FB0CC;margin-bottom:4px;letter-spacing:.1em">难度（下落速度）</div>
+<select id="diff"><option value="easy">简单 · 慢</option><option value="normal" selected>普通</option><option value="hard">困难 · 快</option><option value="expert">专家 · 极快</option></select></div>
+</div></div>
+<div class="controls">
+<button data-a="left" data-hold="1">◀</button><button data-a="right" data-hold="1">▶</button><button data-a="down" data-hold="1">▼ 软降</button><button data-a="drop">⤓ 硬降</button>
+<button data-a="rotate" style="grid-column:span 2">↻ 旋转</button><button data-a="hold" style="grid-column:span 2">暂存</button>
+</div>
+<p class="tip">操作：◀ ▶ ▼ 长按可连发；在棋盘上左右拖动连续移动、下滑软降、快速下甩硬降、点按旋转。键盘 ← → ↑ ↓ 空格 C P 同前 ｜ 消行 100/300/500/800×等级，每 10 行升 1 级加速</p>
+<div class="overlay" id="over"><div class="panel"><h2 style="font-size:24px">游戏结束</h2><p style="margin:10px 0;color:#555">最终分数 <b id="finalScore">0</b><br>消除行数 <b id="finalLines">0</b></p><button id="btnAgain">再来一局</button></div></div>
+<script>
+const COLS=10,ROWS=20,CELL=30;
+const boardC=document.getElementById('board'),bx=boardC.getContext('2d');
+const nextC=document.getElementById('next').getContext('2d'),holdC=document.getElementById('hold').getContext('2d');
+const COLORS={I:'#22C7E6',O:'#FFD83D',T:'#B07FE8',S:'#63E63A',Z:'#FF5A5A',J:'#4A7DFF',L:'#FF9F2E'};
+const SHAPES={I:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],O:[[1,1],[1,1]],T:[[0,1,0],[1,1,1],[0,0,0]],S:[[0,1,1],[1,1,0],[0,0,0]],Z:[[1,1,0],[0,1,1],[0,0,0]],J:[[1,0,0],[1,1,1],[0,0,0]],L:[[0,0,1],[1,1,1],[0,0,0]]};
+let grid,cur,nextType,holdType,canHold,score,lines,level,dropMs,lastTime,acc,running,paused,raf,bag=[];
+const DIFF={easy:{base:1000,step:55,min:160},normal:{base:800,step:65,min:90},hard:{base:560,step:60,min:70},expert:{base:380,step:45,min:50}};
+let diffKey='normal';
+function speedForLevel(lv){const D=DIFF[diffKey];return Math.max(D.min,D.base-(lv-1)*D.step)}
+function emptyGrid(){return Array.from({length:ROWS},()=>Array(COLS).fill(null))}
+function refillBag(){bag=['I','O','T','S','Z','J','L'];for(let i=bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]]}}
+function drawBag(){if(bag.length<2)refillBag();return bag.pop()}
+function spawn(type){const m=SHAPES[type].map(r=>r.slice());return{type,m,x:Math.floor((COLS-m[0].length)/2),y:type==='I'?-1:0}}
+function collide(p,dx=0,dy=0,m=p.m){for(let y=0;y<m.length;y++)for(let x=0;x<m[y].length;x++){if(!m[y][x])continue;const nx=p.x+x+dx,ny=p.y+y+dy;if(nx<0||nx>=COLS||ny>=ROWS)return true;if(ny>=0&&grid[ny][nx])return true}return false}
+function rotate(m){return m[0].map((_,i)=>m.map(r=>r[i]).reverse())}
+function tryRotate(){const rm=rotate(cur.m);for(const k of [0,-1,1,-2,2]){if(!collide(cur,k,0,rm)){cur.m=rm;cur.x+=k;draw();return}}}
+function merge(){cur.m.forEach((row,y)=>row.forEach((v,x)=>{if(v&&cur.y+y>=0)grid[cur.y+y][cur.x+x]=cur.type}));clearLines();cur=spawn(nextType);nextType=drawBag();canHold=true;if(collide(cur)){gameOver()}draw()}
+function clearLines(){let c=0;for(let y=ROWS-1;y>=0;y--){if(grid[y].every(v=>v)){grid.splice(y,1);grid.unshift(Array(COLS).fill(null));c++;y++}}if(c){lines+=c;score+=[0,100,300,500,800][c]*level;level=Math.floor(lines/10)+1;dropMs=speedForLevel(level);updateHUD()}}
+function ghostY(){let g=0;while(!collide(cur,0,g+1))g++;return cur.y+g}
+function cell(ctx,x,y,s,color){ctx.fillStyle=color;ctx.fillRect(x*s+1,y*s+1,s-2,s-2);ctx.fillStyle='rgba(255,255,255,.28)';ctx.fillRect(x*s+1,y*s+1,s-2,6)}
+function draw(){bx.clearRect(0,0,300,600);bx.strokeStyle='rgba(255,255,255,.06)';for(let i=1;i<COLS;i++){bx.beginPath();bx.moveTo(i*CELL,0);bx.lineTo(i*CELL,600);bx.stroke()}for(let i=1;i<ROWS;i++){bx.beginPath();bx.moveTo(0,i*CELL);bx.lineTo(300,i*CELL);bx.stroke()}
+grid.forEach((row,y)=>row.forEach((v,x)=>{if(v)cell(bx,x,y,CELL,COLORS[v])}));
+if(cur){const gy=ghostY();cur.m.forEach((row,y)=>row.forEach((v,x)=>{if(v&&gy+y>=0){bx.strokeStyle=COLORS[cur.type];bx.globalAlpha=.45;bx.strokeRect((cur.x+x)*CELL+2,(gy+y)*CELL+2,CELL-4,CELL-4);bx.globalAlpha=1}}));
+cur.m.forEach((row,y)=>row.forEach((v,x)=>{if(v&&cur.y+y>=0)cell(bx,cur.x+x,cur.y+y,CELL,COLORS[cur.type])}))}
+drawMini(nextC,nextType);drawMini(holdC,holdType)}
+function drawMini(ctx,type){ctx.clearRect(0,0,120,90);if(!type)return;const m=SHAPES[type],s=20,ox=(120-m[0].length*s)/2,oy=(90-m.length*s)/2;m.forEach((row,y)=>row.forEach((v,x)=>{if(v){ctx.fillStyle=COLORS[type];ctx.fillRect(ox+x*s+1,oy+y*s+1,s-2,s-2)}}))}
+function updateHUD(){document.getElementById('score').textContent=score;document.getElementById('level').textContent=level;document.getElementById('lines').textContent=lines}
+function step(t){if(!running||paused)return;if(!lastTime)lastTime=t;acc+=t-lastTime;lastTime=t;if(acc>=dropMs){acc=0;if(!collide(cur,0,1))cur.y++;else merge();draw()}raf=requestAnimationFrame(step)}
+function start(){grid=emptyGrid();score=0;lines=0;level=1;dropMs=speedForLevel(1);acc=0;lastTime=0;bag=[];holdType=null;canHold=true;nextType=drawBag();cur=spawn(drawBag());nextType=drawBag();running=true;paused=false;document.getElementById('btnPause').textContent='暂停';document.getElementById('over').classList.remove('show');updateHUD();draw();cancelAnimationFrame(raf);raf=requestAnimationFrame(step)}
+document.getElementById('diff').addEventListener('change',e=>{diffKey=e.target.value;dropMs=speedForLevel(level||1)});
+function gameOver(){running=false;document.getElementById('finalScore').textContent=score;document.getElementById('finalLines').textContent=lines;document.getElementById('over').classList.add('show')}
+function doHold(){if(!canHold||!running)return;const t=cur.type;if(holdType){cur=spawn(holdType)}else{cur=spawn(nextType);nextType=drawBag()}holdType=t;canHold=false;if(collide(cur))gameOver();draw()}
+function act(a){if(!running){start();return}if(paused)return;
+if(a==='left'){if(!collide(cur,-1,0))cur.x--}
+if(a==='right'){if(!collide(cur,1,0))cur.x++}
+if(a==='rotate')tryRotate();
+if(a==='down'){if(!collide(cur,0,1)){cur.y++;score+=1}else merge();updateHUD()}
+if(a==='drop'){const gy=ghostY();score+=(gy-cur.y)*2;cur.y=gy;merge();updateHUD();return}
+if(a==='hold')doHold();
+draw()}
+function togglePause(){if(!running)return;paused=!paused;document.getElementById('btnPause').textContent=paused?'继续':'暂停';if(!paused){lastTime=0;raf=requestAnimationFrame(step)}}
+document.addEventListener('keydown',e=>{const map={ArrowLeft:'left',ArrowRight:'right',ArrowDown:'down',ArrowUp:'rotate',x:'rotate',X:'rotate',c:'hold',C:'hold',p:'pause',P:'pause',' ':'drop'};if(map[e.key]!==undefined){e.preventDefault();map[e.key]==='pause'?togglePause():act(map[e.key])}});
+document.querySelectorAll('[data-a]').forEach(b=>{
+ let t1=null,t2=null;
+ const clear=()=>{if(t1)clearTimeout(t1);if(t2)clearInterval(t2);t1=t2=null};
+ b.addEventListener('pointerdown',e=>{e.preventDefault();act(b.dataset.a);
+   if(b.dataset.hold){clear();t1=setTimeout(()=>{t2=setInterval(()=>act(b.dataset.a),55)},190)}});
+ ['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,clear));
+ b.addEventListener('contextmenu',e=>e.preventDefault());
+});
+document.getElementById('btnStart').onclick=start;document.getElementById('btnAgain').onclick=start;document.getElementById('btnPause').onclick=togglePause;
+let tx=0,ty=0,lx=0,ly=0,t0=0,moved=false;
+boardC.addEventListener('touchstart',e=>{tx=lx=e.touches[0].clientX;ty=ly=e.touches[0].clientY;t0=Date.now();moved=false},{passive:true});
+boardC.addEventListener('touchmove',e=>{const x=e.touches[0].clientX,y=e.touches[0].clientY;
+ while(x-lx>=24){act('right');lx+=24;moved=true}
+ while(lx-x>=24){act('left');lx-=24;moved=true}
+ while(y-ly>=30){act('down');ly+=30;moved=true}
+},{passive:true});
+boardC.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty,dt=Date.now()-t0;
+ if(!moved&&Math.abs(dx)<12&&Math.abs(dy)<12){act('rotate');return}
+ if(dy>60&&dt<260){act('drop')}
+},{passive:true});
+document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+grid=emptyGrid();cur=spawn('T');nextType='I';holdType=null;draw();
+</script></body></html>

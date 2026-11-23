@@ -9,7 +9,10 @@ const games = [
   { route: '/TQ', title: '跳棋', name: 'tiaoqi' },
   { route: '/2048', title: '2048 · 游戏', name: '2048' },
   { route: '/JQ', title: '军棋 · 陆战棋', name: 'junqi' },
-  { route: '/SL', title: '扫雷', name: 'saolei' }
+  { route: '/SL', title: '扫雷', name: 'saolei' },
+  { route: '/TCS', title: '贪吃蛇', name: 'snake' },
+  { route: '/TXZ', title: '推箱子', name: 'sokoban' },
+  { route: '/ELSFK', title: '俄罗斯方块', name: 'tetris' }
 ];
 const b = await launch(BASE + '/', { port: 9611 });
 const R = [];
@@ -50,9 +53,9 @@ try {
   }
   await t('miniroute.home_cards', async () => {
     await b.send('Page.navigate', { url: BASE + '/' });
-    await waitFor(`document.querySelectorAll('.game-card[data-status="live"]').length === 6`, 12000);
+    await waitFor(`document.querySelectorAll('.game-card[data-status="live"]').length === 9`, 12000);
     const links = await b.evaluate(`[...document.querySelectorAll('.game-card[data-status="live"] .play-link')].map(a => a.getAttribute('href'))`);
-    const want = ['./HBQS', './ZGXQ', './2048', './SL', './TQ', './JQ'];
+    const want = ['./HBQS', './ZGXQ', './2048', './SL', './TQ', './JQ', './TCS', './TXZ', './ELSFK'];
     if (JSON.stringify(links) !== JSON.stringify(want)) return 'links ' + JSON.stringify(links);
     await b.evaluate(`document.querySelector('.game-card a[href="./2048"]').click()`);
     if (!await waitFor(`document.title.includes('2048') && location.pathname === '/2048'`, 12000)) return '2048 card failed';

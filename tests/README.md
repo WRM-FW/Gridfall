@@ -19,8 +19,8 @@ node live-online.mjs       # 线上整局，4 项
 node route-test.mjs        # /HBQS 路由、刷新、查询、尾斜杠、前进后退，7 项
 node xiangqi-route.mjs     # /ZGXQ 路由、刷新、尾斜杠、首页卡片，4 项
 node xiangqi-online.mjs    # 象棋联机、换方、认输、再来一局、音效开关，7 项
-node minigames-smoke.mjs   # 跳棋/2048/军棋/扫雷本地交互冒烟
-node minigames-route.mjs   # /TQ /2048 /JQ /SL 路由、刷新、尾斜杠、首页卡片，9 项
+node minigames-smoke.mjs   # 跳棋/2048/军棋/扫雷/贪吃蛇/推箱子/俄罗斯方块本地交互冒烟
+node minigames-route.mjs   # /TQ /2048 /JQ /SL /TCS /TXZ /ELSFK 路由、刷新、尾斜杠、首页卡片，15 项
 node go-bench.mjs --size=9 --low=4 --high=5 --games=20  # 围棋相邻档对抗
 node go-smoke.mjs          # 19 路五档 30 手冒烟与耗时
 ```

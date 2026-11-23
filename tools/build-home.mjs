@@ -330,6 +330,57 @@ replaceCard('扫雷 minesweeper 推理', cardMine);
 replaceCard('跳棋 棋类 tiaoqi checkers', cardTq);
 replaceCard('军棋 棋类 junqi', cardJq);
 
+/* ---------- 贪吃蛇 / 推箱子 / 俄罗斯方块 ---------- */
+const cardSnake = `        <article class="game-card" data-status="live" data-cat="action" data-name="贪吃蛇 街机 休闲 snake">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/snake.svg" alt="贪吃蛇游戏封面" width="1200" height="600" decoding="async">
+            <span class="gv-badge">已上线</span>
+          </div>
+          <div class="game-body">
+            <h3>贪吃蛇<span class="en">SNAKE</span></h3>
+            <p>21×21 棋盘，吃红果 +10、金果限时 +30；四档速度，撞墙或穿墙两种规则，方向键、十字键或滑动都能玩。</p>
+            <div class="tags"><span>单人</span><span>街机</span><span>四档速度</span></div>
+            <div class="game-foot">
+              <span class="meta">入口 /TCS · 本机最高分</span>
+              <a class="play-link" href="./TCS" data-local="./snake.html">开始游戏 →</a>
+            </div>
+          </div>
+        </article>`;
+const cardSokoban = `        <article class="game-card" data-status="live" data-cat="puzzle" data-name="推箱子 益智 解谜 sokoban">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/sokoban.svg" alt="推箱子游戏封面" width="1200" height="600" decoding="async">
+            <span class="gv-badge">已上线</span>
+          </div>
+          <div class="game-body">
+            <h3>推箱子<span class="en">SOKOBAN</span></h3>
+            <p>30 关仓库谜题，箱子只能推不能拉；支持撤销、重开与跳关，21 关起是多箱大图。方向键 / WASD / 滑动操作。</p>
+            <div class="tags"><span>单人</span><span>30 关</span><span>撤销 / 重开</span></div>
+            <div class="game-foot">
+              <span class="meta">入口 /TXZ · 本地闯关</span>
+              <a class="play-link" href="./TXZ" data-local="./sokoban.html">开始解谜 →</a>
+            </div>
+          </div>
+        </article>`;
+const cardTetris = `        <article class="game-card" data-status="live" data-cat="action puzzle" data-name="俄罗斯方块 街机 益智 tetris">
+          <div class="game-visual gv-cover">
+            <img class="gv-cover-img" src="./assets/covers/tetris.svg" alt="俄罗斯方块游戏封面" width="1200" height="600" decoding="async">
+            <span class="gv-badge">已上线</span>
+          </div>
+          <div class="game-body">
+            <h3>俄罗斯方块<span class="en">TETRIS</span></h3>
+            <p>10×20 标准场地，7 种方块、暂存、下一个与落点预览；四档下落速度，消行计分并逐级加速。</p>
+            <div class="tags"><span>单人</span><span>四档难度</span><span>暂存 / 预览</span></div>
+            <div class="game-foot">
+              <span class="meta">入口 /ELSFK · 街机益智</span>
+              <a class="play-link" href="./ELSFK" data-local="./tetris.html">开始游戏 →</a>
+            </div>
+          </div>
+        </article>`;
+var jqAt = html.indexOf('data-name="军棋 棋类 junqi"');
+var jqEnd = html.indexOf('</article>', jqAt) + '</article>'.length;
+if (jqAt < 0 || jqEnd < 0) throw new Error('junqi card end missing');
+html = html.slice(0, jqEnd) + '\n\n' + cardSnake + '\n\n' + cardSokoban + '\n\n' + cardTetris + html.slice(jqEnd);
+
 /* live cards first */
 var gridOpen = html.indexOf('<div class="games" id="gameGrid">');
 var gridClose = html.indexOf('</div>\n      <p class="empty-msg"', gridOpen);
@@ -474,42 +525,43 @@ setCover('更多游戏 新游戏 点单 社区共建', 'next-game', '下一款�
 
 /* 元信息 */
 must('<title>Gridfall 游戏大厅 · 黑白棋社</title>',
-'<title>Gridfall 游戏大厅 · 六个入口，八种玩法</title>');
+'<title>Gridfall 游戏大厅 · 九个入口，十一种玩法</title>');
 must('<meta name="description" content="Gridfall 游戏大厅：黑白棋社收录五子棋、国际连珠、围棋，支持单机、双人与联机开房；打开即玩，更多游戏持续上新。" />',
-'<meta name="description" content="Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷，共 6 个入口、8 种玩法；棋社与中国象棋支持联机开房，免下载、免注册。" />');
+'<meta name="description" content="Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷，共 9 个入口、11 种玩法；棋社与中国象棋支持联机开房，免下载、免注册。" />');
 
 /* 首屏 */
 must('名字叫 Gridfall，装的却不只是棋盘。黑白棋社、中国象棋、跳棋、军棋、2048、扫雷都已经入驻；黑白棋社与中国象棋还能开房联机，卡牌与其他游戏也会陆续搬进来——不用下载、不用注册，点开任意一局就开玩。',
-'名字叫 Gridfall，装的却不只是棋盘。六个入口、八种玩法：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷。棋社与中国象棋可以开房联机，其余随时坐下就玩——不用下载、不用注册。');
+'名字叫 Gridfall，装的却不只是棋盘。九个入口、十一种玩法：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块。棋社与中国象棋可以开房联机，其余随时坐下就玩——不用下载、不用注册。');
 must('六款游戏已就绪 · 联机房间已开放 · 卡牌与其他新游戏在路上 · <b>5 档难度</b>任选 · 打开即玩',
-'6 个入口 · 8 种玩法 · 2 款支持联机 · 全部免费、免注册');
+'9 个入口 · 11 种玩法 · 2 款支持联机 · 全部免费、免注册');
 must(`<div><label>平台 PLATFORM</label><strong>网页 · <em>免下载</em></strong></div>
             <div><label>费用 PRICE</label><strong>免费</strong></div>
             <div><label>对战 MODES</label><strong>单机 / 双人 / 联机</strong></div>
             <div><label>难度 LEVELS</label><strong>简单 → 极难 <em>5 档</em></strong></div>`,
 `<div><label>平台 PLATFORM</label><strong>网页 · <em>免下载</em></strong></div>
             <div><label>费用 PRICE</label><strong>免费 · <em>免注册</em></strong></div>
-            <div><label>内容 CONTENT</label><strong>6 个入口 · <em>8 种玩法</em></strong></div>
+            <div><label>内容 CONTENT</label><strong>9 个入口 · <em>11 种玩法</em></strong></div>
             <div><label>联机 ONLINE</label><strong>棋社 / 象棋</strong></div>`);
 must('黑白棋社里有禁手判定、棋谱回放、联机房间与计时对局；新游戏的桌子还在往里搬，进门右转。',
 '黑白棋社有禁手判定、26 种连珠开局、棋谱回放和联机房间；中国象棋也能开房，房主执红。跳棋、军棋、2048、扫雷坐下就能玩。');
 
 /* 滚动条：去掉已经上线的“筹备中”，换成真实功能 */
 must('<span>五子棋 <i>●</i></span><span>连珠 RENJU <i>●</i></span><span>围棋 <i>●</i></span><span>9 / 13 / 19 路 <i>●</i></span><span>五档难度 <i>●</i></span><span>黑白棋社 <i>●</i></span><span>中国象棋 <i>●</i></span><span>跳棋 <i>●</i></span><span>军棋 <i>●</i></span><span>2048 <i>●</i></span><span>扫雷 <i>●</i></span><span>联机开房 <i>●</i></span><span>Supabase 实时同步 <i>●</i></span><span>棋谱回放 <i>●</i></span><span>双人对弈 <i>●</i></span><span>2048 筹备中 <i>●</i></span><span>扫雷 筹备中 <i>●</i></span><span>卡牌 筹备中 <i>●</i></span><span>新游戏持续上新 <i>●</i></span>',
-'<span>五子棋 <i>●</i></span><span>连珠 RENJU <i>●</i></span><span>围棋 <i>●</i></span><span>9 / 13 / 19 路 <i>●</i></span><span>黑白棋社 AI 5 档 <i>●</i></span><span>象棋 / 跳棋 3 档 <i>●</i></span><span>黑白棋社 <i>●</i></span><span>中国象棋 <i>●</i></span><span>跳棋 <i>●</i></span><span>军棋 <i>●</i></span><span>2048 <i>●</i></span><span>扫雷 <i>●</i></span><span>联机开房 <i>●</i></span><span>Supabase 实时同步 <i>●</i></span><span>棋谱回放 <i>●</i></span><span>双人对弈 <i>●</i></span><span>换方申请 <i>●</i></span><span>军棋布阵 <i>●</i></span><span>自定义雷区 <i>●</i></span><span>6 个入口 · 8 种玩法 <i>●</i></span>');
+'<span>五子棋 <i>●</i></span><span>连珠 RENJU <i>●</i></span><span>围棋 <i>●</i></span><span>9 / 13 / 19 路 <i>●</i></span><span>黑白棋社 AI 5 档 <i>●</i></span><span>象棋 / 跳棋 3 档 <i>●</i></span><span>黑白棋社 <i>●</i></span><span>中国象棋 <i>●</i></span><span>跳棋 <i>●</i></span><span>军棋 <i>●</i></span><span>2048 <i>●</i></span><span>扫雷 <i>●</i></span><span>贪吃蛇 <i>●</i></span><span>推箱子 <i>●</i></span><span>俄罗斯方块 <i>●</i></span><span>联机开房 <i>●</i></span><span>Supabase 实时同步 <i>●</i></span><span>棋谱回放 <i>●</i></span><span>双人对弈 <i>●</i></span><span>换方申请 <i>●</i></span><span>军棋布阵 <i>●</i></span><span>自定义雷区 <i>●</i></span><span>9 个入口 · 11 种玩法 <i>●</i></span>');
 
 /* 大厅：六个入口已经上线 */
 must('<div class="chips" role="group" aria-label="按状态筛选游戏">',
 '<div class="chips" role="group" aria-label="按类型筛选游戏">');
 must('「黑白棋社」把五子棋、连珠、围棋收进同一个入口；中国象棋、跳棋、军棋、2048、扫雷也都已进场。下面还留着规划中的位置——卡牌与其他游戏上线后，会直接摆进这张货架。',
-'六个入口已经开桌：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷。棋社与中国象棋支持开房联机；下面可以按「可联机 / 棋类 / 益智」筛选。');
+'九个入口已经开桌：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块。棋社与中国象棋支持开房联机；下面可以按「可联机 / 棋类 / 益智 / 街机」筛选。');
 must(`<button class="chip" type="button" data-filter="all" aria-pressed="true">全部</button>
           <button class="chip" type="button" data-filter="live" aria-pressed="false">已上线</button>
           <button class="chip" type="button" data-filter="soon" aria-pressed="false">即将推出</button>`,
 `<button class="chip" type="button" data-filter="all" aria-pressed="true">全部</button>
           <button class="chip" type="button" data-filter="online" aria-pressed="false">可联机</button>
           <button class="chip" type="button" data-filter="board" aria-pressed="false">棋类</button>
-          <button class="chip" type="button" data-filter="puzzle" aria-pressed="false">益智</button>`);
+          <button class="chip" type="button" data-filter="puzzle" aria-pressed="false">益智</button>
+          <button class="chip" type="button" data-filter="action" aria-pressed="false">街机</button>`);
 
 /* 规划中的卡片移出“现在就能玩”网格，改到下一批桌子 */
 var soonRe = /<article class="game-card" data-status="soon"[\s\S]*?<\/article>/g;
@@ -567,6 +619,9 @@ var FEATURES = `  <!-- FEATURES / CONTENTS -->
           <div class="feat"><h4>跳棋 / 军棋 <span class="arr">→</span></h4><p>跳棋三档 AI；军棋布阵后走铁路、工兵排雷、夺旗，电脑或双人都能开。</p></div>
           <div class="feat"><h4>2048 <span class="arr">→</span></h4><p>滑动或方向键合并数字，撤销、步数与本次最高分都在侧栏。</p></div>
           <div class="feat"><h4>扫雷 <span class="arr">→</span></h4><p>初级 / 中级 / 高级与自定义雷区；第一击安全，插旗、计时、双击展开。</p></div>
+          <div class="feat"><h4>贪吃蛇 <span class="arr">→</span></h4><p>21×21 棋盘，红果 +10、金果限时 +30；四档速度，撞墙 / 穿墙两种规则。</p></div>
+          <div class="feat"><h4>推箱子 <span class="arr">→</span></h4><p>30 关仓库谜题，箱子只能推不能拉；撤销、重开、跳关，21 关起多箱大图。</p></div>
+          <div class="feat"><h4>俄罗斯方块 <span class="arr">→</span></h4><p>10×20 场地，暂存、下一个与落点预览；四档速度，消行计分逐级加速。</p></div>
         </div>
       </div>
     </div>
@@ -576,7 +631,7 @@ var ROADMAP = `  <!-- COMING SOON -->
   <section class="block" id="soon">
     <div class="wrap">
       <h2 class="big"><span class="en">ON THE BENCH</span>下一批桌子。</h2>
-      <p class="sec-sub">大厅现在有六个入口。下面三款还在候选清单里，没有开发排期；想先玩哪一款，可以直接点单，也可以自己写好代码后提交 PR。</p>
+      <p class="sec-sub">大厅现在有九个入口。下面三款还在候选清单里，没有开发排期；想先玩哪一款，可以直接点单，也可以自己写好代码后提交 PR。</p>
       <div class="roadmap-row">
         <article class="roadmap-card">
           <div class="roadmap-cover"><img src="./assets/covers/chess.png" alt="国际象棋规划封面" width="1200" height="600" decoding="async"><span class="st">规划中</span></div>
@@ -623,10 +678,10 @@ html = html.slice(0, featStart) + FEATURES + '\n\n' + ROADMAP + '\n\n' + html.sl
 
 /* 结尾与页脚 */
 must('从黑白棋社的休闲五子棋、正式连珠，到 9 路围棋快棋、19 路正赛，也可以开一间房等朋友进来——先挑一局开打；2048、扫雷和卡牌，正在赶来的路上。',
-'从黑白棋社的休闲五子棋、正式连珠，到 9 路围棋快棋、19 路正赛；也可以去中国象棋开一间房，或者一个人刷 2048、扫雷。全部免费，不用账号。');
+'从黑白棋社的休闲五子棋、正式连珠，到 9 路围棋快棋、19 路正赛；也可以去中国象棋开一间房，或者一个人刷 2048、扫雷、贪吃蛇、推箱子、俄罗斯方块。全部免费，不用账号。');
 must('<a href="#soon">即将推出</a>', '<a href="#soon">下一批游戏</a>');
 must('Gridfall 游戏大厅：黑白棋社、中国象棋、跳棋、军棋、2048、扫雷已上线；黑白棋社与中国象棋支持联机，其余为本地/单人对弈。卡牌类、国际象棋等为后续扩建规划，标注「规划中」者尚未开放游玩。',
-'Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷已上线；棋社与中国象棋支持联机，其余为本地 / 单人。国际象棋、四子棋、卡牌为候选规划，尚未开放。');
+'Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块已上线；棋社与中国象棋支持联机，其余为本地 / 单人。国际象棋、四子棋、卡牌为候选规划，尚未开放。');
 
 /* 规划区样式 */
 must('  @media (max-width:900px){',
