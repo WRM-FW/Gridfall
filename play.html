@@ -328,6 +328,15 @@ details.pages ol{ line-height:1.9; font-size:13.5px; margin:8px 0; padding-left:
 }
 .hall-link:hover{ border-color:#e8cf96; }
 
+/* 围棋难度：名称 + 目标棋力范围 */
+#wLevelSeg{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; }
+#wLevelSeg button{ padding:8px 3px; line-height:1.15; white-space:normal; }
+#wLevelSeg button span{ display:block; margin-top:2px; font-size:10px; font-weight:600; letter-spacing:0; opacity:.72; }
+#wLevelSeg button.active span{ opacity:.85; }
+@media (max-width:560px){
+  #wLevelSeg{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+
 </style>
 </head>
 <body>
@@ -474,6 +483,9 @@ details.pages ol{ line-height:1.9; font-size:13.5px; margin:8px 0; padding-left:
             <button data-v="4" type="button">困难</button>
             <button data-v="5" type="button">极难</button>
           </div>
+          <p class="hint" id="wLevelInfo" style="margin:8px 0 0"></p>
+          <p class="hint" style="margin:4px 0 0">目标范围为保守估计，未与 KataGo / 真人段位校准；实测胜率见开发报告。</p>
+          <p class="hint" style="margin:4px 0 0">局中切档：电脑下一手起按新难度，当前棋局保留。</p>
         </div>
         <div class="seg" id="wColorSeg" style="margin-top:8px">
           <button data-v="1" class="active" type="button">执黑 · 先行</button>
@@ -1312,18 +1324,18 @@ gStart();
 /* ================= 围棋 引擎 ================= */
 function wEmptyBoard(n){ var b=[],r,c; for(r=0;r<n;r++){ b.push([]); for(c=0;c<n;c++) b[r].push(0); } return b; }
 function wGroup(bd,n,r,c){
-  var color=bd[r][c], seen={}, stack=[[r,c]], stones=[], libs={};
+  var color=bd[r][c], seen={}, stack=[[r,c]], stones=[], libs={}, libPoints=[];
   seen[r+","+c]=1;
   while(stack.length){
     var cur=stack.pop(); stones.push(cur);
     var nb=[[1,0],[-1,0],[0,1],[0,-1]], i, rr, cc;
     for(i=0;i<4;i++){ rr=cur[0]+nb[i][0]; cc=cur[1]+nb[i][1];
       if(rr<0||cc<0||rr>=n||cc>=n) continue;
-      if(bd[rr][cc]===0) libs[rr+","+cc]=1;
+      if(bd[rr][cc]===0){ var lk=rr+","+cc; if(!libs[lk]){ libs[lk]=1; libPoints.push([rr,cc]); } }
       else if(bd[rr][cc]===color&&!seen[rr+","+cc]){ seen[rr+","+cc]=1; stack.push([rr,cc]); }
     }
   }
-  return {stones:stones, liberties:Object.keys(libs).length, color:color};
+  return {stones:stones, liberties:libPoints.length, libPoints:libPoints, color:color};
 }
 function wHash(bd,n){ var s=""; for(var r=0;r<n;r++) s+=bd[r].join(""); return s; }
 function wTryPlay(bd,n,r,c,color,prevHash){
@@ -1374,6 +1386,15 @@ function wIsEye(bd,n,r,c,color){
 }
 /* ---- 围棋 AI：全盘评估 + 应手搜索 ---- */
 var W_DIRS4 = [[1,0],[-1,0],[0,1],[0,-1]];
+
+/* 五档参数集中在这里；改一档不影响其他档 */
+var GO_LEVELS = {
+  1: { name:'简单', target:'25–20级', engine:'novice', depth:1, tactics:false, deadline:80,  noise:45, captureOdds:0.55, saveOdds:0.5, selfAtariOdds:0.2, desc:'只看局部，常漏看打吃、征子读错' },
+  2: { name:'一般', target:'20–15级', engine:'basic',  depth:1, tactics:false, deadline:180, noise:10, bookOdds:0.6, randPick:0.15, desc:'只看局部与提子，不读全盘和征子' },
+  3: { name:'普通', target:'15–11级', engine:'eval',   depth:1, tactics:false, deadline:300, noise:0, evalLimit:18, desc:'全盘评估、抢角做眼，仍不读长征子' },
+  4: { name:'困难', target:'12–9级', engine:'deep', depth:3, tactics:false, deadline:2500, noise:0, root:8, reply:16, strongEval:true, useSearch:true, desc:'长读应手 + 精确后盘' },
+  5: { name:'极难', target:'10–7级（保守）', engine:'search', depth:3, tactics:false, deadline:1200, noise:1, root:8, reply:4, strongEval:true, useSearch:true, desc:'短读快搜 + 精确后盘；未与外部引擎校准' }
+};
 
 function wBoardGroups(bd,n){
   var seen=[], groups=[], r, c, i;
@@ -1450,7 +1471,7 @@ function wDistMap(bd,n,color){
   return d;
 }
 
-function wEvalBoard(bd,n,aiColor){
+function wEvalBoard(bd,n,aiColor,strong){
   var groups=wBoardGroups(bd,n);
   var db=wDistMap(bd,n,1), dw=wDistMap(bd,n,2);
   var bStones=0, wStones=0, bSafe=0, wSafe=0, gi, si, i;
@@ -1487,6 +1508,11 @@ function wEvalBoard(bd,n,aiColor){
   var phase=(bStones+wStones)/(n*n);
   var terrW=phase>0.45?0.9:(phase>0.28?0.45:0);
   var terr=terrW?wTerritory(bd,n):{bTerr:0,wTerr:0};
+  if(strong&&phase>0.55){
+    var sc=wScore(bd,n);
+    var exact=(aiColor===1?sc.black-sc.white:sc.white-sc.black)*0.8+(bSafe-wSafe)*0.2;
+    return exact;
+  }
   var black=bStones+terr.bTerr*terrW+bInf*0.35+bSafe*0.7;
   var white=wStones+terr.wTerr*terrW+wInf*0.35+wSafe*0.7+7.5;
   return aiColor===1?black-white:white-black;
@@ -1497,7 +1523,88 @@ function wIsStar(n,r,c){
   return pts.indexOf(r)>=0&&pts.indexOf(c)>=0;
 }
 
-function wQuickMoveScore(W,bd,n,color,r,c,res,lastMove,stoneNo){
+function wLadderCapture(bd,n,targetColor,tr,tc,attackerColor,depth,deadline){
+  if(depth<=0||(deadline&&Date.now()>deadline)) return false;
+  if(bd[tr][tc]===0) return true;
+  var g=wGroup(bd,n,tr,tc);
+  if(g.color!==targetColor) return false;
+  if(g.liberties>=3) return false;
+  if(g.liberties===2) return false;       // 两气不是征子，交给普通搜索
+  if(g.liberties===0) return true;
+  var lib=g.libPoints[0];
+  var res=wTryPlay(bd,n,lib[0],lib[1],attackerColor,null);
+  if(!res) return false;
+  if(res.board[tr][tc]===0) return true;
+  var g2=wGroup(res.board,n,tr,tc);
+  if(g2.liberties>=3) return false;
+  if(g2.liberties===0) return true;
+  if(g2.liberties>1) return false;        // 被打吃方出现选择，征子不成立
+  var dl=g2.libPoints[0];
+  var dres=wTryPlay(res.board,n,dl[0],dl[1],targetColor,null);
+  if(!dres) return false;
+  var g3=wGroup(dres.board,n,tr,tc);
+  if(g3.liberties>=3) return false;
+  return wLadderCapture(dres.board,n,targetColor,tr,tc,attackerColor,depth-1,deadline);
+}
+
+function wSnapback(bd,n,r,c,color){
+  var self=wGroup(bd,n,r,c);
+  if(self.liberties!==1) return false;
+  var lib=self.libPoints[0], opp=color===1?2:1;
+  var cap=wTryPlay(bd,n,lib[0],lib[1],opp,null);
+  if(!cap||cap.captured===0) return false;
+  var rec=wTryPlay(cap.board,n,lib[0],lib[1],color,null);
+  return !!rec&&rec.captured>=2&&rec.captured>cap.captured; // 倒扑：先弃后提，净赚
+}
+
+function wTacticalBonus(W,bd,n,color,r,c,res){
+  var bonus=0, opp=color===1?2:1, seen={}, i, rr, cc;
+  var deadline=W._deadline||Date.now()+400;
+  for(i=0;i<4;i++){
+    rr=r+W_DIRS4[i][0]; cc=c+W_DIRS4[i][1];
+    if(rr<0||cc<0||rr>=n||cc>=n||bd[rr][cc]!==opp) continue;
+    var key=rr*n+cc;
+    if(seen[key]) continue;
+    var g=wGroup(bd,n,rr,cc);
+    for(var si=0;si<g.stones.length;si++) seen[g.stones[si][0]*n+g.stones[si][1]]=1;
+    if(g.liberties===2&&res.board[rr][cc]!==0){
+      var after=wGroup(res.board,n,rr,cc);
+      if(after.liberties===1){
+        if(wLadderCapture(res.board,n,opp,rr,cc,color,36,deadline)) bonus+=1200;
+        else bonus-=180;
+      }
+    }
+  }
+  var self=wGroup(res.board,n,r,c);
+  if(self.liberties===1&&res.captured===0&&wSnapback(res.board,n,r,c,color)) bonus+=1000;
+  return bonus;
+}
+
+function wTerritoryMap(bd,n){
+  var owner=new Int8Array(n*n), seen=[], r, c, i;
+  for(r=0;r<n;r++){ seen[r]=[]; for(c=0;c<n;c++) seen[r][c]=false; }
+  for(r=0;r<n;r++) for(c=0;c<n;c++){
+    if(bd[r][c]!==0||seen[r][c]) continue;
+    var stack=[[r,c]], region=[], border={};
+    seen[r][c]=true;
+    while(stack.length){
+      var cur=stack.pop(); region.push(cur);
+      for(i=0;i<4;i++){
+        var rr=cur[0]+W_DIRS4[i][0], cc=cur[1]+W_DIRS4[i][1];
+        if(rr<0||cc<0||rr>=n||cc>=n) continue;
+        if(bd[rr][cc]===0){ if(!seen[rr][cc]){ seen[rr][cc]=true; stack.push([rr,cc]); } }
+        else border[bd[rr][cc]]=1;
+      }
+    }
+    var keys=Object.keys(border);
+    if(keys.length===1){
+      for(i=0;i<region.length;i++) owner[region[i][0]*n+region[i][1]]=parseInt(keys[0],10);
+    }
+  }
+  return owner;
+}
+
+function wQuickMoveScore(W,bd,n,color,r,c,res,lastMove,stoneNo,terrMap){
   var opp=color===1?2:1, s=res.captured*130, i, rr, cc;
   var self=wGroup(res.board,n,r,c);
   if(self.liberties===1&&res.captured===0) s-=520;        // 自陷
@@ -1522,6 +1629,11 @@ function wQuickMoveScore(W,bd,n,color,r,c,res,lastMove,stoneNo){
   if(ownG>1) s+=(ownG-1)*14;                               // 连接
   if(oppG>1) s+=(oppG-1)*18;                               // 分断
   if(res.captured===0&&wTrueEye(bd,n,r,c,color)) s-=480;   // 不填自己的真眼
+  if(terrMap&&res.captured===0&&stoneNo>n*2){
+    var owner=terrMap[r*n+c];
+    if(owner===color) s-=(stoneNo>n*2.6?260:120);          // 不往自己空里填子
+    else if(owner===opp) s-=40;                            // 不轻易送进对方空
+  }
   var edge=Math.min(r,c,n-1-r,n-1-c);
   if(stoneNo<n*1.6){
     if(edge===0) s-=38;
@@ -1536,25 +1648,28 @@ function wQuickMoveScore(W,bd,n,color,r,c,res,lastMove,stoneNo){
     if(d<=2) s+=12;
     if(d===0) s-=80;
   }
-  s+=Math.random()*3;
+  if(W.aiCfg&&W.aiCfg.tactics) s+=wTacticalBonus(W,bd,n,color,r,c,res);
+  var noise=(W.aiCfg&&W.aiCfg.noise!=null)?W.aiCfg.noise:3;
+  s+=Math.random()*noise;
   return s;
 }
 
 function wCandidates(W,bd,n,color,prevHash,lastMove,limit,full){
   var list=[], stoneNo=0, i, r, c;
   for(i=0;i<W.history.length;i++) if(!W.history[i].pass) stoneNo++;
+  var terrMap=wTerritoryMap(bd,n);
   for(r=0;r<n;r++) for(c=0;c<n;c++){
     if(bd[r][c]!==0) continue;
     var res=wTryPlay(bd,n,r,c,color,prevHash);
     if(!res) continue;
-    var s=wQuickMoveScore(W,bd,n,color,r,c,res,lastMove,stoneNo);
+    var s=wQuickMoveScore(W,bd,n,color,r,c,res,lastMove,stoneNo,terrMap);
     list.push({r:r,c:c,res:res,quick:s,full:0,total:s});
   }
   list.sort(function(a,b){ return b.quick-a.quick; });
   if(full){
     var top=list.slice(0,Math.max(limit,60));
     for(i=0;i<top.length;i++){
-      top[i].full=wEvalBoard(top[i].res.board,n,color);
+      top[i].full=wEvalBoard(top[i].res.board,n,color,W.aiCfg&&W.aiCfg.strongEval);
       top[i].total=top[i].full+top[i].quick*0.22;
     }
     top.sort(function(a,b){ return b.total-a.total; });
@@ -1563,9 +1678,34 @@ function wCandidates(W,bd,n,color,prevHash,lastMove,limit,full){
   return list.slice(0,limit);
 }
 
+function wForcedTactic(W,bd,n,color,cands){
+  var opp=color===1?2:1, best=null, bestS=0;
+  var deadline=W._deadline||Date.now()+500;
+  for(var i=0;i<cands.length;i++){
+    var cd=cands[i], res=cd.res;
+    var s=0;
+    if(res.captured>0) s+=1000+res.captured*120;
+    if(res.captured===0){
+      // 征子：这手把对方某块打成单气，且征子成立
+      for(var d=0;d<4;d++){
+        var rr=cd.r+W_DIRS4[d][0], cc=cd.c+W_DIRS4[d][1];
+        if(rr<0||cc<0||rr>=n||cc>=n||bd[rr][cc]!==opp) continue;
+        var g=wGroup(res.board,n,rr,cc);
+        if(g.liberties===1&&wLadderCapture(res.board,n,opp,rr,cc,color,36,deadline)){ s+=850; break; }
+      }
+      // 倒扑：先弃后提，净赚
+      var self=wGroup(res.board,n,cd.r,cd.c);
+      if(self.liberties===1&&wSnapback(res.board,n,cd.r,cd.c,color)) s+=800;
+    }
+    if(s>bestS){ bestS=s; best=cd; }
+    if(Date.now()>deadline) break;
+  }
+  return bestS>=800?[best.r,best.c]:null;
+}
+
 function wOpponentWorst(W,board,n,oppColor,oppPrevHash,lastMove,aiColor,limit,deep,deadline){
-  var replies=wCandidates(W,board,n,oppColor,oppPrevHash,lastMove,limit,false);
-  if(!replies.length) return wEvalBoard(board,n,aiColor);
+  var replies=wCandidates(W,board,n,oppColor,oppPrevHash,lastMove,limit,true);
+  if(!replies.length) return wEvalBoard(board,n,aiColor,W.aiCfg&&W.aiCfg.strongEval);
   var aiPrevHash=wHash(board,n); // 对方落子前的局面，用于下一手劫争
   var worst=Infinity, i, j;
   for(i=0;i<replies.length;i++){
@@ -1578,17 +1718,19 @@ function wOpponentWorst(W,board,n,oppColor,oppPrevHash,lastMove,aiColor,limit,de
         if(ev>bestMe) bestMe=ev;
         if(Date.now()>deadline) break;
       }
-      val=bestMe===-Infinity?wEvalBoard(rep.res.board,n,aiColor):bestMe;
+      val=bestMe===-Infinity?wEvalBoard(rep.res.board,n,aiColor,W.aiCfg&&W.aiCfg.strongEval):bestMe;
     } else {
-      val=wEvalBoard(rep.res.board,n,aiColor)-rep.quick*0.12;
+      val=wEvalBoard(rep.res.board,n,aiColor,W.aiCfg&&W.aiCfg.strongEval);
     }
     if(val<worst) worst=val;
     if(Date.now()>deadline) break;
   }
-  return worst===Infinity?wEvalBoard(board,n,aiColor):worst;
+  return worst===Infinity?wEvalBoard(board,n,aiColor,W.aiCfg&&W.aiCfg.strongEval):worst;
 }
 
 function wBookMove(W,bd,n,stones){
+  var gs=wBoardGroups(bd,n), gi;
+  for(gi=0;gi<gs.length;gi++) if(gs[gi].libs===1) return null; // 先处理打吃
   var stars=n>=17
     ? [[3,3],[3,15],[15,3],[15,15],[3,9],[9,3],[9,15],[15,9],[9,9]]
     : (n>=11
@@ -1600,7 +1742,7 @@ function wBookMove(W,bd,n,stones){
     if(bd[r][c]===0&&wTryPlay(bd,n,r,c,W.turn,W.prevHash)) legal.push([r,c]);
   }
   if(!legal.length) return null;
-  if(stones===0) return n>=13?legal[0]:legal[Math.floor(legal.length/2)];
+  if(stones===0) return legal[0];
   var opp=W.turn===1?2:1, best=null, bestD=-1;
   for(i=0;i<legal.length;i++){
     var minD=99;
@@ -1615,23 +1757,123 @@ function wBookMove(W,bd,n,stones){
   return best;
 }
 
+function wHasNearStone(bd,n,r,c,dist){
+  for(var dr=-dist;dr<=dist;dr++) for(var dc=-dist;dc<=dist;dc++){
+    if(!dr&&!dc) continue;
+    var rr=r+dr, cc=c+dc;
+    if(rr>=0&&cc>=0&&rr<n&&cc<n&&bd[rr][cc]) return true;
+  }
+  return false;
+}
+function wNoviceMove(W,bd,n,color,legal,stones){
+  var cfg=W.aiCfg, i, p, res;
+  if(stones===0){
+    var e=2+Math.floor(Math.random()*2);
+    var opens=[[e,e],[e,n-1-e],[n-1-e,e],[n-1-e,n-1-e]];
+    opens.sort(function(){ return Math.random()-0.5; });
+    for(i=0;i<opens.length;i++){
+      p=opens[i];
+      if(bd[p[0]][p[1]]===0&&wTryPlay(bd,n,p[0],p[1],color,W.prevHash)) return p;
+    }
+  }
+  var local=[], caps=[], saves=[];
+  for(i=0;i<legal.length;i++){
+    p=legal[i];
+    var near=wHasNearStone(bd,n,p[0],p[1],2);
+    if(!near&&W.lastMove){
+      near=Math.abs(p[0]-W.lastMove[0])+Math.abs(p[1]-W.lastMove[1])<=2;
+    }
+    if(!near&&stones>0) continue;
+    res=wTryPlay(bd,n,p[0],p[1],color,W.prevHash);
+    if(!res) continue;
+    var s=Math.random()*70;
+    if(res.captured>0){ caps.push({p:p,s:res.captured*120+Math.random()*40}); continue; }
+    var save=false, connect=0;
+    for(var d=0;d<4;d++){
+      var rr=p[0]+W_DIRS4[d][0], cc=p[1]+W_DIRS4[d][1];
+      if(rr<0||cc<0||rr>=n||cc>=n) continue;
+      if(bd[rr][cc]===color){
+        connect++;
+        var g=wGroup(bd,n,rr,cc);
+        if(g.liberties===1) save=true;
+      }
+    }
+    if(save){ saves.push({p:p,s:180+Math.random()*40}); continue; }
+    var self=wGroup(res.board,n,p[0],p[1]);
+    if(self.liberties===1) s-=Math.random()<cfg.selfAtariOdds?0:300;
+    if(connect>1) s+=18;
+    var edge=Math.min(p[0],p[1],n-1-p[0],n-1-p[1]);
+    if(stones<12&&edge===0) s-=22;
+    local.push({p:p,s:s});
+  }
+  if(caps.length&&Math.random()<cfg.captureOdds){
+    caps.sort(function(a,b){return b.s-a.s;});
+    return caps[0].p;
+  }
+  if(saves.length&&Math.random()<cfg.saveOdds){
+    saves.sort(function(a,b){return b.s-a.s;});
+    return saves[0].p;
+  }
+  if(local.length){
+    local.sort(function(a,b){return b.s-a.s;});
+    return local[0].p;
+  }
+  return legal[Math.floor(Math.random()*legal.length)];
+}
+
+function wBasicMove(W,bd,n,color,legal,stones){
+  var cfg=W.aiCfg, list=[], i, p, res;
+  for(i=0;i<legal.length;i++){
+    p=legal[i];
+    res=wTryPlay(bd,n,p[0],p[1],color,W.prevHash);
+    if(!res) continue;
+    var s=res.captured*160;
+    var self=wGroup(res.board,n,p[0],p[1]);
+    if(self.liberties===1&&res.captured===0) s-=400;
+    var connect=0;
+    for(var d=0;d<4;d++){
+      var rr=p[0]+W_DIRS4[d][0], cc=p[1]+W_DIRS4[d][1];
+      if(rr<0||cc<0||rr>=n||cc>=n) continue;
+      if(bd[rr][cc]===color){
+        connect++;
+        var g=wGroup(bd,n,rr,cc);
+        if(g.liberties===1) s+=130;
+      }
+    }
+    if(connect>1) s+=14;
+    if(stones<10){
+      var edge=Math.min(p[0],p[1],n-1-p[0],n-1-p[1]);
+      if(edge===0) s-=18;
+      else if(edge===2||edge===3) s+=8;
+    }
+    if(W.lastMove){
+      var ld=Math.abs(p[0]-W.lastMove[0])+Math.abs(p[1]-W.lastMove[1]);
+      if(ld<=2) s+=8;
+    }
+    s+=Math.random()*50;
+    list.push({p:p,s:s});
+  }
+  if(!list.length) return legal[Math.floor(Math.random()*legal.length)];
+  list.sort(function(a,b){ return b.s-a.s; });
+  if(Math.random()<0.25) return list[Math.floor(Math.random()*Math.min(list.length,5))].p;
+  return list[0].p;
+}
+
 function goAI(W){
   var n=W.size, bd=W.board, color=W.turn, opp=color===1?2:1, r, c, i;
+  var cfg=GO_LEVELS[W.level]||GO_LEVELS[3];
+  W.aiCfg=cfg;
+  W._deadline=Date.now()+cfg.deadline;
   var legal=[];
   for(r=0;r<n;r++) for(c=0;c<n;c++){
     if(bd[r][c]===0&&wTryPlay(bd,n,r,c,color,W.prevHash)) legal.push([r,c]);
   }
   if(!legal.length) return "pass";
 
-  var level=W.level, stones=0;
+  var stones=0;
   for(i=0;i<W.history.length;i++) if(!W.history[i].pass) stones++;
 
-  if(level===1){
-    var caps=legal.filter(function(p){ var res=wTryPlay(bd,n,p[0],p[1],color,W.prevHash); return res&&res.captured>0; });
-    if(caps.length&&Math.random()<0.55) return caps[Math.floor(Math.random()*caps.length)];
-    if(Math.random()<0.05) return "pass";
-    return legal[Math.floor(Math.random()*legal.length)];
-  }
+  if(cfg.engine==='novice') return wNoviceMove(W,bd,n,color,legal,stones);
 
   // 对方停一手时，若自己领先就跟着停；落后则继续找机会
   if(W.history.length&&W.history[W.history.length-1].pass){
@@ -1640,47 +1882,68 @@ function goAI(W){
     if(lead>0) return "pass";
   }
 
-  if(level>=4&&stones<6){
-    var urgent=false, gs=wBoardGroups(bd,n);
-    for(i=0;i<gs.length;i++){ if(gs[i].libs===1){ urgent=true; break; } }
-    if(!urgent){
-      var book=wBookMove(W,bd,n,stones);
-      if(book) return book;
+  if(cfg.engine==='basic'){
+    if(stones<4&&Math.random()<cfg.bookOdds){
+      var b1=wBookMove(W,bd,n,stones);
+      if(b1) return b1;
     }
+    var local=[];
+    for(i=0;i<legal.length;i++){
+      var lp=legal[i];
+      if(wHasNearStone(bd,n,lp[0],lp[1],2)||(W.lastMove&&Math.abs(lp[0]-W.lastMove[0])+Math.abs(lp[1]-W.lastMove[1])<=2)) local.push(lp);
+    }
+    return wBasicMove(W,bd,n,color,local.length?local:legal,stones);
   }
 
-  if(level===2){
-    var loose=wCandidates(W,bd,n,color,W.prevHash,W.lastMove,20,false);
-    if(!loose.length) return "pass";
-    if(Math.random()<0.28){
-      var pick=loose[Math.floor(Math.random()*Math.min(loose.length,8))];
-      return [pick.r,pick.c];
+  if(cfg.engine==='quick'){
+    if(stones<6){
+      var bq=wBookMove(W,bd,n,stones);
+      if(bq) return bq;
     }
-    return [loose[0].r,loose[0].c];
+    var qlist=wCandidates(W,bd,n,color,W.prevHash,W.lastMove,18,false);
+    if(!qlist.length) return "pass";
+    if(qlist[0].quick<-220&&stones>n*n*0.85) return "pass";
+    return [qlist[0].r,qlist[0].c];
   }
 
-  if(level===3){
-    var mid=wCandidates(W,bd,n,color,W.prevHash,W.lastMove,16,true);
+  if(cfg.engine==='eval'){
+    if(stones<6){
+      var b2=wBookMove(W,bd,n,stones);
+      if(b2) return b2;
+    }
+    var mid=wCandidates(W,bd,n,color,W.prevHash,W.lastMove,cfg.evalLimit||18,true);
     if(!mid.length) return "pass";
-    if(mid[0].quick<-220&&stones>n*n*0.5) return "pass";
+    if(mid[0].quick<-220&&stones>n*n*0.85) return "pass";
     return [mid[0].r,mid[0].c];
   }
 
-  var rootLimit=level>=5?18:10;
-  var replyLimit=level>=5?12:8;
-  var deadline=Date.now()+(level>=5?1200:420);
-  var cands=wCandidates(W,bd,n,color,W.prevHash,W.lastMove,rootLimit,true);
-  if(!cands.length) return "pass";
-  if(cands[0].quick<-220&&stones>n*n*0.5) return "pass";
+  if(stones<6){
+    var urgent=false, gs=wBoardGroups(bd,n);
+    for(i=0;i<gs.length;i++){ if(gs[i].libs===1){ urgent=true; break; } }
+    if(!urgent){
+      var b3=wBookMove(W,bd,n,stones);
+      if(b3) return b3;
+    }
+  }
 
-  var rootPrevHash=wHash(bd,n); // AI 落子后，对手的劫争禁着依据
+  var cands=wCandidates(W,bd,n,color,W.prevHash,W.lastMove,cfg.root,true);
+  if(!cands.length) return "pass";
+  if(cands[0].quick<-220&&stones>n*n*0.85) return "pass";
+  if(cfg.forcedTactics){
+    var ft=wForcedTactic(W,bd,n,color,cands);
+    if(ft) return ft;
+  }
+
+  var rootPrevHash=wHash(bd,n);
   var best=cands[0], bestVal=-Infinity;
+  if(cfg.useSearch===false) return [best.r,best.c];
   for(i=0;i<cands.length;i++){
     var cd=cands[i];
-    var val=wOpponentWorst(W,cd.res.board,n,opp,rootPrevHash,[cd.r,cd.c],color,replyLimit,level>=5,deadline)+cd.quick*0.35;
+    var val=wOpponentWorst(W,cd.res.board,n,opp,rootPrevHash,[cd.r,cd.c],color,cfg.reply,cfg.depth>=3,W._deadline)+cd.quick*0.35;
     if(val>bestVal){ bestVal=val; best=cd; }
-    if(Date.now()>deadline) break;
+    if(Date.now()>W._deadline) break;
   }
+  if(best.full<cands[0].full-4) best=cands[0];
   return [best.r,best.c];
 }
 </script>
@@ -1823,6 +2086,8 @@ function wRender(){
   st.innerHTML="<b>"+turnTxt+"</b> · "+(W.opp==="ai"? ("你执"+colName(W.playerColor)+" · 难度 "+["","简单","一般","普通","困难","极难"][W.level]) : "双人对弈")+" · "+n+" 路"
     +"<br>提子 — 黑提 "+W.capB+" 子 · 白提 "+W.capW+" 子"
     +(W.msg? '<br><span class="'+(W.msgType==="warn"?"warn":"okmsg")+'">'+W.msg+"</span>":"");
+  var lv=GO_LEVELS[W.level]||GO_LEVELS[3];
+  if($("wLevelInfo")) $("wLevelInfo").textContent="当前："+lv.name+" · 目标 "+lv.target+" · "+lv.desc;
   var res=$("wResult");
   if(W.over){
     res.classList.add("show");
@@ -1896,6 +2161,12 @@ setInterval(function(){
   }
   W.lastTick=now;
 }, 500);
+(function(){
+  Object.keys(GO_LEVELS).forEach(function(k){
+    var b=document.querySelector('#wLevelSeg button[data-v="'+k+'"]');
+    if(b) b.innerHTML=GO_LEVELS[k].name+'<span>'+GO_LEVELS[k].target+'</span>';
+  });
+})();
 wStart();
 </script>
 <script>/* ============================================================

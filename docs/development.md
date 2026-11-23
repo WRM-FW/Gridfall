@@ -63,6 +63,13 @@
 - 镜像：GitHub Pages → https://wrm-fw.github.io/Gridfall/
 - `gridfall.pages.dev` 属于其他项目，不使用。
 
+## 围棋 AI 难度
+
+- 五档参数集中在 `tools/src/legacy.html` 的 `GO_LEVELS`；改一档不影响其他档。
+- 引擎分支：`novice`（局部/漏看）、`basic`（局部快评）、`eval`（全盘评估）、`search`/`deep`（应手搜索）。
+- 对抗测试：`node tests/go-bench.mjs --size=9 --low=4 --high=5 --games=20`；19 路冒烟：`node tests/go-smoke.mjs`。
+- 当前实测未达到“极难对普通 ≥85%”的目标，界面标注已下调为保守范围。
+
 ## 点单 / 社区共建
 
 - 开发者邮箱：3391792088@qq.com
