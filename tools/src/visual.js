@@ -366,21 +366,6 @@ function openRules(){ var m = document.getElementById("rulesModal"); if (m) m.cl
 document.getElementById("rulesClose").addEventListener("click", function(){ document.getElementById("rulesModal").classList.remove("show"); });
 document.getElementById("rulesModal").addEventListener("click", function(e){ if (e.target === this) this.classList.remove("show"); });
 
-document.getElementById("btnDownload").addEventListener("click", function(){
-  var clone = document.documentElement.cloneNode(true);
-  clone.querySelectorAll("script[data-online]").forEach(function(x){ x.remove(); });
-  clone.querySelectorAll("#tabOnline, #secOnline, .hall-link").forEach(function(x){ x.remove(); });
-  var modal = clone.querySelector("#rulesModal"); if (modal) modal.classList.remove("show");
-  var toast = clone.querySelector("#toast"); if (toast) toast.classList.remove("show");
-  var html = "<!doctype html>\n" + clone.outerHTML;
-  var blob = new Blob([html], { type: "text/html;charset=utf-8" });
-  var a = document.createElement("a");
-  a.href = URL.createObjectURL(blob); a.download = "Gridfall.html";
-  document.body.appendChild(a); a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
-  toastMsg("已生成单文件（单机可用；联机请使用线上地址）");
-});
-
 var toastTimer = null;
 function toastMsg(msg){
   var el = document.getElementById("toast");

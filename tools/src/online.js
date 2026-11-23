@@ -12,7 +12,7 @@ var NET = {
   settings: { game: "gomoku", rule: "free", openingMode: "free", size: 19 },
   state: null, lastSeq: -1, seq: 0, lastResultSeq: -1,
   rematch: { host: false, guest: false },
-  record: { win: 0, lose: 0 },
+  record: { win: 0, lose: 0 }, hostColor: 1,
   hover: null, busy: false, left: false, started: false, enterTimer: null, opponentGone: false, lastSeen: 0, hbTimer: null,
   lastSaved: null
 };
@@ -242,7 +242,7 @@ function netOpponentLeft(msg){
 function netCreateRoom(){
   if (NET.connected) return;
   netEnsureLibs().then(function(){
-    NET.role = "host"; NET.code = netCode(); NET.clientId = NET.clientId || netId();
+    NET.role = "host"; NET.code = netCode(); NET.clientId = NET.clientId || netId(); NET.hostColor = 1;
     netSetStatus("等待对手加入…", "把房间码发给对手，对手加入后自动开局。");
     netUpdateLobby();
     netConnect();
@@ -275,7 +275,7 @@ function netLeave(){
   NET.connected = false; NET.subscribed = false; NET.left = true; NET.started = false;
   NET.state = null; NET.code = ""; NET.role = ""; NET.lastSeq = -1;
   NET.hostClientId = ""; NET.guestClientId = "";
-  NET.record = { win: 0, lose: 0 };
+  NET.record = { win: 0, lose: 0 }; NET.hostColor = 1;
   netClearSession();
   document.getElementById("nRoomBox").classList.add("hidden");
   var input = document.getElementById("nCodeInput"); if (input) input.value = "";
@@ -290,7 +290,7 @@ function netNewState(){
     seq: 0, game: NET.settings.game, rule: NET.settings.rule,
     openingMode: NET.settings.openingMode, size: NET.settings.game === "go" ? NET.settings.size : 15,
     board: null, history: [], turn: 1, over: false, winner: 0, draw: false,
-    winLine: null, phase: "play", candidates: [], finalHostColor: 1,
+    winLine: null, phase: "play", candidates: [], finalHostColor: NET.hostColor, swapRequest: null,
     lastMove: null, caps: { b: 0, w: 0 }, ko: null, passes: 0,
     goPrev: null, score: null, msg: "", rematch: { host: false, guest: false },
     startAt: Date.now()
@@ -323,6 +323,48 @@ function netCheckEnd(st, r, c, color){
 
 function netReject(side, msg){
   if (side === "guest") netSendReject(msg); else netToast(msg);
+}
+
+function netCanSwap(){
+  var st = NET.state;
+  if (!st || !NET.connected || st.over) return false;
+  if (st.history.length > 0) return false;
+  if (st.game === "gomoku" && st.rule === "renju" && st.openingMode === "formal") return false;
+  return true;
+}
+function netHostRequestSwap(side){
+  var st = NET.state;
+  if (!st || !netCanSwap() || st.swapRequest) return;
+  st.swapRequest = { from: side };
+  st.msg = side === "host" ? "房主申请换方，等待对手回应。" : "对手申请换方，等待房主回应。";
+  netBroadcastState();
+}
+function netHostRespondSwap(side, accept){
+  var st = NET.state;
+  if (!st || !st.swapRequest || st.swapRequest.from === side) return;
+  if (accept) {
+    NET.hostColor = 3 - NET.hostColor;
+    st.finalHostColor = NET.hostColor;
+    st.swapRequest = null;
+    st.turn = 1;
+    st.msg = "已换方：房主执" + netColorName(NET.hostColor) + "，对手执" + netColorName(3 - NET.hostColor) + "。黑棋先行。";
+  } else {
+    st.swapRequest = null;
+    st.msg = "对方拒绝换方。";
+  }
+  netBroadcastState();
+}
+function netUserSwapRequest(){
+  var st = NET.state;
+  if (!st || !netCanSwap() || st.swapRequest) return;
+  if (NET.role === "host") netHostRequestSwap("host");
+  else { netSendIntent("swapReq"); NET.busy = true; netRender(); }
+}
+function netUserSwapResponse(accept){
+  var st = NET.state;
+  if (!st || !st.swapRequest || st.swapRequest.from === NET.role) return;
+  if (NET.role === "host") netHostRespondSwap("host", !!accept);
+  else { netSendIntent("swapResp", { accept: !!accept }); NET.busy = true; netRender(); }
 }
 
 function netHostSelectOpening(idx){
@@ -469,6 +511,10 @@ function netHostIntent(p){
       netHostMove("guest", p.r, p.c); break;
     case "swap":
       netHostSwap(!!p.yes); break;
+    case "swapReq":
+      netHostRequestSwap("guest"); break;
+    case "swapResp":
+      netHostRespondSwap("guest", !!p.accept); break;
     case "pass":
       netHostPass("guest"); break;
     case "resign":
@@ -663,6 +709,12 @@ function netRender(){
   }
 
   document.getElementById("nResign").disabled = !(st && !st.over);
+  var swBtn = document.getElementById("nSwap");
+  if (swBtn) {
+    swBtn.classList.toggle("hidden", !(st && !st.over));
+    swBtn.disabled = !(st && netCanSwap() && !st.swapRequest);
+    swBtn.textContent = (st && st.swapRequest && st.swapRequest.from === NET.role) ? "已申请换方" : "申请换方";
+  }
   var nPass = document.getElementById("nPass");
   if (nPass) {
     nPass.classList.toggle("hidden", !(st && st.game === "go"));
@@ -685,7 +737,20 @@ function netRender(){
 
   /* 动态区域：开局选择 / 交换 / 再来一局状态 */
   sub.textContent = sub.textContent || "";
-  if (st && !st.over && st.phase === "select" && NET.role === "host") {
+  if (st && !st.over && st.swapRequest) {
+    var sr = st.swapRequest;
+    var srWrap = document.createElement("div"); srWrap.style.marginTop = "8px";
+    if (sr.from === NET.role) {
+      srWrap.textContent = "已申请换方，等待对方回应…";
+      sub.appendChild(srWrap);
+    } else {
+      srWrap.textContent = "对方申请换方";
+      var srRow = document.createElement("div"); srRow.className = "row"; srRow.style.marginTop = "6px";
+      var y = document.createElement("button"); y.type = "button"; y.textContent = "同意换方"; y.onclick = function(){ netUserSwapResponse(true); };
+      var n = document.createElement("button"); n.type = "button"; n.textContent = "拒绝"; n.onclick = function(){ netUserSwapResponse(false); };
+      srRow.appendChild(y); srRow.appendChild(n); srWrap.appendChild(srRow); sub.appendChild(srWrap);
+    }
+  } else if (st && !st.over && st.phase === "select" && NET.role === "host") {
     netShowOpeningPicker(sub);
   } else if (st && !st.over && st.phase === "swap" && NET.role === "guest") {
     var row = document.createElement("div"); row.className = "row"; row.style.marginTop = "8px";
@@ -772,6 +837,7 @@ function onlineInit(){
   document.getElementById("nResign").addEventListener("click", netUserResign);
   document.getElementById("nPass").addEventListener("click", netUserPass);
   document.getElementById("nRematch").addEventListener("click", netUserRematch);
+  document.getElementById("nSwap").addEventListener("click", netUserSwapRequest);
   document.getElementById("nCopy").addEventListener("click", function(){
     if (!NET.code) return;
     if (navigator.clipboard && navigator.clipboard.writeText) {

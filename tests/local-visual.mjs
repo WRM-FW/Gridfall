@@ -134,16 +134,9 @@ try {
     return true;
   });
 
-  /* 下载 payload 不含联机库 */
-  await t('local.download_payload', async () => {
-    await b.evaluate(`(() => { window.__dl=null; const orig=URL.createObjectURL.bind(URL); URL.createObjectURL=function(blob){ blob.text().then(t=>window.__dl=t); return orig(blob); }; })()`);
-    await b.clickSel('#btnDownload');
-    if (!await waitFor('window.__dl !== null', 4000)) return 'no download';
-    const r = await b.evaluate(`(() => { const t=window.__dl; return {len:t.length, title:t.includes('<title>黑白棋社 · Gridfall</title>'), sup:/<script[^>]*data-online|<script[^>]+src="supabase/.test(t), tail:t.slice(-8)}; })()`);
-    if (!r.title) return 'title';
-    if (r.sup) return 'online lib tag not stripped';
-    if (!r.tail.includes('</html>')) return 'tail ' + r.tail;
-    return true;
+  await t('local.download_button_removed', async () => {
+    const n = await b.evaluate('document.querySelectorAll("#btnDownload").length');
+    return n === 0 ? true : 'download button still present';
   });
 
   const fail = R.filter(r => !r.pass);
