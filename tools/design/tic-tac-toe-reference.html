@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>井字棋 · Gridfall</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#14202E;color:#fff;min-height:100dvh;overscroll-behavior:none;display:flex;flex-direction:column;align-items:center;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}
+header{text-align:center}header h1{font-size:24px;letter-spacing:.04em}header p{color:#9FB4C8;font-size:11px;margin-top:2px}
+.stats{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.card{background:#fff;color:#0B1220;border:2px solid #000;box-shadow:3px 3px 0 #000;border-radius:10px;padding:6px 14px;min-width:88px;text-align:center}.card small{color:#666;letter-spacing:.06em;font-size:11px}.card b{font-size:20px;display:block;line-height:1.15}
+.card.xcard b{color:#1E5BF0}.card.ocard b{color:#E0483E}
+.turn{margin-top:10px;font-size:16px;font-weight:700;min-height:24px;text-align:center}
+.turn .mx{color:#6FA8FF}.turn .mo{color:#FF8A7A}
+.board-wrap{margin-top:10px;background:#1E3448;border:2px solid #000;box-shadow:5px 5px 0 #000;border-radius:14px;padding:10px}
+.board{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;width:min(348px,88vw,calc(100dvh - 400px));min-width:210px;aspect-ratio:1}
+.cell{border:2px solid #000;border-radius:12px;background:#F4F7FA;font-size:min(56px,13vw);font-weight:900;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#0B1220;box-shadow:3px 3px 0 #000;touch-action:manipulation;user-select:none;padding:0;min-width:0;min-height:0;height:100%;overflow:hidden}
+.cell:active{transform:translate(1px,1px);box-shadow:2px 2px 0 #000}
+.cell.x{color:#1E5BF0}.cell.o{color:#E0483E}
+.cell.win{background:#FFD83D}
+.cell:disabled{cursor:default;opacity:1}
+.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:center;align-items:center}
+button.ctl,select{cursor:pointer;border:2px solid #000;box-shadow:3px 3px 0 #000;border-radius:10px;padding:9px 13px;font-weight:700;background:#63E63A;color:#0B1220;font-size:14px}
+button.ctl:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+button.ctl.sec{background:#FFD83D}button.ctl.ghost{background:#fff}
+select{background:#fff}
+label.lab{font-size:12px;color:#9FB4C8}
+.tip{color:#9FB4C8;font-size:11px;text-align:center;margin-top:10px;line-height:1.6;max-width:480px}
+.overlay{position:fixed;inset:0;background:rgba(5,10,16,.72);display:none;align-items:center;justify-content:center;z-index:9}.overlay.show{display:flex}
+.panel{background:#fff;color:#0B1220;border:2px solid #000;box-shadow:6px 6px 0 #000;border-radius:16px;padding:24px;text-align:center;max-width:320px;width:90%}
+.panel h2{font-size:26px}.panel p{margin:10px 0;color:#555}
+@media(max-height:680px){.tip{display:none}header p{display:none}}
+</style></head><body>
+<header><h1>井字棋</h1><p>TIC-TAC-TOE · Gridfall 棋盘类 · 本地单机</p></header>
+<div class="stats">
+<div class="card xcard"><small>X 胜</small><b id="sx">0</b></div>
+<div class="card"><small>平局</small><b id="sd">0</b></div>
+<div class="card ocard"><small>O 胜</small><b id="so">0</b></div>
+</div>
+<div class="turn" id="turn"></div>
+<div class="board-wrap"><div class="board" id="board"></div></div>
+<div class="row">
+<label class="lab">模式</label>
+<select id="mode"><option value="ai" selected>人机对战</option><option value="pvp">本地双人</option></select>
+<label class="lab">难度</label>
+<select id="diff"><option value="easy">简单</option><option value="normal" selected>普通</option><option value="hard">困难（不败）</option></select>
+<label class="lab">先后手</label>
+<select id="side"><option value="X" selected>我执 X · 先手</option><option value="O">我执 O · 后手</option></select>
+</div>
+<div class="row">
+<button class="ctl" id="btnRestart">重开一局</button>
+<button class="ctl ghost" id="btnReset">重置比分</button>
+</div>
+<p class="tip">规则：X 先行，双方轮流落子，先连成横、竖、斜任意一条线者胜，棋盘填满无人连线为平局。<br>人机难度：简单随机落子；普通会赢会堵、偶尔失误；困难用 minimax 全盘推演，不可战胜、最多打平。</p>
+<div class="overlay" id="over"><div class="panel"><h2 id="overTitle">X 获胜</h2><p id="overText"></p><button class="ctl" id="btnAgain">再来一局</button></div></div>
+<script>
+const LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+let board,current,gameOver,winLine,scores={X:0,O:0,D:0},aiTimer=null;
+const boardEl=document.getElementById('board');
+function mode(){return document.getElementById('mode').value}
+function diff(){return document.getElementById('diff').value}
+function humanMark(){return document.getElementById('side').value}
+function aiMark(){return humanMark()==='X'?'O':'X'}
+function isAiTurn(){return mode()==='ai'&&current===aiMark()&&!gameOver}
+function winnerOf(b){for(const ln of LINES){const[a,c,d]=ln;if(b[a]&&b[a]===b[c]&&b[a]===b[d])return{winner:b[a],line:ln}}return null}
+function emptyCells(b){const r=[];b.forEach((v,i)=>{if(!v)r.push(i)});return r}
+function minimax(b,isMax,ai,hu,depth){
+  const w=winnerOf(b);
+  if(w)return w.winner===ai?10-depth:depth-10;
+  if(emptyCells(b).length===0)return 0;
+  if(isMax){let best=-Infinity;for(const i of emptyCells(b)){b[i]=ai;best=Math.max(best,minimax(b,false,ai,hu,depth+1));b[i]=null}return best}
+  let best=Infinity;for(const i of emptyCells(b)){b[i]=hu;best=Math.min(best,minimax(b,true,ai,hu,depth+1));b[i]=null}return best;
+}
+function bestMove(b,ai,hu){let bestScore=-Infinity,bestIdx=-1;for(const i of emptyCells(b)){b[i]=ai;const s=minimax(b,false,ai,hu,0);b[i]=null;if(s>bestScore){bestScore=s;bestIdx=i}}return bestIdx}
+function findWinningMove(b,mark){for(const i of emptyCells(b)){b[i]=mark;const w=winnerOf(b);b[i]=null;if(w&&w.winner===mark)return i}return -1}
+function aiChoose(){
+  const ai=aiMark(),hu=humanMark(),empt=emptyCells(board);
+  if(empt.length===0)return -1;
+  const d=diff();
+  if(d==='easy')return empt[Math.floor(Math.random()*empt.length)];
+  if(d==='hard')return bestMove(board.slice(),ai,hu);
+  // normal: 25% 失误走随机，否则会赢会堵
+  if(Math.random()<0.25)return empt[Math.floor(Math.random()*empt.length)];
+  const win=findWinningMove(board,ai);if(win>=0)return win;
+  const block=findWinningMove(board,hu);if(block>=0)return block;
+  if(board[4]===null)return 4;
+  const corners=[0,2,6,8].filter(i=>board[i]===null);
+  if(corners.length)return corners[Math.floor(Math.random()*corners.length)];
+  return empt[Math.floor(Math.random()*empt.length)];
+}
+function start(){
+  if(aiTimer){clearTimeout(aiTimer);aiTimer=null}
+  board=Array(9).fill(null);current='X';gameOver=false;winLine=null;
+  document.getElementById('over').classList.remove('show');
+  render();maybeAi();
+}
+function maybeAi(){if(isAiTurn()){aiTimer=setTimeout(()=>{const idx=aiChoose();if(idx>=0)place(idx)},380)}}
+function place(i){
+  if(gameOver||board[i])return;
+  if(mode()==='ai'&&current!==humanMark()&&current!==aiMark())return;
+  board[i]=current;
+  const w=winnerOf(board);
+  if(w){gameOver=true;winLine=w.line;scores[w.winner]++;finish(w.winner)}
+  else if(emptyCells(board).length===0){gameOver=true;scores.D++;finish(null)}
+  else{current=current==='X'?'O':'X';render();maybeAi();return}
+  render();
+}
+function finish(winner){
+  const t=document.getElementById('overTitle'),x=document.getElementById('overText');
+  let who;
+  if(winner===null){t.textContent='平局';who='棋盘已满，谁也没连成线。'}
+  else if(mode()==='ai'){t.textContent=winner===humanMark()?'你赢了！':'AI 赢了';who=(winner===humanMark()?'你执 ':'AI 执 ')+winner+' 连成一线。'}
+  else{t.textContent=winner+' 获胜';who='玩家 '+winner+' 连成一线。'}
+  x.textContent=who+' 当前比分 X '+scores.X+' · 平 '+scores.D+' · O '+scores.O;
+  updateScores();
+  setTimeout(()=>document.getElementById('over').classList.add('show'),420);
+}
+function updateScores(){document.getElementById('sx').textContent=scores.X;document.getElementById('sd').textContent=scores.D;document.getElementById('so').textContent=scores.O}
+function turnText(){
+  if(gameOver){const w=winnerOf(board);return w?('🏆 '+w.winner+' 连成一线，获胜'):'本局平局'}
+  const m=current==='X'?'<span class="mx">X</span>':'<span class="mo">O</span>';
+  if(mode()==='ai')return '轮到 '+m+'（'+(current===humanMark()?'你':'AI')+'）落子';
+  return '轮到 '+m+' 落子';
+}
+function render(){
+  boardEl.innerHTML='';
+  board.forEach((v,i)=>{
+    const b=document.createElement('button');
+    b.className='cell'+(v==='X'?' x':v==='O'?' o':'')+(winLine&&winLine.includes(i)?' win':'');
+    b.textContent=v||'';
+    b.disabled=gameOver||!!v||isAiTurn();
+    b.setAttribute('aria-label','格子 '+(i+1)+(v?('，已落 '+v):''));
+    b.addEventListener('click',()=>{if(mode()==='ai'&&isAiTurn())return;place(i)});
+    boardEl.appendChild(b);
+  });
+  document.getElementById('turn').innerHTML=turnText();
+  updateScores();
+}
+document.getElementById('btnRestart').onclick=start;
+document.getElementById('btnAgain').onclick=start;
+document.getElementById('btnReset').onclick=()=>{scores={X:0,O:0,D:0};updateScores();start()};
+['mode','diff','side'].forEach(id=>document.getElementById(id).addEventListener('change',start));
+start();
+</script></body></html>

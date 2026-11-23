@@ -16,7 +16,8 @@ const pages = [
   ['minesweeper', 'games/minesweeper/index.html'],
   ['snake', 'games/snake/index.html'],
   ['sokoban', 'games/sokoban/index.html'],
-  ['tetris', 'games/tetris/index.html']
+  ['tetris', 'games/tetris/index.html'],
+  ['tic-tac-toe', 'games/tic-tac-toe/index.html']
 ];
 const b = await launch(home, { port: 9466 });
 const R = [];

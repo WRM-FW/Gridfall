@@ -9,7 +9,8 @@ const games = [
   { ref: 'saolei-reference.html', dir: 'minesweeper', route: '../../minesweeper', label: '扫雷', hall: 'mineMain', style: 'background:var(--cell-face);color:var(--ink);border:2px solid var(--panel-edge);border-radius:6px;padding:6px 11px;box-shadow:2px 2px 0 var(--panel-edge);' },
   { ref: 'snake-reference.html', dir: 'snake', route: '../../snake', label: '贪吃蛇', hall: 'fixed', style: 'background:#63E63A;color:#0B1220;border:2px solid #000;border-radius:10px;padding:8px 12px;box-shadow:3px 3px 0 #000;font-weight:800;' },
   { ref: 'sokoban-reference.html', dir: 'sokoban', route: '../../sokoban', label: '推箱子', hall: 'fixed', style: 'background:#FFF9EA;color:#0B1220;border:2px solid #000;border-radius:10px;padding:8px 12px;box-shadow:4px 4px 0 #4A3220;font-weight:800;' },
-  { ref: 'tetris-reference.html', dir: 'tetris', route: '../../tetris', label: '俄罗斯方块', hall: 'fixed', style: 'background:#FFF9EA;color:#0B1220;border:2px solid #000;border-radius:10px;padding:8px 12px;box-shadow:3px 3px 0 #000;font-weight:800;' }
+  { ref: 'tetris-reference.html', dir: 'tetris', route: '../../tetris', label: '俄罗斯方块', hall: 'fixed', style: 'background:#FFF9EA;color:#0B1220;border:2px solid #000;border-radius:10px;padding:8px 12px;box-shadow:3px 3px 0 #000;font-weight:800;' },
+  { ref: 'tic-tac-toe-reference.html', dir: 'tic-tac-toe', route: '../../tic-tac-toe', label: '井字棋', hall: 'fixed', style: 'background:#63E63A;color:#0B1220;border:2px solid #000;border-radius:10px;padding:8px 12px;box-shadow:3px 3px 0 #000;font-weight:800;' }
 ];
 
 const HALL_CSS = `<style>

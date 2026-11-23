@@ -76,4 +76,10 @@ try {
   }
   console.log('tetris after', JSON.stringify(await b.evaluate(`({ running:running, paused:paused, score:document.getElementById('score').textContent, over:document.getElementById('over').classList.contains('show') })`)));
   await b.screenshot(path.join(SHOTS, 'tetris-page.png'));
+
+  await goto(page('games/tic-tac-toe/index.html'));
+  console.log('ttt', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), cells:document.querySelectorAll('.cell').length, mode:document.getElementById('mode').value })`)));
+  await b.evaluate(`document.querySelectorAll('.cell')[4].click()`); await sleep(600);
+  console.log('ttt after', JSON.stringify(await b.evaluate(`({ mark:board[4], over:gameOver, turn:current, sx:document.getElementById('sx').textContent })`)));
+  await b.screenshot(path.join(SHOTS, 'tic-tac-toe-page.png'));
 } finally { await b.close(); }
