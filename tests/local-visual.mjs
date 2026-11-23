@@ -27,7 +27,7 @@ const waitFor = async (expr, ms = 10000) => {
 const clickPoint = async (canvasId, n, r, c) => {
   const pt = await b.evaluate(`(() => {
     const el = document.getElementById('${canvasId}');
-    el.scrollIntoView({block:'center'});
+    el.scrollIntoView({block:'center', behavior:'instant'});
     const rect = el.getBoundingClientRect();
     const cell = (1240 - 92*2) / (${n} - 1);
     return { x: rect.left + (92 + ${c} * cell) / 1240 * rect.width,
@@ -133,6 +133,22 @@ try {
     if (!r.over) return 'resign';
     return true;
   });
+
+  await t('local.go_l5_responds', async () => {
+    await b.evaluate(`document.querySelector('#wOppSeg button[data-v="ai"]').click()`);
+    await b.evaluate(`document.querySelector('#wLevelSeg button[data-v="5"]').click()`);
+    await b.evaluate(`document.querySelector('#wSizeSeg button[data-v="9"]').click()`);
+    await b.evaluate(`document.getElementById('wNew').click()`);
+    await sleep(300);
+    if (await b.evaluate('W.level') !== 5) return 'level not set';
+    await b.evaluate('wUserMove(4,4)');
+    const ok = await waitFor(`W.history.length >= 2 && !W.thinking && W.turn === W.playerColor`, 10000);
+    if (!ok) return 'no ai reply: ' + JSON.stringify(await b.evaluate(`({h:W.history.length,t:W.turn,p:W.playerColor,think:W.thinking,msg:W.msg})`));
+    const r = await b.evaluate(`({ level:W.level, pass:!!W.history[1].pass, color:W.history[1].color, move:[W.history[1].r,W.history[1].c] })`);
+    if (r.level !== 5 || r.pass || r.color !== 2) return JSON.stringify(r);
+    return true;
+  });
+  await b.screenshot(path.join(SHOTS, 'local-go-l5.png'));
 
   await t('local.download_button_removed', async () => {
     const n = await b.evaluate('document.querySelectorAll("#btnDownload").length');

@@ -183,6 +183,52 @@
     const res = wTryPlay(b, 9, mv[0], mv[1], 2, null);
     return !!res && res.captured === 1;
   });
+  t('go.ai_l5_captures_atari', () => {
+    const b = wEmptyBoard(9);
+    b[4][4] = 1; b[3][4] = 2; b[4][3] = 2; b[5][4] = 2;
+    const fake = { size: 9, board: b, turn: 2, level: 5, history: [], lastMove: null, prevHash: null, playerColor: 1 };
+    const mv = goAI(fake);
+    if (mv === 'pass') return 'AI passed instead of capturing';
+    const res = wTryPlay(b, 9, mv[0], mv[1], 2, null);
+    return !!res && res.captured === 1 ? true : 'played ' + JSON.stringify(mv);
+  });
+  t('go.ai_l5_saves_atari', () => {
+    const b = wEmptyBoard(9);
+    b[4][4] = 2; b[4][5] = 2;
+    [[3,4],[3,5],[5,4],[5,5],[4,3]].forEach(p => b[p[0]][p[1]] = 1);
+    const fake = { size: 9, board: b, turn: 2, level: 5, history: [], lastMove: null, prevHash: null, playerColor: 1 };
+    const mv = goAI(fake);
+    if (mv === 'pass') return 'AI passed instead of saving';
+    const res = wTryPlay(b, 9, mv[0], mv[1], 2, null);
+    if (!res) return 'illegal ' + JSON.stringify(mv);
+    const g = wGroup(res.board, 9, 4, 4);
+    return g.liberties >= 2 ? true : 'played ' + JSON.stringify(mv) + ' libs ' + g.liberties;
+  });
+  t('go.ai_l5_opens_on_star', () => {
+    const fake = { size: 19, board: wEmptyBoard(19), turn: 1, level: 5, history: [], lastMove: null, prevHash: null, playerColor: 2 };
+    const mv = goAI(fake);
+    return Array.isArray(mv) && wIsStar(19, mv[0], mv[1]) ? true : 'played ' + JSON.stringify(mv);
+  });
+  t('go.ai_eye_penalty', () => {
+    const b = wEmptyBoard(9);
+    [[3,4],[5,4],[4,3],[4,5]].forEach(p => b[p[0]][p[1]] = 2);
+    const isEye = wTrueEye(b, 9, 4, 4, 2);
+    const fake = { size: 9, board: b, turn: 2, level: 5, history: [], lastMove: null, prevHash: null, playerColor: 1 };
+    const res = wTryPlay(b, 9, 4, 4, 2, null);
+    const s = wQuickMoveScore(fake, b, 9, 2, 4, 4, res, null, 10);
+    return isEye && s < -300 ? true : 'eye ' + isEye + ' score ' + s;
+  });
+  t('go.ai_l5_time_budget', () => {
+    const b = wEmptyBoard(19);
+    [[3,3,1],[3,15,2],[15,3,2],[15,15,1],[9,9,1],[9,3,2],[3,9,2],[15,9,1],[9,15,2],[6,6,1],[6,12,2],[12,6,2],[12,12,1]]
+      .forEach(p => b[p[0]][p[1]] = p[2]);
+    const fake = { size: 19, board: b, turn: 2, level: 5, history: new Array(13).fill({pass:false}), lastMove: [12,12], prevHash: null, playerColor: 1 };
+    const t0 = Date.now();
+    const mv = goAI(fake);
+    const ms = Date.now() - t0;
+    if (!mv) return 'no move';
+    return ms <= 5000 ? true : 'slow ' + ms + 'ms';
+  });
 
   // ---------- 战绩分桶 ----------
   t('stats.gomoku_key_shape', () => {

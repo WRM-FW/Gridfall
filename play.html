@@ -1372,64 +1372,316 @@ function wIsEye(bd,n,r,c,color){
   for(i=0;i<4;i++){ rr=r+dirs[i][0]; cc=c+dirs[i][1]; if(rr<0||cc<0||rr>=n||cc>=n) continue; tot++; if(bd[rr][cc]===color) own++; }
   return tot>0&&own===tot;
 }
-function wPointScore(W,r,c){
-  var bd=W.board, n=W.size, color=W.turn, opp=color===1?2:1;
-  var res=wTryPlay(bd,n,r,c,color,W.prevHash);
-  if(!res) return -Infinity;
-  var s=0, dirs=[[1,0],[-1,0],[0,1],[0,-1]], i, rr, cc;
-  s+=res.captured*120;
-  var self=wGroup(res.board,n,r,c);
-  if(self.liberties===1&&res.captured===0) s-=260;         // 自陷
-  if(self.liberties===2) s-=25;
-  if(self.liberties>=4) s+=12;
-  for(i=0;i<4;i++){ rr=r+dirs[i][0]; cc=c+dirs[i][1]; if(rr<0||cc<0||rr>=n||cc>=n) continue;
-    if(bd[rr][cc]===opp){ var og=wGroup(bd,n,rr,cc); if(og.liberties===1&&res.captured===0) s+=70; if(og.liberties===2) s+=26; }
-    if(bd[rr][cc]===color){ var mg=wGroup(bd,n,rr,cc); if(mg.liberties===1) s+=95; if(mg.liberties===2) s+=18; } // 救子/连接
+/* ---- 围棋 AI：全盘评估 + 应手搜索 ---- */
+var W_DIRS4 = [[1,0],[-1,0],[0,1],[0,-1]];
+
+function wBoardGroups(bd,n){
+  var seen=[], groups=[], r, c, i;
+  for(r=0;r<n;r++){ seen[r]=[]; for(c=0;c<n;c++) seen[r][c]=false; }
+  for(r=0;r<n;r++) for(c=0;c<n;c++){
+    if(!bd[r][c]||seen[r][c]) continue;
+    var color=bd[r][c], stack=[[r,c]], stones=[], libs={};
+    seen[r][c]=true;
+    while(stack.length){
+      var cur=stack.pop(); stones.push(cur);
+      for(i=0;i<4;i++){
+        var rr=cur[0]+W_DIRS4[i][0], cc=cur[1]+W_DIRS4[i][1];
+        if(rr<0||cc<0||rr>=n||cc>=n) continue;
+        if(bd[rr][cc]===0) libs[rr*n+cc]=1;
+        else if(bd[rr][cc]===color&&!seen[rr][cc]){ seen[rr][cc]=true; stack.push([rr,cc]); }
+      }
+    }
+    groups.push({color:color,stones:stones,libs:Object.keys(libs).length});
   }
-  if(wIsEye(bd,n,r,c,color)&&res.captured===0) s-=190;    // 填真眼
-  if(W.lastMove){ var d=Math.abs(r-W.lastMove[0])+Math.abs(c-W.lastMove[1]); if(d<=2) s+=10; if(d===0) s-=40; }
+  return groups;
+}
+
+function wTrueEye(bd,n,r,c,color){
+  var i, rr, cc;
+  for(i=0;i<4;i++){
+    rr=r+W_DIRS4[i][0]; cc=c+W_DIRS4[i][1];
+    if(rr<0||cc<0||rr>=n||cc>=n||bd[rr][cc]!==color) return false;
+  }
+  var opp=color===1?2:1, bad=0;
+  for(var dr=-1;dr<=1;dr+=2) for(var dc=-1;dc<=1;dc+=2){
+    rr=r+dr; cc=c+dc;
+    if(rr>=0&&cc>=0&&rr<n&&cc<n&&bd[rr][cc]===opp) bad++;
+  }
+  return bad<2; // 两个以上对方斜子，按假眼处理
+}
+
+function wTerritory(bd,n){
+  var seen=[], bTerr=0, wTerr=0, r, c, i;
+  for(r=0;r<n;r++){ seen[r]=[]; for(c=0;c<n;c++) seen[r][c]=false; }
+  for(r=0;r<n;r++) for(c=0;c<n;c++){
+    if(bd[r][c]!==0||seen[r][c]) continue;
+    var stack=[[r,c]], region=0, border={};
+    seen[r][c]=true;
+    while(stack.length){
+      var cur=stack.pop(); region++;
+      for(i=0;i<4;i++){
+        var rr=cur[0]+W_DIRS4[i][0], cc=cur[1]+W_DIRS4[i][1];
+        if(rr<0||cc<0||rr>=n||cc>=n) continue;
+        if(bd[rr][cc]===0){ if(!seen[rr][cc]){ seen[rr][cc]=true; stack.push([rr,cc]); } }
+        else border[bd[rr][cc]]=1;
+      }
+    }
+    var keys=Object.keys(border);
+    if(keys.length===1){ if(keys[0]==="1") bTerr+=region; else wTerr+=region; }
+  }
+  return {bTerr:bTerr,wTerr:wTerr};
+}
+
+function wDistMap(bd,n,color){
+  var N=n*n, d=new Int16Array(N), q=[], head=0, i, r, c;
+  for(i=0;i<N;i++) d[i]=9999;
+  for(r=0;r<n;r++) for(c=0;c<n;c++){
+    if(bd[r][c]===color){ var idx=r*n+c; d[idx]=0; q.push(idx); }
+  }
+  while(head<q.length){
+    var cur=q[head++], cr=(cur/n)|0, c0=cur%n, nd=d[cur]+1;
+    for(i=0;i<4;i++){
+      var rr=cr+W_DIRS4[i][0], cc=c0+W_DIRS4[i][1];
+      if(rr<0||cc<0||rr>=n||cc>=n) continue;
+      var ni=rr*n+cc;
+      if(d[ni]>nd){ d[ni]=nd; q.push(ni); }
+    }
+  }
+  return d;
+}
+
+function wEvalBoard(bd,n,aiColor){
+  var groups=wBoardGroups(bd,n);
+  var db=wDistMap(bd,n,1), dw=wDistMap(bd,n,2);
+  var bStones=0, wStones=0, bSafe=0, wSafe=0, gi, si, i;
+  for(gi=0;gi<groups.length;gi++){
+    var g=groups[gi], size=g.stones.length, safety=0;
+    if(g.libs===0) safety-=size*140;
+    else if(g.libs===1) safety-=size*55;
+    else if(g.libs===2) safety-=size*10;
+    else safety+=Math.min(g.libs,6)*2;
+    var seenEye={}, eyes=0;
+    for(si=0;si<g.stones.length;si++){
+      var st=g.stones[si];
+      for(i=0;i<4;i++){
+        var rr=st[0]+W_DIRS4[i][0], cc=st[1]+W_DIRS4[i][1];
+        if(rr<0||cc<0||rr>=n||cc>=n||bd[rr][cc]!==0) continue;
+        var key=rr*n+cc;
+        if(!seenEye[key]&&wTrueEye(bd,n,rr,cc,g.color)){ seenEye[key]=1; eyes++; }
+      }
+    }
+    if(eyes>=2) safety+=size*14;
+    else if(eyes===1) safety+=size*4;
+    else if(size>=5) safety-=size*3;
+    if(g.color===1){ bStones+=size; bSafe+=safety; }
+    else { wStones+=size; wSafe+=safety; }
+  }
+  var bInf=0, wInf=0, r, c;
+  for(r=0;r<n;r++) for(c=0;c<n;c++){
+    if(bd[r][c]) continue;
+    var idx=r*n+c, diff=dw[idx]-db[idx];
+    if(diff>1) bInf+=Math.min(diff,5);
+    else if(diff<-1) wInf+=Math.min(-diff,5);
+  }
+  // 空盘和中盘不能把整片开放地都算成领地；只有棋子多起来才引入围空
+  var phase=(bStones+wStones)/(n*n);
+  var terrW=phase>0.45?0.9:(phase>0.28?0.45:0);
+  var terr=terrW?wTerritory(bd,n):{bTerr:0,wTerr:0};
+  var black=bStones+terr.bTerr*terrW+bInf*0.35+bSafe*0.7;
+  var white=wStones+terr.wTerr*terrW+wInf*0.35+wSafe*0.7+7.5;
+  return aiColor===1?black-white:white-black;
+}
+
+function wIsStar(n,r,c){
+  var pts=n>=17?[3,9,15]:(n>=11?[3,6,9]:(n>=7?[2,4,6]:[]));
+  return pts.indexOf(r)>=0&&pts.indexOf(c)>=0;
+}
+
+function wQuickMoveScore(W,bd,n,color,r,c,res,lastMove,stoneNo){
+  var opp=color===1?2:1, s=res.captured*130, i, rr, cc;
+  var self=wGroup(res.board,n,r,c);
+  if(self.liberties===1&&res.captured===0) s-=520;        // 自陷
+  else if(self.liberties===2&&res.captured===0) s-=48;
+  else if(self.liberties>=4) s+=8;
+  var ownG=0, oppG=0;
+  for(i=0;i<4;i++){
+    rr=r+W_DIRS4[i][0]; cc=c+W_DIRS4[i][1];
+    if(rr<0||cc<0||rr>=n||cc>=n) continue;
+    if(bd[rr][cc]===color){
+      ownG++;
+      var mg=wGroup(bd,n,rr,cc);
+      if(mg.liberties===1) s+=190;                         // 救自己被打吃的棋
+      else if(mg.liberties===2) s+=26;
+    } else if(bd[rr][cc]===opp){
+      oppG++;
+      var og=wGroup(bd,n,rr,cc);
+      if(og.liberties===1) s+=170;                         // 紧对方一气
+      else if(og.liberties===2) s+=64;
+    }
+  }
+  if(ownG>1) s+=(ownG-1)*14;                               // 连接
+  if(oppG>1) s+=(oppG-1)*18;                               // 分断
+  if(res.captured===0&&wTrueEye(bd,n,r,c,color)) s-=480;   // 不填自己的真眼
   var edge=Math.min(r,c,n-1-r,n-1-c);
-  var stones=W.history.filter(function(m){return !m.pass;}).length;
-  if(stones<10){ if(edge===2) s+=16; if(edge===0) s-=14; if(edge===1) s-=4; }
-  s+=Math.random()*4;
+  if(stoneNo<n*1.6){
+    if(edge===0) s-=38;
+    else if(edge===1) s-=10;
+    else if(edge===2) s+=12;
+    else if(edge===3) s+=16;
+    else if(edge===4) s+=8;
+  }
+  if(stoneNo<n*2.5&&wIsStar(n,r,c)&&bd[r][c]===0) s+=28;    // 开局占星位
+  if(lastMove){
+    var d=Math.abs(r-lastMove[0])+Math.abs(c-lastMove[1]);
+    if(d<=2) s+=12;
+    if(d===0) s-=80;
+  }
+  s+=Math.random()*3;
   return s;
 }
+
+function wCandidates(W,bd,n,color,prevHash,lastMove,limit,full){
+  var list=[], stoneNo=0, i, r, c;
+  for(i=0;i<W.history.length;i++) if(!W.history[i].pass) stoneNo++;
+  for(r=0;r<n;r++) for(c=0;c<n;c++){
+    if(bd[r][c]!==0) continue;
+    var res=wTryPlay(bd,n,r,c,color,prevHash);
+    if(!res) continue;
+    var s=wQuickMoveScore(W,bd,n,color,r,c,res,lastMove,stoneNo);
+    list.push({r:r,c:c,res:res,quick:s,full:0,total:s});
+  }
+  list.sort(function(a,b){ return b.quick-a.quick; });
+  if(full){
+    var top=list.slice(0,Math.max(limit,60));
+    for(i=0;i<top.length;i++){
+      top[i].full=wEvalBoard(top[i].res.board,n,color);
+      top[i].total=top[i].full+top[i].quick*0.22;
+    }
+    top.sort(function(a,b){ return b.total-a.total; });
+    return top.slice(0,limit);
+  }
+  return list.slice(0,limit);
+}
+
+function wOpponentWorst(W,board,n,oppColor,oppPrevHash,lastMove,aiColor,limit,deep,deadline){
+  var replies=wCandidates(W,board,n,oppColor,oppPrevHash,lastMove,limit,false);
+  if(!replies.length) return wEvalBoard(board,n,aiColor);
+  var aiPrevHash=wHash(board,n); // 对方落子前的局面，用于下一手劫争
+  var worst=Infinity, i, j;
+  for(i=0;i<replies.length;i++){
+    var rep=replies[i], val;
+    if(deep){
+      var mine=wCandidates(W,rep.res.board,n,aiColor,aiPrevHash,[rep.r,rep.c],5,false);
+      var bestMe=-Infinity;
+      for(j=0;j<mine.length;j++){
+        var ev=wEvalBoard(mine[j].res.board,n,aiColor)+mine[j].quick*0.15;
+        if(ev>bestMe) bestMe=ev;
+        if(Date.now()>deadline) break;
+      }
+      val=bestMe===-Infinity?wEvalBoard(rep.res.board,n,aiColor):bestMe;
+    } else {
+      val=wEvalBoard(rep.res.board,n,aiColor)-rep.quick*0.12;
+    }
+    if(val<worst) worst=val;
+    if(Date.now()>deadline) break;
+  }
+  return worst===Infinity?wEvalBoard(board,n,aiColor):worst;
+}
+
+function wBookMove(W,bd,n,stones){
+  var stars=n>=17
+    ? [[3,3],[3,15],[15,3],[15,15],[3,9],[9,3],[9,15],[15,9],[9,9]]
+    : (n>=11
+      ? [[3,3],[3,9],[9,3],[9,9],[6,6],[3,6],[6,3],[6,9],[9,6]]
+      : [[2,2],[2,6],[6,2],[6,6],[4,4],[2,4],[4,2],[4,6],[6,4]]);
+  var legal=[], i, r, c;
+  for(i=0;i<stars.length;i++){
+    r=stars[i][0]; c=stars[i][1];
+    if(bd[r][c]===0&&wTryPlay(bd,n,r,c,W.turn,W.prevHash)) legal.push([r,c]);
+  }
+  if(!legal.length) return null;
+  if(stones===0) return n>=13?legal[0]:legal[Math.floor(legal.length/2)];
+  var opp=W.turn===1?2:1, best=null, bestD=-1;
+  for(i=0;i<legal.length;i++){
+    var minD=99;
+    for(r=0;r<n;r++) for(c=0;c<n;c++){
+      if(bd[r][c]===opp){
+        var d=Math.abs(legal[i][0]-r)+Math.abs(legal[i][1]-c);
+        if(d<minD) minD=d;
+      }
+    }
+    if(minD>bestD){ bestD=minD; best=legal[i]; }
+  }
+  return best;
+}
+
 function goAI(W){
-  var n=W.size, bd=W.board, legal=[], r, c;
-  for(r=0;r<n;r++) for(c=0;c<n;c++){ if(bd[r][c]===0&&wTryPlay(bd,n,r,c,W.turn,W.prevHash)) legal.push([r,c]); }
-  if(legal.length===0) return "pass";
-  var level=W.level;
+  var n=W.size, bd=W.board, color=W.turn, opp=color===1?2:1, r, c, i;
+  var legal=[];
+  for(r=0;r<n;r++) for(c=0;c<n;c++){
+    if(bd[r][c]===0&&wTryPlay(bd,n,r,c,color,W.prevHash)) legal.push([r,c]);
+  }
+  if(!legal.length) return "pass";
+
+  var level=W.level, stones=0;
+  for(i=0;i<W.history.length;i++) if(!W.history[i].pass) stones++;
+
   if(level===1){
-    // 简单：多为随机，偶尔提子
-    var caps=legal.filter(function(p){ var res=wTryPlay(bd,n,p[0],p[1],W.turn,W.prevHash); return res&&res.captured>0; });
+    var caps=legal.filter(function(p){ var res=wTryPlay(bd,n,p[0],p[1],color,W.prevHash); return res&&res.captured>0; });
     if(caps.length&&Math.random()<0.55) return caps[Math.floor(Math.random()*caps.length)];
-    if(Math.random()<0.06) return "pass";
+    if(Math.random()<0.05) return "pass";
     return legal[Math.floor(Math.random()*legal.length)];
   }
-  var best=null, bs=-Infinity, i, p, s;
-  for(i=0;i<legal.length;i++){ p=legal[i]; s=wPointScore(W,p[0],p[1]);
-    if(level===2) s=(wTryPlay(bd,n,p[0],p[1],W.turn,W.prevHash).captured*120)+(Math.random()*30);
-    if(level===3) { /* wPointScore 全量 */ }
-    if(s>bs){ bs=s; best=p; }
+
+  // 对方停一手时，若自己领先就跟着停；落后则继续找机会
+  if(W.history.length&&W.history[W.history.length-1].pass){
+    var sc=wScore(bd,n);
+    var lead=color===1?sc.black-sc.white:sc.white-sc.black;
+    if(lead>0) return "pass";
   }
-  if(level>=4){
-    // 模拟对手最佳提子回应，扣分
-    var saved=best;
-    var bestNet=-Infinity, cand=legal.slice().sort(function(a,b){ return wPointScore(W,b[0],b[1])-wPointScore(W,a[0],a[1]); }).slice(0, level===5?8:5);
-    for(i=0;i<cand.length;i++){ p=cand[i];
-      var res=wTryPlay(bd,n,p[0],p[1],W.turn,W.prevHash); if(!res) continue;
-      var oppColor=W.turn===1?2:1, oppBest=0, r2, c2;
-      for(r2=0;r2<n;r2++) for(c2=0;c2<n;c2++){ if(res.board[r2][c2]!==0) continue;
-        var ores=wTryPlay(res.board,n,r2,c2,oppColor,null); if(ores&&ores.captured>oppBest) oppBest=ores.captured;
-      }
-      var net=wPointScore(W,p[0],p[1]) - oppBest*95;
-      if(net>bestNet){ bestNet=net; best=p; }
+
+  if(level>=4&&stones<6){
+    var urgent=false, gs=wBoardGroups(bd,n);
+    for(i=0;i<gs.length;i++){ if(gs[i].libs===1){ urgent=true; break; } }
+    if(!urgent){
+      var book=wBookMove(W,bd,n,stones);
+      if(book) return book;
     }
-    if(!best) best=saved;
   }
-  var stones=W.history.filter(function(m){return !m.pass;}).length;
-  if(bs<-60&&stones>n) return "pass";  // 无好点则停一手
-  return best;
+
+  if(level===2){
+    var loose=wCandidates(W,bd,n,color,W.prevHash,W.lastMove,20,false);
+    if(!loose.length) return "pass";
+    if(Math.random()<0.28){
+      var pick=loose[Math.floor(Math.random()*Math.min(loose.length,8))];
+      return [pick.r,pick.c];
+    }
+    return [loose[0].r,loose[0].c];
+  }
+
+  if(level===3){
+    var mid=wCandidates(W,bd,n,color,W.prevHash,W.lastMove,16,true);
+    if(!mid.length) return "pass";
+    if(mid[0].quick<-220&&stones>n*n*0.5) return "pass";
+    return [mid[0].r,mid[0].c];
+  }
+
+  var rootLimit=level>=5?18:10;
+  var replyLimit=level>=5?12:8;
+  var deadline=Date.now()+(level>=5?1200:420);
+  var cands=wCandidates(W,bd,n,color,W.prevHash,W.lastMove,rootLimit,true);
+  if(!cands.length) return "pass";
+  if(cands[0].quick<-220&&stones>n*n*0.5) return "pass";
+
+  var rootPrevHash=wHash(bd,n); // AI 落子后，对手的劫争禁着依据
+  var best=cands[0], bestVal=-Infinity;
+  for(i=0;i<cands.length;i++){
+    var cd=cands[i];
+    var val=wOpponentWorst(W,cd.res.board,n,opp,rootPrevHash,[cd.r,cd.c],color,replyLimit,level>=5,deadline)+cd.quick*0.35;
+    if(val>bestVal){ bestVal=val; best=cd; }
+    if(Date.now()>deadline) break;
+  }
+  return [best.r,best.c];
 }
 </script>
 <script>"use strict";
