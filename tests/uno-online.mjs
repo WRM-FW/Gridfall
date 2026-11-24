@@ -86,7 +86,7 @@ async function runRoom(count) {
     }
     await host.evaluate(`document.getElementById('btn-restart').click()`);
     for (let i = 0; i < count; i++) {
-      if (!await wait(clients[i], `!UNO_API.state.gameOver && UNO_API.state.players.every(p => p.hand.length === 7)`)) {
+      if (!await wait(clients[i], `!UNO_API.state.gameOver && UNO_API.state.players.every(p => p.hand.length >= 7)`)) {
         return { pass: false, detail: 'rematch failed on client ' + i };
       }
     }

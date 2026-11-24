@@ -388,6 +388,20 @@
       animation: popIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
+    .seat-offline-tag {
+      position: absolute;
+      top: -9px;
+      left: 10px;
+      background: var(--text-muted);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      padding: 2px 7px;
+      border-radius: 999px;
+      box-shadow: var(--shadow-sm);
+    }
+
     .catch-btn {
       margin-top: 2px;
       border: none;
@@ -1418,6 +1432,12 @@
           statusStackTurn: (n) => `当前叠加罚摸 +${n}，出叠加牌或点击牌堆摸 ${n} 张`,
           statusDrawnPlayable: '刚摸到的牌可以直接打出，或点击「保留并过牌」',
           statusAiTurn: (name) => `${name} 正在思考…`,
+          statusWaiting: (name) => `等待 ${name} 出牌…`,
+          statusOffline: (name) => `${name} 已离开，等待重连…`,
+          statusAuto: (name) => `${name} 托管出牌中…`,
+          offlineTag: '已离开',
+          autoTag: '托管中',
+          toastOnlineRuleLocked: '联机对局中不能修改叠加规则',
           toastPlayed: (name, card) => `${name} 打出了 ${card}`,
           toastDrew: (name, n) => `${name} 摸了 ${n} 张牌`,
           toastSkipped: (name) => `${name} 被跳过回合`,
@@ -1488,6 +1508,12 @@
           statusStackTurn: (n) => `Stack penalty +${n} — stack a draw card or draw ${n}`,
           statusDrawnPlayable: 'You drew a playable card — play it now or Keep & Pass',
           statusAiTurn: (name) => `${name} is thinking…`,
+          statusWaiting: (name) => `Waiting for ${name}…`,
+          statusOffline: (name) => `${name} left — waiting to reconnect…`,
+          statusAuto: (name) => `${name} is auto-playing…`,
+          offlineTag: 'Offline',
+          autoTag: 'Auto',
+          toastOnlineRuleLocked: 'Stacking cannot be changed during an online match',
           toastPlayed: (name, card) => `${name} played ${card}`,
           toastDrew: (name, n) => `${name} drew ${n} card${n > 1 ? 's' : ''}`,
           toastSkipped: (name) => `${name} was skipped`,
@@ -1785,6 +1811,23 @@
         return ((fromIdx + state.direction * steps) % n + n) % n;
       }
 
+      function isOnlineMode() {
+        return !!(window.UNO_NET && window.UNO_NET.mode);
+      }
+
+      // A catch window closes as soon as any other player takes an action.
+      function clearOtherVulnerabilities(actorIdx) {
+        state.players.forEach((p, i) => {
+          if (i !== actorIdx) p.vulnerableUno = false;
+        });
+      }
+
+      // Host-authoritative online games must push every state mutation.
+      function onlineAfterChange() {
+        if (!window.UNO_NET || !window.UNO_NET.isHost || !window.UNO_NET.started) return;
+        if (typeof unoNetBroadcastState === 'function') unoNetBroadcastState();
+      }
+
       function ensureDeckHas(count) {
         if (state.deck.length >= count) return true;
         if (state.discard.length <= 1) return false;
@@ -1809,14 +1852,17 @@
         const top = topDiscard();
         if (!top) return true;
 
-        // If stacking penalty is active
-        if (state.pendingDraw > 0 && state.allowStacking) {
+        // While a stacking penalty is pending, only cards that can legally
+        // continue the stack may be played. Otherwise the player must draw.
+        if (state.pendingDraw > 0) {
+          if (!state.allowStacking) return false;
           if (state.pendingDrawType === 'draw2') {
             return card.value === 'draw2' || card.value === 'wild4';
           }
           if (state.pendingDrawType === 'wild4') {
             return card.value === 'wild4';
           }
+          return false;
         }
 
         if (card.color === 'wild') return true;
@@ -1890,9 +1936,10 @@
       }
 
       /* ======================== GAME INIT ======================== */
-      function startGame(playerCount = state.playerCount) {
+      // Shared by offline rounds and host-authoritative online rounds.
+      function resetRound(players) {
         clearAllTimers();
-        state.playerCount = playerCount;
+        state.playerCount = players.length;
         state.deck = createDeck();
         state.discard = [];
         state.direction = 1;
@@ -1902,24 +1949,18 @@
         state.awaitingWildColor = false;
         state.pendingWildCardId = null;
         state.gameOver = false;
+        state.unoGraceTimer = null;
 
-        closeModal(els.wildModal);
-        closeModal(els.gameoverModal);
-
-        const aiNames = playerCount === 3 ? t().aiNames3 : t().aiNames4;
-        state.players = [
-          { id: 0, name: t().you, isHuman: true, hand: [], saidUno: false, vulnerableUno: false }
-        ];
-        for (let i = 0; i < playerCount - 1; i++) {
-          state.players.push({
-            id: i + 1,
-            name: aiNames[i],
-            isHuman: false,
-            hand: [],
-            saidUno: false,
-            vulnerableUno: false
-          });
-        }
+        state.players = players.map((p) => ({
+          id: p.id,
+          name: p.name,
+          isHuman: p.isHuman !== false,
+          connected: p.connected !== false,
+          auto: !!p.auto,
+          hand: [],
+          saidUno: false,
+          vulnerableUno: false
+        }));
 
         // Deal 7 cards each
         for (let r = 0; r < 7; r++) {
@@ -1927,7 +1968,7 @@
             p.hand.push(state.deck.pop());
           }
         }
-        sortHand(state.players[0].hand);
+        state.players.forEach((p) => sortHand(p.hand));
 
         // Flip initial discard: avoid Wild+4 (official rule) and pick a clean starting card
         let first = state.deck.pop();
@@ -1940,11 +1981,46 @@
         state.activeColor = first.color;
         state.currentTurn = 0;
 
-        // If first card is Reverse, flip direction cleanly
+        // Apply the first card's effect instead of silently ignoring it.
         if (first.value === 'reverse') {
           state.direction = -1;
           showToast(t().toastReversed);
+        } else if (first.value === 'skip') {
+          const skipped = state.players[0];
+          state.currentTurn = nextIndex(0, 1);
+          showToast(t().toastSkipped(skipped.name));
+        } else if (first.value === 'draw2') {
+          const victim = state.players[0];
+          const drawn = drawFromDeck(2);
+          victim.hand.push(...drawn);
+          sortHand(victim.hand);
+          Sound.penalty();
+          showToast(t().toastDrew(victim.name, drawn.length));
+          state.currentTurn = nextIndex(0, 1);
         }
+
+        closeModal(els.wildModal);
+        closeModal(els.gameoverModal);
+      }
+
+      function startGame(playerCount = state.playerCount) {
+        if (isOnlineMode()) return;
+        const aiNames = playerCount === 3 ? t().aiNames3 : t().aiNames4;
+        const players = [
+          { id: 0, name: t().you, isHuman: true, hand: [], saidUno: false, vulnerableUno: false }
+        ];
+        for (let i = 0; i < playerCount - 1; i++) {
+          players.push({
+            id: i + 1,
+            name: aiNames[i],
+            isHuman: false,
+            hand: [],
+            saidUno: false,
+            vulnerableUno: false
+          });
+        }
+
+        resetRound(players);
 
         els.btnMode3.classList.toggle('active', state.playerCount === 3);
         els.btnMode4.classList.toggle('active', state.playerCount === 4);
@@ -1963,9 +2039,7 @@
         if (!canPlayCard(card)) return;
 
         // Clear any previous player's UNO vulnerability once a new play happens
-        state.players.forEach((p, i) => {
-          if (i !== playerIdx) p.vulnerableUno = false;
-        });
+        clearOtherVulnerabilities(playerIdx);
 
         player.hand.splice(idx, 1);
         state.discard.push(card);
@@ -1996,17 +2070,26 @@
 
         // Check UNO state when dropping to 1 card
         if (player.hand.length === 1) {
-          if (player.isHuman) {
+          if (isOnlineMode() && player.isHuman) {
+            // Online: never auto-penalize a remote player. They stay catchable
+            // until an opponent clicks "Catch UNO" (or the next play closes the window).
             if (player.saidUno) {
               Sound.uno();
               showToast(t().toastUnoShout(player.name));
             } else {
-              // Give human a brief grace window to hit UNO before AI catches
+              player.vulnerableUno = true;
+            }
+          } else if (player.isHuman) {
+            if (player.saidUno) {
+              Sound.uno();
+              showToast(t().toastUnoShout(player.name));
+            } else {
+              // Offline: give the human a brief grace window to hit UNO.
               player.vulnerableUno = true;
               if (state.unoGraceTimer) clearTimeout(state.unoGraceTimer);
               state.unoGraceTimer = setTimeout(() => {
                 if (!state.gameOver && player.hand.length === 1 && player.vulnerableUno && !player.saidUno) {
-                  applyUnoPenalty(0);
+                  applyUnoPenalty(playerIdx);
                 }
               }, 2400);
             }
@@ -2059,6 +2142,7 @@
         state.currentTurn = nextIndex(playerIdx, step);
         renderAll();
         maybeTriggerAiTurn();
+        onlineAfterChange();
       }
 
       function applyUnoPenalty(targetIdx) {
@@ -2072,12 +2156,16 @@
         Sound.penalty();
         showToast(t().toastUnoCaught(p.name));
         renderAll();
+        onlineAfterChange();
       }
 
       function handleHumanDraw() {
         if (state.gameOver || state.currentTurn !== 0 || state.awaitingWildColor) return;
         if (state.drawnPlayableCardId !== null) return;
 
+        if (isOnlineMode()) { unoNetAct('draw'); return; }
+
+        clearOtherVulnerabilities(0);
         const human = state.players[0];
 
         // If stacking penalty is pending, draw full penalty and end turn
@@ -2132,6 +2220,8 @@
 
       function handleHumanPass() {
         if (state.gameOver || state.currentTurn !== 0 || state.drawnPlayableCardId === null) return;
+        if (isOnlineMode()) { unoNetAct('pass'); return; }
+        clearOtherVulnerabilities(0);
         state.drawnPlayableCardId = null;
         state.currentTurn = nextIndex(0, 1);
         renderAll();
@@ -2140,6 +2230,7 @@
 
       function handleHumanCardClick(cardId) {
         if (state.gameOver || state.currentTurn !== 0 || state.awaitingWildColor) return;
+        if (isOnlineMode()) { unoNetHandClick(cardId); return; }
         const human = state.players[0];
         const card = human.hand.find((c) => c.id === cardId);
         if (!card || !canPlayCard(card)) return;
@@ -2161,6 +2252,7 @@
 
       function handleWildColorChosen(color) {
         if (!state.awaitingWildColor || !state.pendingWildCardId) return;
+        if (isOnlineMode()) { unoNetColorChosen(color); return; }
         const cid = state.pendingWildCardId;
         state.awaitingWildColor = false;
         state.pendingWildCardId = null;
@@ -2170,6 +2262,7 @@
 
       function handleHumanUnoClick() {
         if (state.gameOver) return;
+        if (isOnlineMode()) { unoNetAct('uno'); return; }
         const human = state.players[0];
         if (human.hand.length === 2 && state.currentTurn === 0) {
           human.saidUno = !human.saidUno;
@@ -2242,25 +2335,28 @@
 
       function maybeTriggerAiTurn() {
         if (state.gameOver) return;
-        const curr = state.players[state.currentTurn];
+        const currIdx = state.currentTurn;
+        const curr = state.players[currIdx];
         if (!curr || curr.isHuman) return;
 
         const spd = AI_SPEEDS[state.aiSpeed] || AI_SPEEDS.fast;
         const delay = spd.thinkBase + Math.floor(Math.random() * spd.thinkJitter);
         schedule(() => {
-          if (state.gameOver || state.currentTurn !== curr.id) return;
+          // The seat may have reconnected or the turn may have moved on while waiting.
+          if (state.gameOver || state.currentTurn !== currIdx || !state.players[currIdx] || state.players[currIdx].isHuman) return;
 
-          const card = chooseAiCard(curr.id);
+          const card = chooseAiCard(currIdx);
           if (card) {
             const chosenColor = card.color === 'wild'
               ? pickBestAiColor(curr.hand.filter((x) => x.id !== card.id))
               : null;
-            executePlayCard(curr.id, card.id, chosenColor);
+            executePlayCard(currIdx, card.id, chosenColor);
             return;
           }
 
           // No playable card: draw
           if (state.pendingDraw > 0) {
+            clearOtherVulnerabilities(currIdx);
             const amt = state.pendingDraw;
             state.pendingDraw = 0;
             state.pendingDrawType = null;
@@ -2270,12 +2366,14 @@
             curr.vulnerableUno = false;
             Sound.penalty();
             showToast(t().toastDrew(curr.name, drawn.length));
-            state.currentTurn = nextIndex(curr.id, 1);
+            state.currentTurn = nextIndex(currIdx, 1);
             renderAll();
+            onlineAfterChange();
             maybeTriggerAiTurn();
             return;
           }
 
+          clearOtherVulnerabilities(currIdx);
           const drawn = drawFromDeck(1);
           if (drawn.length > 0) {
             const dCard = drawn[0];
@@ -2287,19 +2385,21 @@
 
             if (canPlayCard(dCard)) {
               renderAll();
+              onlineAfterChange();
               schedule(() => {
-                if (state.gameOver || state.currentTurn !== curr.id) return;
+                if (state.gameOver || state.currentTurn !== currIdx || !state.players[currIdx] || state.players[currIdx].isHuman) return;
                 const chosenColor = dCard.color === 'wild'
                   ? pickBestAiColor(curr.hand.filter((x) => x.id !== dCard.id))
                   : null;
-                executePlayCard(curr.id, dCard.id, chosenColor);
+                executePlayCard(currIdx, dCard.id, chosenColor);
               }, (AI_SPEEDS[state.aiSpeed] || AI_SPEEDS.fast).drawPlay);
               return;
             }
           }
 
-          state.currentTurn = nextIndex(curr.id, 1);
+          state.currentTurn = nextIndex(currIdx, 1);
           renderAll();
+          onlineAfterChange();
           maybeTriggerAiTurn();
         }, delay);
       }
@@ -2308,12 +2408,15 @@
       function finishGame(winnerIdx) {
         clearAllTimers();
         state.gameOver = true;
+        if (isOnlineMode()) window.UNO_NET.overShown = true;
         Sound.win();
 
         const winner = state.players[winnerIdx];
         const totalPoints = state.players.reduce((sum, p, i) => i === winnerIdx ? sum : sum + handPoints(p.hand), 0);
 
-        els.gameoverTitle.textContent = winner.isHuman ? t().gameOverWin : t().gameOverLose(winner.name);
+        els.gameoverTitle.textContent = isOnlineMode()
+          ? (winner.id === window.UNO_NET.myId ? t().gameOverWin : t().gameOverLose(winner.name))
+          : (winner.isHuman ? t().gameOverWin : t().gameOverLose(winner.name));
         els.gameoverSubtitle.textContent = t().gameOverPts(totalPoints);
 
         els.gameoverList.innerHTML = state.players.map((p, i) => {
@@ -2333,11 +2436,12 @@
 
         renderAll();
         openModal(els.gameoverModal);
+        onlineAfterChange();
       }
 
       /* ======================== RENDERING ======================== */
-      function renderSeatHtml(player) {
-        const isTurn = !state.gameOver && state.currentTurn === player.id;
+      function renderSeatHtml(player, idx) {
+        const isTurn = !state.gameOver && state.currentTurn === idx;
         const count = player.hand.length;
         const visibleMini = Math.min(count, 9);
         let miniCards = '';
@@ -2348,12 +2452,16 @@
         const unoBadge = count === 1 && player.saidUno
           ? '<div class="seat-uno-tag">UNO!</div>'
           : '';
+        const offlineTag = window.UNO_NET && window.UNO_NET.mode && player.connected === false
+          ? `<div class="seat-offline-tag">${player.auto ? t().autoTag : t().offlineTag}</div>`
+          : '';
         const catchBtn = count === 1 && player.vulnerableUno && !player.saidUno
-          ? `<button class="catch-btn" data-catch-id="${player.id}">${t().catchUno}</button>`
+          ? `<button class="catch-btn" data-catch-index="${idx}" data-catch-id="${player.id}">${t().catchUno}</button>`
           : '';
 
         return `
           <div class="seat-badge ${isTurn ? 'active-turn' : ''}" style="--active-color:${COLOR_HEX[state.activeColor]}">
+            ${offlineTag}
             ${unoBadge}
             <div class="seat-header">
               <div class="seat-identity">
@@ -2377,11 +2485,11 @@
         if (state.playerCount === 3) {
           // Player 1 (left/top-left), Player 2 (right/top-right)
           if (isNarrowMobile) {
-            els.opponentsTop.innerHTML = renderSeatHtml(state.players[1]) + renderSeatHtml(state.players[2]);
+            els.opponentsTop.innerHTML = renderSeatHtml(state.players[1], 1) + renderSeatHtml(state.players[2], 2);
             els.seatLeft.classList.add('empty');
             els.seatRight.classList.add('empty');
           } else {
-            els.opponentsTop.innerHTML = renderSeatHtml(state.players[1]) + renderSeatHtml(state.players[2]);
+            els.opponentsTop.innerHTML = renderSeatHtml(state.players[1], 1) + renderSeatHtml(state.players[2], 2);
             els.seatLeft.classList.add('empty');
             els.seatRight.classList.add('empty');
           }
@@ -2389,17 +2497,17 @@
           // 4 players: clockwise -> 0(bottom), 1(left), 2(top), 3(right)
           if (isNarrowMobile) {
             els.opponentsTop.innerHTML =
-              renderSeatHtml(state.players[1]) +
-              renderSeatHtml(state.players[2]) +
-              renderSeatHtml(state.players[3]);
+              renderSeatHtml(state.players[1], 1) +
+              renderSeatHtml(state.players[2], 2) +
+              renderSeatHtml(state.players[3], 3);
             els.seatLeft.classList.add('empty');
             els.seatRight.classList.add('empty');
           } else {
             els.seatLeft.classList.remove('empty');
             els.seatRight.classList.remove('empty');
-            els.seatLeft.innerHTML = renderSeatHtml(state.players[1]);
-            els.opponentsTop.innerHTML = renderSeatHtml(state.players[2]);
-            els.seatRight.innerHTML = renderSeatHtml(state.players[3]);
+            els.seatLeft.innerHTML = renderSeatHtml(state.players[1], 1);
+            els.opponentsTop.innerHTML = renderSeatHtml(state.players[2], 2);
+            els.seatRight.innerHTML = renderSeatHtml(state.players[3], 3);
           }
         }
       }
@@ -2448,7 +2556,14 @@
             els.statusText.textContent = dict.statusYourTurn;
           }
         } else {
-          els.statusText.textContent = dict.statusAiTurn(state.players[state.currentTurn].name);
+          const current = state.players[state.currentTurn];
+          if (current && current.connected === false) {
+            els.statusText.textContent = current.auto ? dict.statusAuto(current.name) : dict.statusOffline(current.name);
+          } else if (isOnlineMode()) {
+            els.statusText.textContent = dict.statusWaiting(current ? current.name : '');
+          } else {
+            els.statusText.textContent = dict.statusAiTurn(current ? current.name : '');
+          }
         }
       }
 
@@ -2534,8 +2649,8 @@
         els.rulesBody.innerHTML = dict.rulesHtml;
         els.btnCloseRules.textContent = dict.closeRules;
 
-        // Sync player names on language switch
-        if (state.players.length > 0) {
+        // Sync player names on language switch (offline only; online names are host-owned)
+        if (!isOnlineMode() && state.players.length > 0) {
           state.players[0].name = dict.you;
           const aiNames = state.playerCount === 3 ? dict.aiNames3 : dict.aiNames4;
           for (let i = 1; i < state.players.length; i++) {
@@ -2581,7 +2696,8 @@
       document.querySelector('.arena').addEventListener('click', (e) => {
         const catchBtn = e.target.closest('.catch-btn');
         if (!catchBtn) return;
-        const targetId = Number(catchBtn.dataset.catchId);
+        const targetId = Number(catchBtn.dataset.catchIndex);
+        if (!Number.isFinite(targetId)) return;
         applyUnoPenalty(targetId);
       });
 
@@ -2625,6 +2741,11 @@
         if (e.target === els.rulesModal) closeModal(els.rulesModal);
       });
       els.toggleStacking.addEventListener('change', (e) => {
+        if (isOnlineMode()) {
+          e.target.checked = state.allowStacking;
+          showToast(t().toastOnlineRuleLocked);
+          return;
+        }
         state.allowStacking = e.target.checked;
         try { localStorage.setItem('uno_stacking', state.allowStacking ? '1' : '0'); } catch (_) {}
       });

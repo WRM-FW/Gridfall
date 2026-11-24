@@ -88,14 +88,6 @@ const css = `
 `;
 must('</head>', '<style>' + css + '</style>\n</head>');
 
-must('applyUnoPenalty(0);', 'applyUnoPenalty(playerIdx);');
-must('const isTurn = !state.gameOver && state.currentTurn === player.id;',
-     'const isTurn = !state.gameOver && state.players[state.currentTurn] === player;');
-must('els.gameoverTitle.textContent = winner.isHuman ? t().gameOverWin : t().gameOverLose(winner.name);',
-`els.gameoverTitle.textContent = (typeof UNO_NET !== 'undefined' && UNO_NET.mode)
-          ? (winner.id === UNO_NET.myId ? t().gameOverWin : t().gameOverLose(winner.name))
-          : (winner.isHuman ? t().gameOverWin : t().gameOverLose(winner.name));`);
-
 must('    })();\n  </script>', online + '\n    })();\n  </script>');
 
 fs.mkdirSync(path.join(ROOT, 'games', 'uno'), { recursive: true });
