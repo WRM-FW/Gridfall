@@ -18,7 +18,8 @@ const pages = [
   ['sokoban', 'games/sokoban/index.html'],
   ['tetris', 'games/tetris/index.html'],
   ['tic-tac-toe', 'games/tic-tac-toe/index.html'],
-  ['jump', 'games/jump/index.html']
+  ['jump', 'games/jump/index.html'],
+  ['uno', 'games/uno/index.html']
 ];
 const b = await launch(home, { port: 9466 });
 const R = [];

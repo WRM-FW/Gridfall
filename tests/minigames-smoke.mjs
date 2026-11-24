@@ -86,4 +86,8 @@ try {
   await goto(page('games/jump/index.html'));
   console.log('jump', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), canvas:document.querySelectorAll('canvas').length, three:typeof THREE !== 'undefined' })`)));
   await b.screenshot(path.join(SHOTS, 'jump-page.png'));
+
+  await goto(page('games/uno/index.html'));
+  console.log('uno', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), online:!!document.getElementById('btn-online'), modal:!!document.getElementById('online-modal'), players:UNO_API.state.players.length })`)));
+  await b.screenshot(path.join(SHOTS, 'uno-page.png'));
 } finally { await b.close(); }

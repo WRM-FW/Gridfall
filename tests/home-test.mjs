@@ -39,7 +39,7 @@ try {
       err: window.__qaErrors || []
     })`);
     if (!r.title.includes('游戏大厅')) return 'title ' + r.title;
-    if (r.cards !== 11 || r.live !== 11 || r.soon !== 0) return 'cards ' + JSON.stringify(r);
+    if (r.cards !== 12 || r.live !== 12 || r.soon !== 0) return 'cards ' + JSON.stringify(r);
     if (r.err.length) return 'errors ' + JSON.stringify(r.err);
     return true;
   });
@@ -47,12 +47,12 @@ try {
 
   await t('home.covers', async () => {
     const sel = '.gv-cover-img, .roadmap-cover img, .co-build-art img';
-    const ok = await waitFor(`document.querySelectorAll('${sel}').length === 15 && [...document.querySelectorAll('${sel}')].every(i => i.complete && i.naturalWidth > 0)`, 10000);
+    const ok = await waitFor(`document.querySelectorAll('${sel}').length === 16 && [...document.querySelectorAll('${sel}')].every(i => i.complete && i.naturalWidth > 0)`, 10000);
     if (!ok) return 'covers not loaded';
     const r = await b.evaluate(`[...document.querySelectorAll('${sel}')].map(i => ({ src: i.getAttribute('src'), w: i.naturalWidth, h: i.naturalHeight }))`);
     const bad = r.filter(i => i.w !== 1200 || i.h !== 600 || i.src.indexOf('./assets/covers/') !== 0);
     if (bad.length) return JSON.stringify(bad);
-    if (new Set(r.map(i => i.src)).size !== 15) return 'duplicate cover';
+    if (new Set(r.map(i => i.src)).size !== 16) return 'duplicate cover';
     return true;
   });
   await b.evaluate(`document.getElementById('games').scrollIntoView({ block: 'start', behavior: 'instant' })`);
@@ -106,6 +106,9 @@ try {
     await clickChip('action'); await sleep(200);
     r = await visible();
     if (r !== 3) return 'action filter ' + r;
+    await clickChip('cards'); await sleep(200);
+    r = await visible();
+    if (r !== 1) return 'cards filter ' + r;
     await clickChip('all');
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value='围棋'; i.dispatchEvent(new Event('input')); })()`);
     await sleep(200);
@@ -114,7 +117,7 @@ try {
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value='联机'; i.dispatchEvent(new Event('input')); })()`);
     await sleep(200);
     r = await visible();
-    if (r !== 2) return 'search online ' + r;
+    if (r !== 3) return 'search online ' + r;
     await b.evaluate(`(() => { const i=document.getElementById('gameSearch'); i.value=''; i.dispatchEvent(new Event('input')); })()`);
     return true;
   });
@@ -157,11 +160,12 @@ try {
       ['./games/sokoban/index.html', '推箱子 · Gridfall'],
       ['./games/tetris/index.html', '俄罗斯方块 · Gridfall'],
       ['./games/tic-tac-toe/index.html', '井字棋 · Gridfall'],
-      ['./games/jump/index.html', '跳一跳 · HOP STUDIO']
+      ['./games/jump/index.html', '跳一跳 · HOP STUDIO'],
+      ['./games/uno/index.html', 'UNO · Gridfall']
     ];
     for (const [local, title] of games) {
       await goto(home);
-      await waitFor(`document.querySelectorAll('.game-card').length === 11`, 8000);
+      await waitFor(`document.querySelectorAll('.game-card').length === 12`, 8000);
       const clicked = await b.evaluate(`(() => { const a = document.querySelector('.game-card a[data-local="${local}"]'); if (!a) return false; a.click(); return true; })()`);
       if (!clicked) return 'card missing ' + local;
       if (!await waitFor(`document.title.includes(${JSON.stringify(title)})`, 8000)) return 'did not open ' + local;

@@ -1,6 +1,6 @@
 # Gridfall — 棋盘 / 游戏大厅
 
-黑白棋社（五子棋 / 国际连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳。黑白棋社与中国象棋支持单机/本地/联机；其余为本地或单人。首页是平台大厅，后续继续接入更多游戏。
+黑白棋社（五子棋 / 国际连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO。黑白棋社、中国象棋与 UNO 支持联机；其余为本地或单人。首页是平台大厅，后续继续接入更多游戏。
 
 - 主站（Cloudflare Pages，游戏大厅）：https://play-gridfall.pages.dev/
 - GitHub Pages 访问入口：https://wrm-fw.github.io/Gridfall/
@@ -25,6 +25,7 @@ games/
   tetris/index.html         俄罗斯方块
   tic-tac-toe/index.html    井字棋
   jump/index.html           跳一跳（3D，Three.js 已本地化）
+  uno/index.html            UNO（3/4 人，人机 + 联机）
 assets/covers/              大厅封面
 shared/                     supabase.js / supabase-config.js（仅联机懒加载）
 tools/                      构建源、设计参考、构建脚本
@@ -59,10 +60,10 @@ GitHub Pages：从 `main` 分支根目录发布，推送后自动更新。
 
 ## 联机
 
-- Supabase Realtime Broadcast + Presence；黑白棋社频道 `gridfall-room-<房间码>`，中国象棋频道 `gridfall-xq-room-<房间码>`；广播 `state` / `intent` / `ping` / `pong` / `bye` / `reject` 事件。
+- Supabase Realtime Broadcast + Presence；黑白棋社频道 `gridfall-room-<房间码>`，中国象棋频道 `gridfall-xq-room-<房间码>`，UNO 频道 `gridfall-uno-room-<房间码>`（3/4 人）；广播 `state` / `intent` / `ping` / `pong` / `bye` / `reject` 事件。
 - 没有数据库表：房间状态由房主保存在内存中，每次变更广播完整快照；双方都离开后房间结束。房主刷新会失去房间权威状态；客端在房主在线时可以凭房间码重连。
 - 房主是权威端，落子、禁手、胜负、劫争都按本地规则判定；客户端只渲染快照，未轮到的一方不能落子。
-- 黑白棋社房主默认执黑；任一方可在开局前申请换方，由对方同意或拒绝；正式连珠使用自身开局交换步骤。中国象棋房主默认执红（红先），同样支持换方申请。
+- 黑白棋社房主默认执黑；任一方可在开局前申请换方，由对方同意或拒绝；正式连珠使用自身开局交换步骤。中国象棋房主默认执红（红先），同样支持换方申请。UNO 房主负责洗牌、判定与完整快照，3 人房/4 人房满员后开局。
 - 免费版额度内使用，没有引入付费服务；没有使用 service_role 或 secret key。房间码即入场凭证，频道是公共频道，不要把房间码发给无关的人。
 
 ## 视觉
@@ -71,7 +72,7 @@ GitHub Pages：从 `main` 分支根目录发布，推送后自动更新。
 - 大厅游戏封面统一使用 `assets/covers/` 下的 1200×600 插画（`snake/sokoban/tetris` 为项目内 SVG），`.gv-cover-img` 以 `object-fit: cover` 填充 168px 高的封面区。
 - 黑白棋社对局页复用 `01_木质棋盘陶瓷棋子以及配套UI.html` 的木质棋盘、陶瓷棋子与瓷白/深木 UI，Canvas 绘制。
 - 中国象棋复用 `03_中国象棋.html` 的深色 Canvas 棋盘与面板；音效开关与音效代码已移除。
-- 跳棋、2048、军棋、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳直接复用素材库同名文件，仅加固定返回大厅入口与路由，不改动游戏本体视觉。
+- 跳棋、2048、军棋、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO 直接复用素材库同名文件，仅加固定返回大厅入口与路由，不改动游戏本体视觉。
 
 ## 点单 / 共建
 
@@ -97,15 +98,16 @@ node xiangqi-online.mjs
 node minigames-smoke.mjs
 node minigames-route.mjs
 node hall-buttons.mjs
+node uno-online.mjs
 ```
 
 详见 `tests/README.md`。
 
 ## 已验证
 
-- 目录重构后：首页 14/14、线上首页 7/7、`/board-club` 路由 9/9（含旧入口 301）、`/chinese-chess` 路由 4/4、九款小游戏路由 19/19、返回大厅按钮 22/22（桌面 + 390px）、线上联机整局 4/4、引擎 36/36、本地界面 6/6。
+- 目录重构后：首页 14/14、线上首页 7/7、`/board-club` 路由 9/9（含旧入口 301）、`/chinese-chess` 路由 4/4、十款小游戏路由 21/21、返回大厅按钮 24/24（桌面 + 390px）、UNO 3/4 人房联机 2/2、线上联机整局 4/4、引擎 36/36、本地界面 6/6。
 - Cloudflare：九个新 URL 直接访问/刷新、尾斜杠 301、旧 URL 301 均已实测；`/board-club` 的查询参数与联机深链接保持。
-- GitHub Pages：首页 11 张卡片、`games/<dir>/` 目录访问、旧/新入口的 404 回退均已实测。
+- GitHub Pages：首页 12 张卡片、`games/<dir>/` 目录访问、旧/新入口的 404 回退均已实测。
 - 贪吃蛇、推箱子、俄罗斯方块本地冒烟通过；三款游戏共用 `../../index.html` 回大厅。
 - 中国象棋联机已实测：房主红/客端黑、双向落子同步、换方、认输、再来一局；音效已移除。
 - GitHub Pages 联机也实测 4/4：`/Gridfall/games/board-club/` 加载 `shared/supabase.js` 后完成整局同步。
