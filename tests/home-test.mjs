@@ -69,11 +69,32 @@ try {
       n: document.querySelectorAll('.roadmap-card').length,
       names: [...document.querySelectorAll('.roadmap-card h3')].map(h => h.textContent.replace(/\\s+/g, ' ').trim()),
       panel: !!document.querySelector('.co-build-panel'),
-      img: !!document.querySelector('.co-build-art img')
+      img: !!document.querySelector('.co-build-art img'),
+      orderLinks: document.querySelectorAll('.roadmap-body a').length
     })`);
     if (r.n !== 3) return 'roadmap cards ' + r.n;
     if (!r.names.some(n => n.includes('四子棋'))) return 'no connect4 ' + JSON.stringify(r.names);
     if (!r.panel || !r.img) return 'co-build panel ' + JSON.stringify(r);
+    if (r.orderLinks !== 0) return 'order links ' + r.orderLinks;
+    return true;
+  });
+
+  await t('home.topnav', async () => {
+    const r = await b.evaluate(`(() => {
+      const links = [...document.querySelectorAll('nav.navlinks a')].map(a => a.textContent.trim());
+      const gh = document.querySelector('.nav-github');
+      return {
+        links: links,
+        ghHref: gh ? gh.getAttribute('href') : '',
+        ghTarget: gh ? gh.getAttribute('target') : '',
+        ghRel: gh ? gh.getAttribute('rel') : '',
+        ghIcon: gh ? !!gh.querySelector('svg') : false
+      };
+    })()`);
+    if (r.links.includes('联机开房')) return 'nav still has 联机开房';
+    const i = r.links.indexOf('扫雷');
+    if (i < 0 || r.links[i + 1] !== '跳一跳') return 'jump not after minesweeper ' + JSON.stringify(r.links);
+    if (r.ghHref !== 'https://github.com/WRM-FW/Gridfall' || r.ghTarget !== '_blank' || r.ghRel.indexOf('noopener') < 0 || !r.ghIcon) return 'github ' + JSON.stringify(r);
     return true;
   });
 

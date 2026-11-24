@@ -586,7 +586,7 @@ must(`<div><label>平台 PLATFORM</label><strong>网页 · <em>免下载</em></s
 `<div><label>平台 PLATFORM</label><strong>网页 · <em>免下载</em></strong></div>
             <div><label>费用 PRICE</label><strong>免费 · <em>免注册</em></strong></div>
             <div><label>内容 CONTENT</label><strong>12 个入口 · <em>14 种玩法</em></strong></div>
-            <div><label>联机 ONLINE</label><strong>棋社 / 象棋</strong></div>`);
+            <div><label>联机 ONLINE</label><strong>3 款联机</strong></div>`);
 must('黑白棋社里有禁手判定、棋谱回放、联机房间与计时对局；新游戏的桌子还在往里搬，进门右转。',
 '黑白棋社有禁手判定、26 种连珠开局、棋谱回放和联机房间；中国象棋也能开房，房主执红。跳棋、军棋、2048、扫雷坐下就能玩。');
 
@@ -730,7 +730,7 @@ must('从黑白棋社的休闲五子棋、正式连珠，到 9 路围棋快棋�
 '从黑白棋社的休闲五子棋、正式连珠，到 9 路围棋快棋、19 路正赛；也可以去中国象棋开一间房，或者一个人刷 2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳，也可以开一桌 UNO。全部免费，不用账号。');
 must('<a href="#soon">即将推出</a>', '<a href="#soon">下一批游戏</a>');
 must('Gridfall 游戏大厅：黑白棋社、中国象棋、跳棋、军棋、2048、扫雷已上线；黑白棋社与中国象棋支持联机，其余为本地/单人对弈。卡牌类、国际象棋等为后续扩建规划，标注「规划中」者尚未开放游玩。',
-'Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO 已上线；棋社与中国象棋支持联机，其余为本地 / 单人。国际象棋、四子棋、卡牌为候选规划，尚未开放。');
+'Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO 已上线；棋社、中国象棋与 UNO 支持联机，其余为本地 / 单人。国际象棋、四子棋、卡牌为候选规划，尚未开放。');
 
 /* 规划区样式 */
 must('  @media (max-width:900px){',
@@ -776,7 +776,7 @@ var oldGh = `document.querySelectorAll('a[href^="./HBQS"], a[href^="./ZGXQ"], a[
     });`;
 var newGh = `document.querySelectorAll('a[href]').forEach(function(a){
       var h=a.getAttribute('href');
-      var map={'./board-club':'./games/board-club/','./chinese-chess':'./games/chinese-chess/','./chinese-checkers':'./games/chinese-checkers/','./2048':'./games/2048/','./army-chess':'./games/army-chess/','./minesweeper':'./games/minesweeper/','./snake':'./games/snake/','./sokoban':'./games/sokoban/','./tetris':'./games/tetris/'};
+      var map={'./board-club':'./games/board-club/','./chinese-chess':'./games/chinese-chess/','./chinese-checkers':'./games/chinese-checkers/','./2048':'./games/2048/','./army-chess':'./games/army-chess/','./minesweeper':'./games/minesweeper/','./snake':'./games/snake/','./sokoban':'./games/sokoban/','./tetris':'./games/tetris/','./tic-tac-toe':'./games/tic-tac-toe/','./jump':'./games/jump/','./uno':'./games/uno/'};
       for (var k in map) if (h.indexOf(k) === 0) { a.setAttribute('href', map[k]+h.slice(k.length)); break; }
     });`;
 if (!html.includes(oldGh)) throw new Error('old GH fallback missing');
@@ -828,6 +828,38 @@ var textMap = {
   '/tetris.html': '/tetris'
 };
 Object.keys(textMap).forEach(function(k){ html = html.split(k).join(textMap[k]); });
+
+/* ---------- 20261124 顶栏与下一批桌子调整 ---------- */
+var navStart = html.indexOf('<nav class="navlinks"');
+var navEnd = html.indexOf('</nav>', navStart) + '</nav>'.length;
+if (navStart < 0 || navEnd < 6) throw new Error('nav block missing');
+var nav = html.slice(navStart, navEnd);
+nav = nav.replace(/\s*<a href="\.\/board-club\?online=1&amp;game=gomoku"[^>]*>联机开房<\/a>/, '');
+nav = nav.replace(/(<a href="\.\/minesweeper"[^>]*>扫雷<\/a>)/, '$1\n      <a href="./jump" data-local="./games/jump/index.html">跳一跳</a>');
+html = html.slice(0, navStart) + nav + html.slice(navEnd);
+var ctaStart = html.indexOf('<a class="btn btn-green btn-sm nav-cta"', navStart);
+if (ctaStart < 0) throw new Error('nav cta missing');
+var github = `<a class="nav-github" href="https://github.com/WRM-FW/Gridfall" target="_blank" rel="noopener" title="GitHub 仓库" aria-label="GitHub 仓库">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+    `;
+html = html.slice(0, ctaStart) + github + html.slice(ctaStart);
+html = html.split('<a href="mailto:3391792088@qq.com">点单这款 →</a>').join('');
+must('  .nav-cta{flex:0 0 auto}',
+`  .nav-cta{flex:0 0 auto}
+  .nav-github{
+    flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;min-height:2.25rem;
+    padding:7px 11px;border-radius:8px;border:1.5px solid rgba(255,255,255,.5);
+    background:rgba(255,255,255,.08);color:#fff;text-decoration:none;
+    font-weight:800;font-size:14px;white-space:nowrap;
+  }
+  .nav-github:hover{background:rgba(255,255,255,.18);border-color:#fff}
+  .nav-github svg{width:18px;height:18px;fill:currentColor;flex:0 0 auto}
+  @media (max-width:560px){
+    .nav-github{padding:7px 9px}
+    .nav-github span{display:none}
+  }`);
 
 fs.writeFileSync(path.join(ROOT, 'index.html'), html, 'utf8');
 console.log('built homepage', Buffer.byteLength(html), 'bytes');
