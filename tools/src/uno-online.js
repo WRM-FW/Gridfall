@@ -695,6 +695,7 @@ function unoNetStartFromPlayers(players) {
   unoNetBroadcastState();
   unoNetBroadcastLobby();
   unoNetRenderLobby();
+  maybeTriggerAiTurn();
 }
 function unoNetHandClick(cardId) {
   if (!UNO_NET.mode || !UNO_NET.started || UNO_NET.denied) return;

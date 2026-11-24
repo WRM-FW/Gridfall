@@ -186,6 +186,27 @@ await t('uno.local.no-syntax-errors', async () => {
   } finally { await b.close(); }
 });
 
+
+await t('uno.offline.initial-effect', async () => {
+  const b = await launch(APP, { port: PORT + 901 });
+  try {
+    let hit = null;
+    for (let i = 0; i < 240; i++) {
+      const info = await b.evaluate(`(() => {
+        UNO_API.startGame(3);
+        const S = UNO_API.state;
+        return { top: S.discard[0].value, turn: S.currentTurn, over: S.gameOver };
+      })()`);
+      if (!info.over && info.turn !== 0 && (info.top === 'skip' || info.top === 'draw2')) { hit = info; break; }
+    }
+    if (!hit) throw new Error('could not produce an initial skip/draw2 within 240 deals');
+    // The AI should take the skipped/penalized seat's turn without any human click.
+    const acted = await wait(b, `UNO_API.state.currentTurn === 0 || UNO_API.state.gameOver`, 6000);
+    assert(acted, 'offline AI did not start after initial ' + hit.top + ' (turn ' + hit.turn + ')');
+    return { pass: true, detail: 'initial ' + hit.top + ' auto-started AI' };
+  } finally { await b.close(); }
+});
+
 let room = null;
 let host = null;
 let clients = null;

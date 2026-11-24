@@ -2096,6 +2096,7 @@
         els.btnMode4.classList.toggle('active', state.playerCount === 4);
 
         renderAll();
+        maybeTriggerAiTurn();
       }
 
       /* ======================== CORE TURN ENGINE ======================== */
@@ -3593,6 +3594,7 @@ function unoNetStartFromPlayers(players) {
   unoNetBroadcastState();
   unoNetBroadcastLobby();
   unoNetRenderLobby();
+  maybeTriggerAiTurn();
 }
 function unoNetHandClick(cardId) {
   if (!UNO_NET.mode || !UNO_NET.started || UNO_NET.denied) return;
