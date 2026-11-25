@@ -105,13 +105,14 @@ try {
       const nav = [...f.querySelectorAll('.fcol[aria-label="站内导航"] a')].map(a => ({ text: a.textContent.trim(), href: a.getAttribute('href') }));
       const online = [...f.querySelectorAll('.fcol[aria-label="联机游戏"] a')].map(a => ({ text: a.textContent.trim(), href: a.getAttribute('href') }));
       const external = [...f.querySelectorAll('.fcol a')].filter(a => /^(Poki|4399游戏)/.test(a.textContent.trim())).map(a => ({ text: a.textContent.trim(), href: a.getAttribute('href'), target: a.getAttribute('target'), rel: a.getAttribute('rel') }));
-      const cats = [...f.querySelectorAll('.fcats li')].map(li => li.textContent.trim());
       return {
         brand: f.querySelector('.fbrand')?.textContent.trim() || '',
         tag: f.querySelector('.ftag')?.textContent.trim() || '',
         intro: f.querySelector('.fintro')?.textContent.trim() || '',
-        nav, online, external, cats,
+        nav, online, external,
         fnote: !!f.querySelector('.fnote'),
+        fabout: !!f.querySelector('.fabout'),
+        fcats: !!f.querySelector('.fcats'),
         text: f.innerText
       };
     })()`);
@@ -122,7 +123,8 @@ try {
     if (r.external.length !== 2) return 'external ' + JSON.stringify(r.external);
     if (r.external[0].href !== 'https://poki.com/' || r.external[1].href !== 'https://www.4399.com/') return 'external hrefs ' + JSON.stringify(r.external);
     if (r.external.some(x => x.target !== '_blank' || !x.rel || x.rel.indexOf('noopener') < 0)) return 'external target ' + JSON.stringify(r.external);
-    if (r.cats.length !== 4 || !r.cats.some(x => x.includes('棋类')) || !r.cats.some(x => x.includes('联机'))) return 'categories ' + JSON.stringify(r.cats);
+    if (r.fabout || r.fcats) return 'project description section remains';
+    if (r.text.includes('项目说明') || r.text.includes('定位') || r.text.includes('益智 / 街机')) return 'project copy remains';
     if (r.fnote) return 'old dense footer note remains';
     if (r.text.includes('游戏大厅')) return 'footer still says 游戏大厅';
     return true;

@@ -1,138 +1,184 @@
-# Gridfall — 棋牌与休闲游戏
+# Gridfall
 
-黑白棋社（五子棋 / 国际连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO。黑白棋社、中国象棋与 UNO 支持联机；其余为本地或单人。首页是 Gridfall 入口，后续继续接入更多游戏。
+浏览器里的棋牌与休闲游戏合集。无需下载、无需账号，打开网页就能玩；其中 3 款游戏支持多人联机，整个站点也可以安装为独立应用。
 
 - 主站（Cloudflare Pages）：https://play-gridfall.pages.dev/
-- GitHub Pages 访问入口：https://wrm-fw.github.io/Gridfall/
+- 镜像（GitHub Pages）：https://wrm-fw.github.io/Gridfall/
+- 开源仓库：https://github.com/WRM-FW/Gridfall
 
-`index.html` 是平台首页；所有游戏统一放在 `games/<英文名>/` 下。
+## 玩家指南
 
-支持安装为独立应用（PWA）：Chrome / Edge 地址栏右侧的安装图标，或「更多工具 → 应用 → 安装此站点为应用」。安装后从 Gridfall 首页启动，离线时可打开已缓存的页面。
+### Gridfall 是什么
 
-## 目录结构
+Gridfall 目前收录 12 个入口、14 种玩法，按类型分为：
+
+| 类型 | 内容 |
+| --- | --- |
+| 棋类 | 黑白棋社（五子棋 / 国际连珠 / 围棋）、中国象棋、跳棋、军棋、井字棋 |
+| 益智 / 街机 | 2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、跳一跳 |
+| 卡牌 | UNO |
+
+多数棋类提供人机对弈，部分支持同屏双人；具体模式以进入游戏后的选项为准。黑白棋社、中国象棋和 UNO 支持联网对战。
+
+### 开始游玩
+
+1. 打开主站或镜像地址，在首页选择游戏，也可以按「可联机 / 棋类 / 益智 / 街机 / 牌类」筛选或直接搜索。
+2. 进入游戏后选择人机、同屏双人或联机模式。
+3. 不需要注册；棋局记录、最高分与界面偏好只保存在当前浏览器。
+
+### 联机对战
+
+联机入口位于对应游戏页面内。常见流程：
+
+1. 房主创建房间，得到 6 位房间码。
+2. 其他玩家输入房间码加入。
+3. 人数满足要求后由房主开局。
+
+各游戏规则：
+
+- **黑白棋社**：房主和第一个加入的成员是正式玩家；之后加入的成员进入观战席，只能看不能下。房主默认执黑，开局前可申请换方。观战者不会占用或继承正式席位；玩家掉线后，房主在线时可用同一浏览器会话重新加入。
+- **中国象棋**：两名玩家，房主默认执红；开局前可申请换方，支持认输和再来一局。
+- **UNO**：3 人或 4 人房，满员后由房主开局；支持 +2/+4 叠加规则、喊 UNO 与抓 UNO，结束后可由房主开新局。
+
+联机需要网络。房间状态只保存在房主浏览器中，不写入服务器；房主关闭或刷新页面后房间结束。房间码是加入房间的唯一凭证，请只发给你信任的人。
+
+### 安装为应用
+
+Gridfall 支持 PWA：
+
+- Chrome / Edge：使用地址栏中的安装图标，或「更多工具 → 应用 → 安装此站点为应用」。
+- iPhone / iPad：在 Safari 中分享 → 添加到主屏幕。
+- 安装后的应用名称是 **Gridfall**，以独立窗口运行，并适配 iOS 刘海屏、灵动岛和横竖屏安全区域。
+- 已缓存的页面可以离线打开；联机、首次进入新页面等仍需网络。暂不支持推送通知。
+
+### 数据与限制
+
+- 没有账号体系，也没有云端存档；清除浏览器数据会丢失本地记录。
+- 观战功能目前只在黑白棋社提供。
+- 人机对弈使用浏览器内的启发式引擎，棋力有限，不依赖云端算力。
+
+## 开发者指南
+
+### 技术栈
+
+| 层 | 实现 |
+| --- | --- |
+| 前端 | 原生 HTML / CSS / JavaScript，无前端框架、无运行时构建依赖 |
+| 图形与声音 | Canvas 2D；跳一跳使用本地打包的 Three.js；音效通过 Web Audio 合成 |
+| 联机 | Supabase Realtime 的 Broadcast + Presence，客户端库随项目本地提供 |
+| 数据存储 | 无服务端数据库；房间状态在房主内存中，偏好/最高分/会话标识使用浏览器存储 |
+| PWA | Web App Manifest、Service Worker、离线应用外壳 |
+| 构建 | Node.js ESM 脚本生成静态页面与部署产物 |
+| 部署 | Cloudflare Pages 主站；GitHub Pages 静态镜像 |
+| 测试 | Node.js + 无头 Edge（通过 CDP 驱动） |
+
+### 整体架构
 
 ```text
-index.html                  平台大厅
-404.html                    GitHub Pages 入口回退（新旧 URL → games/）
-_redirects                  Cloudflare Pages 路由与旧 URL 301
-games/
-  board-club/index.html     黑白棋社：五子棋 / 连珠 / 围棋 / 联机
-  chinese-chess/index.html  中国象棋
-  chinese-checkers/index.html 跳棋
-  2048/index.html           2048
-  army-chess/index.html     军棋
-  minesweeper/index.html    扫雷
-  snake/index.html          贪吃蛇
-  sokoban/index.html        推箱子
-  tetris/index.html         俄罗斯方块
-  tic-tac-toe/index.html    井字棋
-  jump/index.html           跳一跳（3D，Three.js 已本地化）
-  uno/index.html            UNO（3/4 人，人机 + 联机）
-assets/covers/              大厅封面
-shared/                     supabase.js / supabase-config.js（仅联机懒加载）
-tools/                      构建源、设计参考、构建脚本
-docs/                       开发与路由文档
-tests/                      无头测试
-dist/                       部署产物（不入库）
+浏览器
+├─ Gridfall 首页（静态页面）
+├─ games/<slug>/index.html（独立游戏页面）
+│  ├─ 本地规则与 AI
+│  └─ 联机模式：Supabase Realtime
+│       房主：保存权威状态，校验操作，广播完整快照
+│       客人：发送操作意图，渲染快照
+└─ PWA：manifest + Service Worker
+静态托管：Cloudflare Pages / GitHub Pages
 ```
 
-## 本地运行
+关键设计：
 
-直接打开 `index.html` 即可；游戏页在 `games/<英文名>/index.html`，首页链接在 `file://` 下会自动改成本地路径。
+- **纯静态前端**：没有自建应用服务器，所有单机规则、AI 和渲染都在浏览器内运行。
+- **房主权威联机**：房主负责规则判定和状态维护，广播快照；客人只发送动作意图，不能直接改状态。Presence 用于维护房间成员与观战者身份。
+- **无数据库**：联机不创建数据表、不使用账号；以房间码隔离的公共 Realtime 频道承载通信。房主离开后房间结束。
+- **静态路由**：Cloudflare Pages 使用 `_redirects` 把无扩展路径映射到对应游戏目录；GitHub Pages 使用根目录 `404.html` 回退。两种部署都支持刷新、复制链接和前进后退。
+- **PWA**：Service Worker 预缓存首页与基础资源；页面导航网络优先，静态资源在后台更新；跨域请求（Supabase、字体等）不拦截。
+- **移动端适配**：CSS 使用安全区变量处理 iOS 主屏幕应用的顶部、左右与横屏布局。
 
-- 单机与本地双人：离线可用。
-- 联机：需要网络；页面进入联机模式时才懒加载 `shared/supabase.js` 与 `shared/supabase-config.js`。
+### 主要模块
 
-## 路由与兼容
+| 模块 | 职责 |
+| --- | --- |
+| 首页 | 游戏入口、分类筛选、搜索、玩法介绍与站点导航 |
+| 黑白棋社 | 五子棋、国际连珠、围棋的规则、AI、同屏双人与双人联机（含观战） |
+| 中国象棋 | 象棋规则、AI、同屏双人与双人联机、换方/认输/再来一局 |
+| UNO | 3/4 人机与联机、牌组与特殊牌规则、UNO/抓 UNO、叠加设置 |
+| 小游戏 | 跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳 |
+| 共享层 | Supabase 客户端与公开配置、Three.js、PWA 注册与安全区支持 |
+| 构建工具 | 从源模板生成首页与游戏页面，并产出静态部署目录 |
+| 测试 | 规则、联机、路由、命名、安全区、PWA 与视觉回归测试 |
 
-游戏页统一在 `games/<英文短名>/`；对外路径使用小写英文 + 连字符（2048 保留数字名，黑白棋社使用 `/board-club`）。Cloudflare Pages 由 `_redirects` 200 代理到对应目录，地址保持无扩展、无尾斜杠；GitHub Pages 由根目录 `404.html` 回退到 `games/<dir>/`。旧的拼音入口与旧 `.html` 文件保留 301 / 回退兼容，查询串与 hash 不丢。
+项目结构：
 
-## 构建与部署
+```text
+index.html                  首页
+games/<slug>/index.html     各游戏页面
+shared/                     联机客户端、公开配置与本地第三方库
+tools/                      页面生成源与构建脚本
+tests/                      无头浏览器测试
+manifest.webmanifest        PWA 清单
+sw.js                       Service Worker
+pwa.js                      Service Worker 注册
+```
+
+### 本地开发
+
+需要 Node.js 22 或更高版本。只玩单机时直接打开 `index.html` 即可；联机和 PWA 需要 HTTP 环境：
 
 ```bash
-node tools/build-page.mjs       # games/board-club/index.html
-node tools/build-xiangqi.mjs    # games/chinese-chess/index.html
-node tools/build-minigames.mjs  # 其余 7 款游戏
-node tools/build-home.mjs       # index.html
-node tools/build-dist.mjs       # dist/：index、404、_redirects、games、shared、assets
-npx wrangler pages deploy dist --project-name play-gridfall --branch main
+# 在仓库根目录
+python -m http.server 8080
+# 打开 http://localhost:8080/
 ```
 
-GitHub Pages：从 `main` 分支根目录发布，推送后自动更新。
+本地没有 Cloudflare 的路径重写，请直接访问 `games/<slug>/index.html` 或对应目录。
 
-## 联机
+联机默认使用仓库内的公开 Supabase 配置。如果你 fork 项目或使用自己的环境，请替换 `shared/supabase-config.js` 中的项目 URL 与 publishable/anon key，并在 Supabase 项目中启用 Realtime。不要提交 service_role 或 secret key。
 
-- Supabase Realtime Broadcast + Presence；黑白棋社频道 `gridfall-room-<房间码>`，中国象棋频道 `gridfall-xq-room-<房间码>`，UNO 频道 `gridfall-uno-room-<房间码>`（3/4 人）；广播 `state` / `intent` / `ping` / `pong` / `bye` / `reject` 事件。
-- 没有数据库表：房间状态由房主保存在内存中，每次变更广播完整快照；双方都离开后房间结束。房主刷新会失去房间权威状态；客端在房主在线时可以凭房间码重连。
-- 房主是权威端，落子、禁手、胜负、劫争都按本地规则判定；客户端只渲染快照，未轮到的一方不能落子。
-- 黑白棋社房主默认执黑；任一方可在开局前申请换方，由对方同意或拒绝；正式连珠使用自身开局交换步骤。中国象棋房主默认执红（红先），同样支持换方申请。UNO 房主负责洗牌、判定与完整快照，3 人房/4 人房满员后开局。
-- 免费版额度内使用，没有引入付费服务；没有使用 service_role 或 secret key。房间码即入场凭证，频道是公共频道，不要把房间码发给无关的人。
+**构建**：首页和游戏页由 Node 脚本生成，生成结果会提交到仓库。修改 `tools/` 下的源后重新构建：
 
-## 视觉
+```bash
+node tools/build-home.mjs       # 首页
+node tools/build-page.mjs       # 黑白棋社
+node tools/build-xiangqi.mjs    # 中国象棋
+node tools/build-minigames.mjs  # 跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳
+node tools/build-uno.mjs        # UNO
+node tools/build-dist.mjs       # 生成 dist/ 部署产物
+```
 
-- 首页直接复用项目素材库 `00_Gridfall首页.html` 的蓝色街机大厅设计，并替换为当前真实游戏与联机入口。
-- 大厅游戏封面统一使用 `assets/covers/` 下的 1200×600 插画（`snake/sokoban/tetris` 为项目内 SVG），`.gv-cover-img` 以 `object-fit: cover` 填充 168px 高的封面区。
-- 黑白棋社对局页复用 `01_木质棋盘陶瓷棋子以及配套UI.html` 的木质棋盘、陶瓷棋子与瓷白/深木 UI，Canvas 绘制。
-- 中国象棋复用 `03_中国象棋.html` 的深色 Canvas 棋盘与面板；音效开关与音效代码已移除。
-- 跳棋、2048、军棋、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO 直接复用素材库同名文件，仅加固定返回首页入口与路由，不改动游戏本体视觉。
-
-## 点单 / 共建
-
-- 开发者邮箱：3391792088@qq.com
-- 有想做的玩法，可以自己实现单文件小游戏（也可借助 AI 工具辅助），向仓库提交 PR；具体约定与流程见 `CONTRIBUTING.md`。通过后会摆进大厅。
-
-## PWA
-
-- `manifest.webmanifest`：名称、短名、`start_url`、`scope`、`standalone` 显示模式、主题色与 192/512 普通/遮罩图标。
-- `sw.js`：应用外壳预缓存；导航网络优先、静态资源 stale-while-revalidate；跨域（Supabase、字体）不拦截。
-- `pwa.js`：从大厅或任意游戏页注册根目录 Service Worker（自动按脚本位置推导 `/` 或 GitHub Pages 的 `/Gridfall/`）。
-- 图标在 `assets/icons/`；`tools/build-dist.mjs` 会把清单、Worker、注册脚本与图标一起带入 `dist/`。
-
-## 测试
+**测试**：测试需要 Node.js 22+ 与本机 Edge，联机用例需要网络。完整清单见 `tests/README.md`，常用入口：
 
 ```bash
 cd tests
 node run-engine.mjs
-node local-visual.mjs
-node online-core.mjs
-node online-extra.mjs
-node online-swap.mjs
 node home-test.mjs
-node live-home.mjs
-node live-online.mjs
-node route-test.mjs
-node online-colors.mjs
-node online-spectators.mjs
-node identity.mjs
-node identity-live.mjs
-node naming.mjs
-node safe-area.mjs
-node xiangqi-route.mjs
-node xiangqi-online.mjs
-node minigames-smoke.mjs
-node minigames-route.mjs
-node hall-buttons.mjs
-node uno-online.mjs
+node online-core.mjs
 node uno-rules.mjs
+node safe-area.mjs
+node pwa.mjs
 ```
 
-详见 `tests/README.md`。
+### 部署
 
-## 已验证
+- **Cloudflare Pages**：`dist/` 是部署产物，包含首页、游戏、共享资源、PWA 文件与路由规则。
 
-- 目录重构后：首页 16/16、线上首页 8/8、`/board-club` 路由 9/9（含旧入口 301）、`/chinese-chess` 路由 4/4、十款小游戏路由 21/21、返回首页按钮 24/24（桌面 + 390px）、UNO 3/4 人房联机 2/2、UNO 规则与回合 22/22（3 人 + 4 人 + 初始牌 + 玩家A-D）、黑白棋社联机 28/28（核心 7 + 连珠围棋 5 + 换方 4 + 换色 6 + 观战 6）、中国象棋联机 8/8、联机身份标识 5/5（线上 UNO 3/3）、命名与页脚 4/4、iOS 安全区域 47/47、PWA 7/7（本地 HTTP + 安装性 + 离线外壳；线上双端各 6/6）、线上联机整局 4/4、引擎 36/36、本地界面 6/6。
-- Cloudflare：九个新 URL 直接访问/刷新、尾斜杠 301、旧 URL 301 均已实测；`/board-club` 的查询参数与联机深链接保持。
-- GitHub Pages：首页 12 张卡片、`games/<dir>/` 目录访问、旧/新入口的 404 回退均已实测。
-- 贪吃蛇、推箱子、俄罗斯方块本地冒烟通过；三款游戏共用 `../../index.html` 回大厅。
-- 中国象棋联机已实测：房主红/客端黑、双向落子同步、换方、认输、再来一局；音效已移除。
-- GitHub Pages 联机也实测 4/4：`/Gridfall/games/board-club/` 加载 `shared/supabase.js` 后完成整局同步。
+  ```bash
+  node tools/build-dist.mjs
+  npx wrangler pages deploy dist --project-name play-gridfall --branch main
+  ```
 
-## 已知限制
+- **GitHub Pages**：从 `main` 分支根目录发布，推送后自动更新。
+- **访问地址**：Cloudflare `https://play-gridfall.pages.dev/`；GitHub Pages `https://wrm-fw.github.io/Gridfall/`。
+- **仓库**：https://github.com/WRM-FW/Gridfall。
 
-- 联机房间不持久化；房主刷新/关闭即结束。
-- 没有账号体系与房间密码，房间码是唯一凭证。
-- 联机用同一台机器上的两个独立浏览器实例验证，未在两台物理设备/移动端实机对弈。
-- 围棋 AI 是启发式引擎，五档参数集中在 `tools/src/legacy.html` 的 `GO_LEVELS`。极难档按实测结果保守标为 10–7 级，未按 1 级–业余 2 段标注。
-- 纯前端启发式在 13 路/19 路的绝对棋力有限；复杂死活、征子与大型劫争仍可能读错。若需要真正段位棋力，需另行评估 KataGo WASM 等方案。
-- 正式连珠人机 AI 不会交换、战绩未按执子分桶、切页时五子棋计时继续走等单机侧历史问题不在本次范围内。
-- 中国象棋棋子声为 Web Audio 合成，未使用外部音频文件；未做真机听感的主观评测。
+### 参与共建
+
+欢迎提交新游戏、规则修正或体验改进，流程与文件约定见 [CONTRIBUTING.md](CONTRIBUTING.md)；想点单新玩法也可以邮件联系 3391792088@qq.com。
+
+### 已知限制
+
+- 没有账号、权限或云端存档；联机房间码就是访问凭证，频道为公共频道。
+- 房间不持久化，房主刷新或关闭后结束；掉线重连需要同一浏览器会话。
+- 观战只支持黑白棋社；UNO 和中国象棋为纯双人/多人对局，没有观战席。
+- AI 为纯前端启发式实现，围棋等复杂局面的棋力有限。
+- PWA 离线能力限于已缓存页面，联机功能必须联网。

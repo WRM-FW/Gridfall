@@ -44,7 +44,7 @@ await t('naming.footer-structure', async () => {
   if (!body.includes('去其他站点游玩')) return 'external heading';
   if (!body.includes('https://poki.com/') || !body.includes('https://www.4399.com/')) return 'external links';
   if (!body.includes('rel="noopener noreferrer"')) return 'external rel';
-  if (!body.includes('项目说明') || !body.includes('class="fcats"')) return 'project section';
+  if (body.includes('项目说明') || body.includes('class="fcats"') || body.includes('class="fabout"')) return 'project section remains';
   if (body.includes('class="fnote"')) return 'old dense note';
   if (!body.includes('联机对局')) return 'online nav';
   return true;
