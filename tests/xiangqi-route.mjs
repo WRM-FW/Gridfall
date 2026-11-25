@@ -28,7 +28,7 @@ try {
   await t('xqroute.entry', async () => {
     const r = await b.evaluate(`({ path: location.pathname, title: document.title, canvas: !!document.getElementById('board'), modes: document.querySelectorAll('#modeSeg .seg-btn').length, download: !!document.getElementById('btnDownload') })`);
     if (r.path !== '/chinese-chess') return 'path ' + r.path;
-    if (r.title !== '中国象棋 · Xiangqi | Gridfall') return 'title ' + r.title;
+    if (r.title !== '中国象棋 · Gridfall') return 'title ' + r.title;
     if (!r.canvas || r.modes !== 3) return JSON.stringify(r);
     if (r.download) return 'download button present';
     return true;
@@ -46,11 +46,11 @@ try {
   });
   await t('xqroute.home_card_back_forward', async () => {
     await b.evaluate(`location.href = ${JSON.stringify(HOME)}`);
-    await waitFor(`document.title === 'Gridfall' && document.querySelectorAll('.game-card').length === 9`, 12000);
+    await waitFor(`document.title === 'Gridfall' && document.querySelectorAll('.game-card').length === 12`, 12000);
     await b.evaluate(`document.querySelectorAll('.game-card[data-status="live"] .play-link')[1].click()`);
     if (!await waitFor(`document.title.includes('中国象棋') && location.pathname === '/chinese-chess'`, 12000)) return 'card enter failed';
     await b.evaluate('history.back()');
-    if (!await waitFor(`document.title === 'Gridfall' && document.querySelectorAll('.game-card').length === 9`, 12000)) return 'back failed';
+    if (!await waitFor(`document.title === 'Gridfall' && document.querySelectorAll('.game-card').length === 12`, 12000)) return 'back failed';
     await b.evaluate('history.forward()');
     if (!await waitFor(`document.title.includes('中国象棋') && location.pathname === '/chinese-chess'`, 12000)) return 'forward failed';
     return true;

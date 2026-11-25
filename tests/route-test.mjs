@@ -68,7 +68,7 @@ try {
 
   await t('route.home_to_entry_back_forward', async () => {
     await b.evaluate(`location.href = ${JSON.stringify(HOME)}`);
-    await waitFor(`document.title === 'Gridfall'`, 10000);
+    await waitFor(`document.title === 'Gridfall' && document.querySelectorAll('.game-card').length === 12`, 12000);
     await b.clickSel('.game-card[data-status="live"] .play-link');
     if (!await waitFor(`typeof G !== "undefined" && location.pathname === '/board-club'`, 12000)) return 'card did not enter /board-club';
     await b.evaluate('history.back()');
