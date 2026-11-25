@@ -594,7 +594,7 @@ function netGuestState(p){
   NET.hostClientId = p.from || NET.hostClientId;
   NET.lastSeen = Date.now();
   NET.busy = false;
-  if (NET.pending && (st.over || st.history.length > NET.pending.history)) NET.pending = null;
+  if (NET.pending && (st.over || st.history.length === 0 || st.history.length > NET.pending.history)) NET.pending = null;
   if (first && st.over) NET.lastResultSeq = st.seq;
   netSetConn("已连接");
   netNoteResult();
