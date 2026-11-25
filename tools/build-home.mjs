@@ -406,7 +406,7 @@ const cardJump = `        <article class="game-card" data-status="live" data-cat
             </div>
           </div>
         </article>`;
-const cardUno = `        <article class="game-card" data-status="live" data-cat="cards" data-name="UNO 牌类 卡牌 3人 4人 联机 uno">
+const cardUno = `        <article class="game-card" data-status="live" data-cat="cards online" data-name="UNO 牌类 卡牌 3人 4人 联机 uno">
           <div class="game-visual gv-cover">
             <img class="gv-cover-img" src="./assets/covers/uno.jpg" alt="UNO 游戏封面" width="1200" height="600" decoding="async">
             <span class="gv-badge">已上线</span>
@@ -572,11 +572,11 @@ setCover('更多游戏 新游戏 点单 社区共建', 'next-game', '下一款�
 must('<title>Gridfall 游戏大厅 · 黑白棋社</title>',
 '<title>Gridfall 游戏大厅 · 十二个入口，十四种玩法</title>');
 must('<meta name="description" content="Gridfall 游戏大厅：黑白棋社收录五子棋、国际连珠、围棋，支持单机、双人与联机开房；打开即玩，更多游戏持续上新。" />',
-'<meta name="description" content="Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷，共 12 个入口、14 种玩法；棋社与中国象棋支持联机开房，免下载、免注册。" />');
+'<meta name="description" content="Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷，共 12 个入口、14 种玩法；棋社、中国象棋与 UNO 支持联机开房，免下载、免注册。" />');
 
 /* 首屏 */
 must('名字叫 Gridfall，装的却不只是棋盘。黑白棋社、中国象棋、跳棋、军棋、2048、扫雷都已经入驻；黑白棋社与中国象棋还能开房联机，卡牌与其他游戏也会陆续搬进来——不用下载、不用注册，点开任意一局就开玩。',
-'名字叫 Gridfall，装的却不只是棋盘。十二个入口、十四种玩法：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO。棋社与中国象棋可以开房联机，其余随时坐下就玩——不用下载、不用注册。');
+'名字叫 Gridfall，装的却不只是棋盘。十二个入口、十四种玩法：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO。棋社、中国象棋与 UNO 可以开房联机，其余随时坐下就玩——不用下载、不用注册。');
 must('六款游戏已就绪 · 联机房间已开放 · 卡牌与其他新游戏在路上 · <b>5 档难度</b>任选 · 打开即玩',
 '12 个入口 · 14 种玩法 · 3 款支持联机 · 全部免费、免注册');
 must(`<div><label>平台 PLATFORM</label><strong>网页 · <em>免下载</em></strong></div>
@@ -588,7 +588,7 @@ must(`<div><label>平台 PLATFORM</label><strong>网页 · <em>免下载</em></s
             <div><label>内容 CONTENT</label><strong>12 个入口 · <em>14 种玩法</em></strong></div>
             <div><label>联机 ONLINE</label><strong>3 款联机</strong></div>`);
 must('黑白棋社里有禁手判定、棋谱回放、联机房间与计时对局；新游戏的桌子还在往里搬，进门右转。',
-'黑白棋社有禁手判定、26 种连珠开局、棋谱回放和联机房间；中国象棋也能开房，房主执红。跳棋、军棋、2048、扫雷坐下就能玩。');
+'黑白棋社有禁手判定、26 种连珠开局、棋谱回放和联机房间；中国象棋与 UNO 也能开房。跳棋、军棋、2048、扫雷坐下就能玩。');
 
 /* 滚动条：去掉已经上线的“筹备中”，换成真实功能 */
 must('<span>五子棋 <i>●</i></span><span>连珠 RENJU <i>●</i></span><span>围棋 <i>●</i></span><span>9 / 13 / 19 路 <i>●</i></span><span>五档难度 <i>●</i></span><span>黑白棋社 <i>●</i></span><span>中国象棋 <i>●</i></span><span>跳棋 <i>●</i></span><span>军棋 <i>●</i></span><span>2048 <i>●</i></span><span>扫雷 <i>●</i></span><span>联机开房 <i>●</i></span><span>Supabase 实时同步 <i>●</i></span><span>棋谱回放 <i>●</i></span><span>双人对弈 <i>●</i></span><span>2048 筹备中 <i>●</i></span><span>扫雷 筹备中 <i>●</i></span><span>卡牌 筹备中 <i>●</i></span><span>新游戏持续上新 <i>●</i></span>',
@@ -598,7 +598,7 @@ must('<span>五子棋 <i>●</i></span><span>连珠 RENJU <i>●</i></span><span
 must('<div class="chips" role="group" aria-label="按状态筛选游戏">',
 '<div class="chips" role="group" aria-label="按类型筛选游戏">');
 must('「黑白棋社」把五子棋、连珠、围棋收进同一个入口；中国象棋、跳棋、军棋、2048、扫雷也都已进场。下面还留着规划中的位置——卡牌与其他游戏上线后，会直接摆进这张货架。',
-'十二个入口已经开桌：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO。棋社与中国象棋支持开房联机；下面可以按「可联机 / 棋类 / 益智 / 街机 / 牌类」筛选。');
+'十二个入口已经开桌：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO。棋社、中国象棋与 UNO 支持开房联机；下面可以按「可联机 / 棋类 / 益智 / 街机 / 牌类」筛选。');
 must(`<button class="chip" type="button" data-filter="all" aria-pressed="true">全部</button>
           <button class="chip" type="button" data-filter="live" aria-pressed="false">已上线</button>
           <button class="chip" type="button" data-filter="soon" aria-pressed="false">即将推出</button>`,

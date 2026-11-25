@@ -117,7 +117,10 @@ try {
     const visible = () => b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').length`);
     await clickChip('online'); await sleep(200);
     let r = await visible();
-    if (r !== 2) return 'online filter ' + r;
+    if (r !== 3) return 'online filter ' + r;
+    const onlineNames = await b.evaluate(`[...document.querySelectorAll('.game-card')].filter(c=>c.style.display !== 'none').map(c=>c.getAttribute('data-name'))`);
+    if (!onlineNames.some(n => n.includes('UNO'))) return 'online filter missing UNO ' + JSON.stringify(onlineNames);
+    if (!onlineNames.some(n => n.includes('黑白棋社')) || !onlineNames.some(n => n.includes('中国象棋'))) return 'online filter missing board/xiangqi ' + JSON.stringify(onlineNames);
     await clickChip('board'); await sleep(200);
     r = await visible();
     if (r !== 5) return 'board filter ' + r;

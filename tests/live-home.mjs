@@ -45,6 +45,22 @@ try {
   await sleep(400);
   await b.screenshot(path.join(SHOTS, 'live-home-roadmap.png'));
 
+  await t('livehome.online_filter', async () => {
+    const r = await b.evaluate(`(() => {
+      const online = [...document.querySelectorAll('.chip')].find(c => c.dataset.filter === 'online');
+      if (!online) return { ok: false, names: ['no chip'] };
+      online.click();
+      const names = [...document.querySelectorAll('.game-card')].filter(c => c.style.display !== 'none').map(c => c.getAttribute('data-name') || '');
+      const all = [...document.querySelectorAll('.chip')].find(c => c.dataset.filter === 'all');
+      if (all) all.click();
+      return {
+        ok: names.length === 3 && names.some(n => n.includes('UNO')) && names.some(n => n.includes('黑白棋社')) && names.some(n => n.includes('中国象棋')),
+        names
+      };
+    })()`);
+    return r.ok ? true : JSON.stringify(r.names);
+  });
+
   await t('livehome.gomoku_card', async () => {
     await b.clickSel('.game-card[data-status="live"] .play-link');
     const ok = await waitFor('typeof G !== "undefined" && !document.getElementById("secGomoku").classList.contains("hidden")');
