@@ -53,6 +53,11 @@ for (const g of games) {
     html = html.replace('</head>', '<style>.hud{z-index:60;}body:has(.overlay.visible) .score-panel,body:has(.overlay.visible) .hud-bottom{visibility:hidden;}</style>\n</head>');
   }
 
+const pwaHead = `<link rel="manifest" href="../../manifest.webmanifest" />
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/icons/apple-touch-icon.png" />
+<script src="../../pwa.js" defer></script>`;
+
+  html = html.replace('</head>', pwaHead + '</head>');
   fs.mkdirSync(path.join(ROOT, 'games', g.dir), { recursive: true });
   fs.writeFileSync(path.join(ROOT, 'games', g.dir, 'index.html'), html, 'utf8');
   console.log('built', 'games/' + g.dir + '/index.html', Buffer.byteLength(html), 'bytes');

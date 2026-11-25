@@ -16,7 +16,7 @@ function copyDir(src, dst) {
 
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
-for (const file of ['index.html', '404.html', '_redirects']) {
+for (const file of ['index.html', '404.html', '_redirects', 'manifest.webmanifest', 'sw.js', 'pwa.js']) {
   fs.copyFileSync(path.join(ROOT, file), path.join(DIST, file));
 }
 for (const dir of ['board-club', 'chinese-chess', 'chinese-checkers', '2048', 'army-chess', 'minesweeper', 'snake', 'sokoban', 'tetris', 'tic-tac-toe', 'jump', 'uno']) {

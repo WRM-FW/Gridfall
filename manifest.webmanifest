@@ -1,0 +1,66 @@
+{
+  "id": "./",
+  "name": "Gridfall 游戏大厅",
+  "short_name": "Gridfall",
+  "description": "Gridfall 棋牌游戏大厅：黑白棋社、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO。部分游戏支持联机开房。",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#1e5bf0",
+  "theme_color": "#1e5bf0",
+  "categories": ["games", "entertainment"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./assets/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "黑白棋社",
+      "short_name": "棋社",
+      "description": "五子棋 / 连珠 / 围棋，支持联机开房",
+      "url": "./games/board-club/",
+      "icons": [{ "src": "./assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "中国象棋",
+      "short_name": "象棋",
+      "description": "人机、双人与联机对弈",
+      "url": "./games/chinese-chess/",
+      "icons": [{ "src": "./assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "UNO",
+      "short_name": "UNO",
+      "description": "3 / 4 人卡牌对局，支持联机",
+      "url": "./games/uno/",
+      "icons": [{ "src": "./assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

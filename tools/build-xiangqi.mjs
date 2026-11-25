@@ -133,6 +133,12 @@ must(`  state.flip = (state.mode === 'ai' && state.humanSide === BLACK);`,
 
 must('</body>', `<script>\n${online}\n</script>\n</body>`);
 
+const pwaHead = `<link rel="manifest" href="../../manifest.webmanifest" />
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/icons/apple-touch-icon.png" />
+<script src="../../pwa.js" defer></script>`;
+
+html = html.replace('</head>', pwaHead + '</head>');
+
 fs.mkdirSync(path.join(ROOT, 'games', 'chinese-chess'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'games', 'chinese-chess', 'index.html'), html, 'utf8');
 console.log('built games/chinese-chess/index.html', Buffer.byteLength(html), 'bytes');

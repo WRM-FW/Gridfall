@@ -23,6 +23,8 @@ node xiangqi-online.mjs    # 象棋联机、换方、认输、再来一局、音
 node minigames-smoke.mjs   # 跳棋/2048/军棋/扫雷/贪吃蛇/推箱子/俄罗斯方块/井字棋/跳一跳/UNO 本地冒烟
 node minigames-route.mjs   # /chinese-checkers /2048 /army-chess /minesweeper /snake /sokoban /tetris /tic-tac-toe /jump /uno 路由、刷新、尾斜杠、首页卡片，21 项
 node uno-online.mjs        # UNO 3 人房 + 4 人房联机、动作同步、再来一局，2 项
+node pwa.mjs               # PWA manifest/图标/Service Worker/安装性/离线外壳，7 项
+node pwa-live.mjs          # 线上 PWA 安装性、游戏页注册与离线，5 项（APP_URL 可覆盖）
 node uno-rules.mjs         # UNO 出牌判定、回合顺序、叠加、UNO/抓 UNO、掉线托管与重连、4 人顺序、初始牌，21 项
 node hall-buttons.mjs      # 12 个游戏返回大厅按钮（桌面 + 390px），24 项
 node go-bench.mjs --size=9 --low=4 --high=5 --games=20  # 围棋相邻档对抗

@@ -90,6 +90,12 @@ must('</head>', '<style>' + css + '</style>\n</head>');
 
 must('    })();\n  </script>', online + '\n    })();\n  </script>');
 
+const pwaHead = `<link rel="manifest" href="../../manifest.webmanifest" />
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/icons/apple-touch-icon.png" />
+<script src="../../pwa.js" defer></script>`;
+
+html = html.replace('</head>', pwaHead + '</head>');
+
 fs.mkdirSync(path.join(ROOT, 'games', 'uno'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'games', 'uno', 'index.html'), html, 'utf8');
 console.log('built games/uno/index.html', Buffer.byteLength(html), 'bytes');

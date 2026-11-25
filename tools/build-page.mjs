@@ -154,7 +154,13 @@ ${d2}</script>
 </html>
 `;
 
+const pwaHead = `<link rel="manifest" href="../../manifest.webmanifest" />
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/icons/apple-touch-icon.png" />
+<script src="../../pwa.js" defer></script>`;
+
+const output = html.replace('</head>', pwaHead + '</head>');
+
 fs.mkdirSync(path.join(REPO, 'games', 'board-club'), { recursive: true });
-fs.writeFileSync(path.join(REPO, 'games', 'board-club', 'index.html'), html, 'utf8');
+fs.writeFileSync(path.join(REPO, 'games', 'board-club', 'index.html'), output, 'utf8');
 
 console.log('done: games/board-club/index.html');

@@ -861,5 +861,17 @@ must('  .nav-cta{flex:0 0 auto}',
     .nav-github span{display:none}
   }`);
 
+/* PWA：manifest、主题色、iOS 图标与 Service Worker 注册 */
+must('<link rel="icon" href="data:," />',
+`<link rel="manifest" href="./manifest.webmanifest" />
+<meta name="theme-color" content="#1e5bf0" />
+<meta name="application-name" content="Gridfall" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Gridfall" />
+<link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon.png" />`);
+must('</head>', '<script src="./pwa.js" defer></script></head>');
+
 fs.writeFileSync(path.join(ROOT, 'index.html'), html, 'utf8');
 console.log('built homepage', Buffer.byteLength(html), 'bytes');
