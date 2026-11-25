@@ -113,6 +113,10 @@ try {
     await sleep(600);
     const raw = await host.evaluate('NET.state.history.length');
     if (raw !== before) return 'raw spectator intent changed history';
+    await watcher.evaluate('netBroadcastBye()');
+    await sleep(500);
+    const bye = await host.evaluate(`({ gone: NET.opponentGone, status: document.getElementById('nStatus').textContent })`);
+    if (bye.gone || bye.status.includes('玩家 2 已离开')) return 'spectator bye marked player 2 offline: ' + JSON.stringify(bye);
     return true;
   });
 

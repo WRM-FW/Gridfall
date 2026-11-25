@@ -2732,7 +2732,14 @@ function netConnect(){
     if (p && p.payload && p.payload.from !== NET.clientId) { NET.busy = false; NET.pending = null; netToast(p.payload.msg || "落子被拒绝"); netRender(); }
   });
   ch.on("broadcast", { event: "bye" }, function(p){
-    if (p && p.payload && p.payload.from !== NET.clientId) netOpponentLeft(p.payload.fromSide === "host" ? "房主已离开，房间关闭。" : "对方已离开，等待重连…");
+    if (!p || !p.payload || p.payload.from === NET.clientId) return;
+    if (NET.role === "host") {
+      if (p.payload.from === NET.guestClientId) netOpponentLeft("玩家 2 已离开，等待重连…");
+      netSyncPresence();
+      return;
+    }
+    if (p.payload.fromSide === "host") netOpponentLeft("房主已离开，房间关闭。");
+    netSyncPresence();
   });
   ch.on("presence", { event: "sync" }, netSyncPresence);
   ch.on("presence", { event: "join" }, netSyncPresence);
