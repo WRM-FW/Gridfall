@@ -581,7 +581,7 @@ canvas#gBoard.no-turn, canvas#wBoard.no-turn, canvas#nBoard.no-turn{ cursor:not-
           <input id="nCodeInput" maxlength="6" placeholder="输入 6 位房间码" autocomplete="off" spellcheck="false">
           <button id="nJoin" type="button">加入房间</button>
         </div>
-        <p class="hint" id="nLobbyHint" style="margin:9px 0 0">第一个加入的成员成为玩家 2，之后加入的成员进入观战席；观战者不能落子。房主执黑先行。</p>
+        <p class="hint" id="nLobbyHint" style="margin:9px 0 0">第一个加入的成员成为玩家B，之后加入的成员进入观战席；观战者不能落子。房主（玩家A）执黑先行。</p>
         <div class="room-code hidden" id="nRoomBox">
           <span>房间码</span><b id="nRoomCode">------</b><button id="nCopy" type="button">复制</button>
         </div>
@@ -626,7 +626,7 @@ canvas#gBoard.no-turn, canvas#wBoard.no-turn, canvas#nBoard.no-turn{ cursor:not-
     <h3>围棋</h3>
     <p>黑先，可选 9/13/19 路。无气提子、禁着点（不可自杀）、劫争不可立即回提。双方连续停手终局，中国规则数子，黑贴 3.75 子（7.5 目）。</p>
     <h3>联机</h3>
-    <p>房主执黑先行；第一个加入的成员成为第二名正式玩家，之后加入的成员全部进入观战席。观战者可以看到盘面，但不能落子、认输、停手或参与再来一局；正式席位不会转给观战者，玩家 2 掉线后房间保留并等待其重连。所有规则由房主端按上面的本地规则判定，再把完整盘面广播给所有成员。未轮到的一方不能落子；房主离开则房间关闭。对局结束后两名正式玩家都点「再来一局」才会开始新局。</p>
+    <p>房主（玩家A）执黑先行；第一个加入的成员成为玩家B，之后加入的成员全部进入观战席。观战者可以看到盘面，但不能落子、认输、停手或参与再来一局；正式席位不会转给观战者，玩家B掉线后房间保留并等待其重连。所有规则由房主端按上面的本地规则判定，再把完整盘面广播给所有成员。未轮到的一方不能落子；房主（玩家A）离开则房间关闭。对局结束后两名正式玩家都点「再来一局」才会开始新局。</p>
     <h3>难度</h3>
     <p>简单 → 一般 → 普通 → 困难 → 极难。极难使用 Alpha-Beta 深搜 + VCF 连续冲四搜索，minimax 有 3.4 秒思考上限。</p>
     <p class="hint">说明：正式开局的 26 种形状按 RIF 官方图校正（直接开局第二手在天元正右，间接开局在右上斜邻）；对局与战绩只保存在当前页面内，刷新后清空。</p>
@@ -2598,6 +2598,9 @@ var NET = {
   lastSaved: null
 };
 
+var NET_HOST_LABEL = "房主（玩家A）";
+var NET_GUEST_LABEL = "玩家B";
+
 function netId(){
   try {
     var k = "gridfall_cid";
@@ -2736,11 +2739,11 @@ function netConnect(){
   ch.on("broadcast", { event: "bye" }, function(p){
     if (!p || !p.payload || p.payload.from === NET.clientId) return;
     if (NET.role === "host") {
-      if (p.payload.from === NET.guestClientId) netOpponentLeft("玩家 2 已离开，等待重连…");
+      if (p.payload.from === NET.guestClientId) netOpponentLeft(NET_GUEST_LABEL + "已离开，等待重连…");
       netSyncPresence();
       return;
     }
-    if (p.payload.fromSide === "host") netOpponentLeft("房主已离开，房间关闭。");
+    if (p.payload.fromSide === "host") netOpponentLeft(NET_HOST_LABEL + "已离开，房间关闭。");
     netSyncPresence();
   });
   ch.on("presence", { event: "sync" }, netSyncPresence);
@@ -2763,7 +2766,7 @@ function netConnect(){
         if (NET.enterTimer) clearTimeout(NET.enterTimer);
         NET.enterTimer = setTimeout(function(){
           if (NET.role === "guest" && !NET.state && !NET.hostPresent) {
-            netSetStatus("房间不存在或房主已离开", "请核对房间码后重试。");
+            netSetStatus("房间不存在或" + NET_HOST_LABEL + "已离开", "请核对房间码后重试。");
             netSetConn("无房主", "warn");
           }
         }, 2600);
@@ -2787,7 +2790,7 @@ function netHeartbeat(){
     NET.channel.send({ type: "broadcast", event: "ping", payload: { from: NET.clientId, at: now } });
   }
   if (!NET.opponentGone && now - NET.lastSeen > 18000) {
-    netOpponentLeft(NET.role === "host" ? "玩家 2 已离开，等待重连…" : "房主已离开，房间关闭。");
+    netOpponentLeft(NET.role === "host" ? NET_GUEST_LABEL + "已离开，等待重连…" : NET_HOST_LABEL + "已离开，房间关闭。");
   }
 }
 
@@ -2812,13 +2815,13 @@ function netSyncPresence(){
       NET.opponentGone = false;
       if (!NET.state) netSendIntent("sync");
       netSetConn("已连接");
-      if (NET.spectator && !NET.state) netSetStatus("观战中，等待房主开局…", "你是观战成员，不能落子或参与对局。");
+      if (NET.spectator && !NET.state) netSetStatus("观战中，等待" + NET_HOST_LABEL + "开局…", "你是观战成员，不能落子或参与对局。");
     } else if (NET.state || NET.started) {
       if (NET.spectator) {
-        netSetStatus("房主已离开，房间关闭。", "观战结束。");
-        netSetConn("房主离线", "warn");
+        netSetStatus(NET_HOST_LABEL + "已离开，房间关闭。", "观战结束。");
+        netSetConn(NET_HOST_LABEL + "离线", "warn");
       } else {
-        netOpponentLeft("房主已离开，房间关闭。");
+        netOpponentLeft(NET_HOST_LABEL + "已离开，房间关闭。");
       }
     }
   } else {
@@ -2841,13 +2844,13 @@ function netSyncPresence(){
       if (!NET.started) netHostStart();
       else if (NET.state) netBroadcastState(); // 重连/补发快照
     } else if (NET.started) {
-      netOpponentLeft("玩家 2 已离开，等待重连…");
-      netSetStatus("玩家 2 已离开，等待重连…", NET.roster.spectators.length ? ("观战 " + NET.roster.spectators.length + " 人；房间保留，正式席位不会转给观战者。") : "房间保留；把房间码再次发给玩家 2 即可继续。");
+      netOpponentLeft(NET_GUEST_LABEL + "已离开，等待重连…");
+      netSetStatus(NET_GUEST_LABEL + "已离开，等待重连…", NET.roster.spectators.length ? ("观战 " + NET.roster.spectators.length + " 人；房间保留，正式席位不会转给观战者。") : "房间保留；把房间码再次发给" + NET_GUEST_LABEL + "即可继续。");
     } else if (NET.guestClientId) {
-      netSetStatus("玩家 2 已离开，等待重连…", "正式席位保留，观战成员不会占用。");
-      netSetConn("玩家 2 离线", "warn");
+      netSetStatus(NET_GUEST_LABEL + "已离开，等待重连…", "正式席位保留，观战成员不会占用。");
+      netSetConn(NET_GUEST_LABEL + "离线", "warn");
     } else {
-      netSetStatus("等待对手加入…", "第一个加入的成员成为玩家 2；之后加入的成员进入观战席。");
+      netSetStatus("等待" + NET_GUEST_LABEL + "加入…", "第一个加入的成员成为" + NET_GUEST_LABEL + "；之后加入的成员进入观战席。");
     }
   }
   netUpdateLobby(); netRender();
@@ -2855,8 +2858,8 @@ function netSyncPresence(){
 
 function netOpponentLeft(msg){
   NET.busy = false; NET.opponentGone = true;
-  netSetStatus(msg || "对方已离开", "你可以离开房间，或等待对手重连。");
-  netSetConn("对手离线", "warn");
+  netSetStatus(msg || (NET.role === "host" ? NET_GUEST_LABEL + "已离开" : NET_HOST_LABEL + "已离开"), "你可以离开房间，或等待对方重连。");
+  netSetConn(NET.role === "host" ? NET_GUEST_LABEL + "离线" : NET_HOST_LABEL + "离线", "warn");
   netRender();
 }
 
@@ -2866,7 +2869,7 @@ function netCreateRoom(){
     NET.role = "host"; NET.code = netCode(); NET.clientId = NET.clientId || netId(); NET.hostColor = 1;
     NET.spectator = false; NET.seatKnown = true;
     NET.roster = { host: NET.clientId, guest: "", spectators: [] };
-    netSetStatus("等待对手加入…", "第一个加入的成员成为玩家 2；之后加入的成员进入观战席。");
+    netSetStatus("等待" + NET_GUEST_LABEL + "加入…", "第一个加入的成员成为" + NET_GUEST_LABEL + "；之后加入的成员进入观战席。");
     netUpdateLobby();
     netConnect();
   }).catch(function(){ netSetStatus("联机组件加载失败", "需要网络与 shared/supabase.js / shared/supabase-config.js。单机功能不受影响。"); });
@@ -2965,7 +2968,7 @@ function netHostRequestSwap(side){
   var st = NET.state;
   if (!st || !netCanSwap() || st.swapRequest) return;
   st.swapRequest = { from: side };
-  st.msg = side === "host" ? "房主申请换方，等待对手回应。" : "对手申请换方，等待房主回应。";
+  st.msg = side === "host" ? NET_HOST_LABEL + "申请换方，等待" + NET_GUEST_LABEL + "回应。" : NET_GUEST_LABEL + "申请换方，等待" + NET_HOST_LABEL + "回应。";
   netBroadcastState();
 }
 function netHostRespondSwap(side, accept){
@@ -2976,7 +2979,7 @@ function netHostRespondSwap(side, accept){
     st.finalHostColor = NET.hostColor;
     st.swapRequest = null;
     st.turn = 1;
-    st.msg = "已换方：房主执" + netColorName(NET.hostColor) + "，对手执" + netColorName(3 - NET.hostColor) + "。黑棋先行。";
+    st.msg = "已换方：" + NET_HOST_LABEL + "执" + netColorName(NET.hostColor) + "，" + NET_GUEST_LABEL + "执" + netColorName(3 - NET.hostColor) + "。黑棋先行。";
   } else {
     st.swapRequest = null;
     st.msg = "对方拒绝换方。";
@@ -3014,7 +3017,7 @@ function netHostSwap(yes){
   var st = NET.state; if (!st || st.phase !== "swap") return;
   st.finalHostColor = yes ? 2 : 1;
   st.phase = "move4"; st.turn = 2;
-  st.msg = yes ? "白方选择交换：房主改执白，对手执黑。" : "白方不交换：房主执黑，对手执白。";
+  st.msg = yes ? NET_GUEST_LABEL + "选择交换：" + NET_HOST_LABEL + "改执白，" + NET_GUEST_LABEL + "执黑。" : NET_GUEST_LABEL + "不交换：" + NET_HOST_LABEL + "执黑，" + NET_GUEST_LABEL + "执白。";
   netBroadcastState();
 }
 
@@ -3274,7 +3277,7 @@ function netPhaseText(st){
   if (st.game === "go") return st.size + " 路围棋";
   if (st.rule === "renju" && st.openingMode === "formal") {
     var d = {
-      select: "开局阶段 1/5：房主选择 26 种规定开局之一",
+      select: "开局阶段 1/5：" + NET_HOST_LABEL + "选择 26 种规定开局之一",
       swap: "开局阶段 2/5：白方决定是否交换黑白",
       move4: "开局阶段 3/5：执白方落第 4 手",
       offer5: "开局阶段 4/5：执黑方提出两个第五手候选",
@@ -3327,35 +3330,35 @@ function netRender(){
     status.className = "status";
     sub.textContent = NET.spectator ? "观战连接已断开。" : "创建房间，或输入房间码加入。";
   } else if (!st) {
-    status.textContent = NET.spectator ? "观战中，等待房主开局…" : (NET.role === "host" ? "等待对手加入…" : "已加入房间，等待房主开局…");
+    status.textContent = NET.spectator ? "观战中，等待" + NET_HOST_LABEL + "开局…" : (NET.role === "host" ? "等待" + NET_GUEST_LABEL + "加入…" : "已加入房间，等待" + NET_HOST_LABEL + "开局…");
     status.className = "status";
-    sub.textContent = NET.spectator ? "你是观战成员，不能落子或参与对局。" : (NET.role === "host" ? "把房间码发给对手，对手加入后自动开局。" : "");
+    sub.textContent = NET.spectator ? "你是观战成员，不能落子或参与对局。" : (NET.role === "host" ? "把房间码发给" + NET_GUEST_LABEL + "，加入后自动开局。" : "");
   } else {
     var actor = netActorSide();
     var phaseTxt = netPhaseText(st);
     if (st.over) {
       status.textContent = NET.spectator ? "观战中 · 对局结束" : "对局结束";
     } else if (st.phase === "select") {
-      status.textContent = NET.spectator ? "观战中 · 等待房主选择开局…" : (NET.role === "host" ? "请选择开局形状" : "等待房主选择开局…");
+      status.textContent = NET.spectator ? "观战中 · 等待" + NET_HOST_LABEL + "选择开局…" : (NET.role === "host" ? "请选择开局形状" : "等待" + NET_HOST_LABEL + "选择开局…");
     } else if (st.phase === "swap") {
-      status.textContent = NET.spectator ? "观战中 · 等待双方决定换方…" : (NET.role === "guest" ? "请决定是否交换黑白" : "等待白方决定是否交换…");
+      status.textContent = NET.spectator ? "观战中 · 等待双方决定换方…" : (NET.role === "guest" ? "请决定是否交换黑白" : "等待" + NET_GUEST_LABEL + "决定是否交换…");
     } else if (NET.spectator) {
-      status.textContent = "观战中 · 等待" + (actor === "host" ? "房主" : "玩家 2") + "落子…";
+      status.textContent = "观战中 · 等待" + (actor === "host" ? NET_HOST_LABEL : NET_GUEST_LABEL) + "落子…";
     } else {
-      status.textContent = myTurn ? "轮到你落子" : ("等待" + (NET.role === "host" ? "对手" : "房主") + "落子…");
+      status.textContent = myTurn ? "轮到你落子" : ("等待" + (NET.role === "host" ? NET_GUEST_LABEL : NET_HOST_LABEL) + "落子…");
     }
     status.className = "status";
     var extra = (NET.spectator ? "观战 · " : "") + phaseTxt;
     if (st.game === "go") extra += " · 提子 黑 " + st.caps.b + " / 白 " + st.caps.w;
     if (st.msg) extra += " · " + st.msg;
-    if (NET.busy && NET.role === "guest" && !NET.spectator) extra += " · 已落子，等待房主确认…";
+    if (NET.busy && NET.role === "guest" && !NET.spectator) extra += " · 已落子，等待" + NET_HOST_LABEL + "确认…";
     sub.textContent = extra;
   }
   if (NET.opponentGone && !NET.spectator) {
-    status.textContent = NET.role === "host" ? "玩家 2 已离开，等待重连…" : "房主已离开，房间关闭。";
+    status.textContent = NET.role === "host" ? NET_GUEST_LABEL + "已离开，等待重连…" : NET_HOST_LABEL + "已离开，房间关闭。";
   }
   if (NET.spectator && NET.seatKnown && NET.connected && !NET.hostPresent) {
-    status.textContent = "房主已离开，房间关闭。";
+    status.textContent = NET_HOST_LABEL + "已离开，房间关闭。";
   }
 
   if (st && st.over) {
@@ -3375,7 +3378,7 @@ function netRender(){
   document.getElementById("nColor").textContent = NET.spectator ? "观战" : (st ? netColorName(netMyColor()) : "—");
   document.getElementById("nTurnText").textContent = st ? (netColorName(st.turn) + (st.over ? "" : (NET.spectator ? "" : (st.turn === netMyColor() ? "（你）" : "（对方）")))) : "—";
   document.getElementById("nMoveCount").textContent = st ? st.history.length : 0;
-  document.getElementById("nConn").textContent = NET.connected ? (NET.hostPresent || NET.guestPresent ? "已连接" : "等待对手") : "未连接";
+  document.getElementById("nConn").textContent = NET.connected ? (NET.hostPresent || NET.guestPresent ? "已连接" : (NET.role === "host" ? "等待" + NET_GUEST_LABEL : "等待" + NET_HOST_LABEL)) : "未连接";
   document.getElementById("nRecord").textContent = NET.spectator ? "—" : (NET.record.win + " 胜 " + NET.record.lose + " 负");
   document.getElementById("nRuleText").textContent = st ? (st.game === "go" ? st.size + " 路围棋" : (st.rule === "renju" ? (st.openingMode === "formal" ? "连珠 · RIF 正式开局" : "连珠 · 自由开局") : "普通五子棋")) : (NET.settings.game === "go" ? NET.settings.size + " 路围棋" : (NET.settings.rule === "renju" ? "国际连珠" : "普通五子棋"));
 
@@ -3444,12 +3447,12 @@ function netRender(){
   } else if (st && st.over) {
     var ready = st.rematch || { host: false, guest: false };
     var tip = document.createElement("div"); tip.style.marginTop = "8px";
-    tip.textContent = "再来一局：" + (ready.host ? "房主已准备" : "房主未准备") + " · " + (ready.guest ? "对手已准备" : "对手未准备");
+    tip.textContent = "再来一局：" + (ready.host ? NET_HOST_LABEL + "已准备" : NET_HOST_LABEL + "未准备") + " · " + (ready.guest ? NET_GUEST_LABEL + "已准备" : NET_GUEST_LABEL + "未准备");
     sub.appendChild(tip);
   }
   if (NET.opponentGone) {
     var og2 = document.createElement("div"); og2.style.marginTop = "8px";
-    og2.textContent = NET.role === "guest" ? "房主已离开，房间关闭。" : "对手已离开，等待重连…";
+    og2.textContent = NET.role === "guest" ? NET_HOST_LABEL + "已离开，房间关闭。" : NET_GUEST_LABEL + "已离开，等待重连…";
     sub.appendChild(og2);
   }
 }
@@ -3480,11 +3483,11 @@ function netRenderRoster(){
     return '<div class="rr ' + kind + (me ? ' me' : '') + '"><b>' + label + '</b>' + (me ? '<span class="you">你</span>' : '') + '<span class="tag">' + tag + '</span></div>';
   }
   var rows = [];
-  rows.push(row("房主", NET.roster.host || (NET.role === "host" ? my : ""), "player", "正式玩家"));
+  rows.push(row(NET_HOST_LABEL, NET.roster.host || (NET.role === "host" ? my : ""), "player", "正式玩家"));
   if (NET.roster.guest) {
     var formalOnline = NET.role === "host" ? !!NET.formalGuestPresent : true;
-    rows.push(row("玩家 2", NET.roster.guest, "player" + (formalOnline ? "" : " offline"), formalOnline ? "正式玩家" : "等待重连"));
-  } else rows.push('<div class="rr waiting"><b>玩家 2</b><span class="tag">等待加入</span></div>');
+    rows.push(row(NET_GUEST_LABEL, NET.roster.guest, "player" + (formalOnline ? "" : " offline"), formalOnline ? "正式玩家" : "等待重连"));
+  } else rows.push('<div class="rr waiting"><b>' + NET_GUEST_LABEL + '</b><span class="tag">等待加入</span></div>');
   (NET.roster.spectators || []).forEach(function(id, i){
     rows.push(row("观战 " + (i + 1), id, "spectator", "观战"));
   });

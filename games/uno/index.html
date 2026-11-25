@@ -1405,7 +1405,7 @@
       <div class="modal-card online-card">
         <div>
           <h2 class="modal-title">UNO 联机</h2>
-          <p class="modal-subtitle" id="online-sub">3 或 4 人房 · 房主权威同步 · 满员后由房主开局</p>
+          <p class="modal-subtitle" id="online-sub">3 或 4 人房 · 房主权威同步 · 满员后由房主（玩家A）开局</p>
         </div>
         <div id="online-setup">
           <div class="mode-pill online-count" role="group" aria-label="联机人数">
@@ -2930,6 +2930,10 @@ function unoNetText(zh, en) {
   return state.lang === 'en' ? en : zh;
 }
 
+function unoSeatName(i) {
+  return i === 0 ? '房主（玩家A）' : '玩家' + String.fromCharCode(65 + i);
+}
+
 const unoNetEls = {
   modal: document.getElementById('online-modal'),
   setup: document.getElementById('online-setup'),
@@ -3009,14 +3013,14 @@ function unoNetSend(event, payload) {
 function unoNetRenderLobby() {
   const count = UNO_NET.playerCount || unoNetSelectedCount();
   if (unoNetEls.sub) {
-    unoNetEls.sub.textContent = '3 或 4 人房 · 房主权威同步 · 满员后由房主开局';
+    unoNetEls.sub.textContent = '3 或 4 人房 · 房主权威同步 · 满员后由房主（玩家A）开局';
   }
   if (UNO_NET.room) {
     unoNetEls.setup.style.display = 'none';
     unoNetEls.roomPanel.classList.remove('hidden');
     unoNetEls.code.textContent = UNO_NET.room;
     const rows = UNO_NET.lobby.map((p, i) =>
-      `<div class="online-player ${p.id === UNO_NET.myId ? 'me' : ''}"><span>${i === 0 ? '房主' : '玩家 ' + (i + 1)}</span><b>${p.name || ''}</b></div>`
+      `<div class="online-player ${p.id === UNO_NET.myId ? 'me' : ''}"><span>${p.name || unoSeatName(i)}</span><b>${p.id === UNO_NET.myId ? '你' : ''}</b></div>`
     );
     unoNetEls.list.innerHTML = rows.join('') || '<div class="online-empty">等待玩家加入…</div>';
     if (UNO_NET.isHost) {
@@ -3033,8 +3037,8 @@ function unoNetRenderLobby() {
           : unoNetText('对局已开始，无法加入。请等待下一局或换一个房间。', 'This match has already started. Try another room or wait for the next one.'));
       } else {
         unoNetStatus(UNO_NET.started
-          ? '对局进行中 · 房主会同步完整盘面'
-          : `已连接，等待房主开局（${UNO_NET.lobby.length}/${count}）`);
+          ? '对局进行中 · 房主（玩家A）会同步完整盘面'
+          : `已连接，等待房主（玩家A）开局（${UNO_NET.lobby.length}/${count}）`);
       }
     }
   } else {
@@ -3076,7 +3080,7 @@ function unoNetRebuildLobby() {
   ids.forEach((id) => {
     if (ordered.some((p) => p.id === id)) return;
     if (ordered.length < capacity) {
-      ordered.push({ id: id, name: '玩家 ' + (ordered.length + 1) });
+      ordered.push({ id: id, name: unoSeatName(ordered.length) });
       delete UNO_NET.deniedPeers[id];
     } else if (!UNO_NET.deniedPeers[id]) {
       UNO_NET.deniedPeers[id] = 1;
@@ -3085,7 +3089,7 @@ function unoNetRebuildLobby() {
   });
   UNO_NET.lobby = ordered.slice(0, capacity).map((p, i) => ({
     id: p.id,
-    name: i === 0 ? '房主' : '玩家 ' + (i + 1)
+    name: unoSeatName(i)
   }));
   unoNetBroadcastLobby();
   unoNetRenderLobby();
@@ -3273,7 +3277,7 @@ async function unoNetConnect(code, host) {
   UNO_NET.seenActions = Object.create(null);
   unoNetClearAllTakeover();
   UNO_NET.playerCount = host ? unoNetSelectedCount() : 0;
-  UNO_NET.lobby = host ? [{ id: UNO_NET.myId, name: '房主' }] : [];
+  UNO_NET.lobby = host ? [{ id: UNO_NET.myId, name: unoSeatName(0) }] : [];
   try {
     const client = await unoNetEnsureClient();
     const ch = client.channel('gridfall-uno-room-' + code, {
@@ -3322,7 +3326,7 @@ async function unoNetConnect(code, host) {
         }
         unoNetRebuildLobby();
       } else if (key === UNO_NET.hostId) {
-        unoNetStatus('房主已离开，房间结束');
+        unoNetStatus('房主（玩家A）已离开，房间结束');
         UNO_NET.started = false;
       }
     });
@@ -3371,15 +3375,15 @@ async function unoNetConnect(code, host) {
         return;
       }
       if (!payload || payload.id === UNO_NET.hostId) {
-        unoNetStatus('房主已离开，房间结束');
+        unoNetStatus('房主（玩家A）已离开，房间结束');
         UNO_NET.started = false;
       }
     });
     await ch.subscribe(async (status) => {
       if (status !== 'SUBSCRIBED') return;
-      await ch.track({ id: UNO_NET.myId, name: host ? '房主' : '玩家' });
+      await ch.track({ id: UNO_NET.myId, name: host ? unoSeatName(0) : '玩家' });
       if (host) unoNetRebuildLobby();
-      else unoNetStatus('已连接，等待房主…');
+      else unoNetStatus('已连接，等待房主（玩家A）…');
     });
     closeModal(els.gameoverModal);
     unoNetRenderLobby();
@@ -3622,7 +3626,7 @@ function unoNetColorChosen(color) {
 }
 function unoNetRestart() {
   if (!UNO_NET.mode || UNO_NET.denied) return;
-  if (!UNO_NET.isHost) { showToast('等待房主开新局'); return; }
+  if (!UNO_NET.isHost) { showToast('等待房主（玩家A）开新局'); return; }
   const players = state.players.length === 3 || state.players.length === 4
     ? state.players.map((p) => ({ id: p.id, name: p.name, connected: p.connected !== false, auto: !!p.auto }))
     : UNO_NET.lobby.slice(0, UNO_NET.playerCount);

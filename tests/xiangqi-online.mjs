@@ -49,11 +49,23 @@ try {
     return true;
   });
 
+  await t('xq.identity', async () => {
+    const a = await A.evaluate(`({ id: document.getElementById('xIdentity').textContent, status: document.getElementById('xStatus').textContent })`);
+    const b = await B.evaluate(`({ id: document.getElementById('xIdentity').textContent, status: document.getElementById('xStatus').textContent })`);
+    if (a.id !== '房主（玩家A）' || b.id !== '玩家B') return 'identity ' + JSON.stringify([a.id, b.id]);
+    if (!b.status.includes('房主（玩家A）')) return 'guest waiting status ' + b.status;
+    if (/玩家\s*[2-4]/.test(a.id + b.id + a.status + b.status)) return 'numeric label remains';
+    return true;
+  });
+
   await t('xq.host_move_syncs', async () => {
     await A.evaluate('onPoint(6,0)'); await sleep(100); await A.evaluate('onPoint(5,0)');
     if (!await waitFor(B, 'state.history.length === 1', 8000)) return 'guest did not get host move';
     const r = await B.evaluate('({board:state.board[5*9+0], turn:state.turn})');
-    return r.board && r.board !== 0 && r.turn === 1 ? true : JSON.stringify(r);
+    if (!(r.board && r.board !== 0 && r.turn === 1)) return JSON.stringify(r);
+    const a = await A.evaluate(`document.getElementById('xStatus').textContent`);
+    if (!a.includes('玩家B')) return 'host waiting status ' + a;
+    return true;
   });
 
   await t('xq.guest_move_syncs', async () => {

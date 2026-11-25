@@ -248,6 +248,7 @@
         <div class="x-online-status" id="xStatus">未连接</div>
         <div class="x-online-sub" id="xSub">创建房间，或输入房间码加入。</div>
         <div class="x-color">你执 <b id="xColor">—</b></div>
+        <div class="x-color">身份 <b id="xIdentity">—</b></div>
         <div class="actions x-actions">
           <button class="btn" id="xSwap" disabled>申请换方</button>
           <button class="btn" id="xResign" disabled>认输</button>
@@ -1272,6 +1273,9 @@ var XNET = {
   record: { win: 0, lose: 0 }
 };
 
+var X_HOST_LABEL = "房主（玩家A）";
+var X_GUEST_LABEL = "玩家B";
+
 function xId(){
   try {
     var k = "gridfall_xq_cid", v = sessionStorage.getItem(k);
@@ -1361,7 +1365,7 @@ function xConnect(){
   ch.on("broadcast", { event: "intent" }, function(p){ if (XNET.role === "host") xHostIntent(p.payload); });
   ch.on("broadcast", { event: "state" }, function(p){ if (XNET.role === "guest") xGuestState(p.payload); });
   ch.on("broadcast", { event: "bye" }, function(p){
-    if (p && p.payload && p.payload.from !== XNET.clientId) xOpponentGone(p.payload.fromSide === "host" ? "房主已离开，房间关闭。" : "对手已离开，等待重连…");
+    if (p && p.payload && p.payload.from !== XNET.clientId) xOpponentGone(p.payload.fromSide === "host" ? X_HOST_LABEL + "已离开，房间关闭。" : X_GUEST_LABEL + "已离开，等待重连…");
   });
   ch.on("broadcast", { event: "reject" }, function(p){
     if (p && p.payload && p.payload.from !== XNET.clientId) { XNET.busy = false; xRender(); }
@@ -1398,7 +1402,7 @@ function xHeartbeat(){
     XNET.channel.send({ type: "broadcast", event: "ping", payload: { from: XNET.clientId, at: now } });
   }
   if (!XNET.opponentGone && now - XNET.lastSeen > 18000) {
-    xOpponentGone(XNET.role === "host" ? "对手已离开，等待重连…" : "房主已离开，房间关闭。");
+    xOpponentGone(XNET.role === "host" ? X_GUEST_LABEL + "已离开，等待重连…" : X_HOST_LABEL + "已离开，房间关闭。");
   }
 }
 function xOpponentGone(msg){
@@ -1424,13 +1428,13 @@ function xSyncPresence(){
   }
   if (XNET.role === "guest") {
     if (hosts.length) { if (!XNET.hasGame) xSendIntent("sync"); }
-    else if (XNET.hasGame) xOpponentGone("房主已离开，房间关闭。");
+    else if (XNET.hasGame) xOpponentGone(X_HOST_LABEL + "已离开，房间关闭。");
   } else {
     if (guests.length) {
       if (!XNET.hasGame) xHostStart();
       else xBroadcast();
     } else if (XNET.hasGame) {
-      document.getElementById("xStatus").textContent = "对手已离开，等待重连…";
+      document.getElementById("xStatus").textContent = X_GUEST_LABEL + "已离开，等待重连…";
     }
   }
   xRender();
@@ -1596,24 +1600,26 @@ function xRender(){
   if (!XNET.connected) {
     st.textContent = "未连接"; sub.textContent = "创建房间，或输入房间码加入。";
   } else if (!XNET.hasGame) {
-    st.textContent = XNET.role === "host" ? "等待对手加入…" : "已加入，等待房主开局…";
-    sub.textContent = XNET.role === "host" ? "把房间码发给对手。" : "";
+    st.textContent = XNET.role === "host" ? "等待" + X_GUEST_LABEL + "加入…" : "已加入，等待" + X_HOST_LABEL + "开局…";
+    sub.textContent = XNET.role === "host" ? "把房间码发给" + X_GUEST_LABEL + "。" : "";
   } else if (state.over) {
     st.textContent = "对局结束 · " + (state.result || "");
     sub.textContent = state.reason || "";
   } else {
-    st.textContent = xMyTurn() ? "轮到你行棋" : "等待对方行棋";
+    st.textContent = xMyTurn() ? "轮到你行棋" : (XNET.role === "host" ? "等待" + X_GUEST_LABEL + "行棋" : "等待" + X_HOST_LABEL + "行棋");
     sub.textContent = (xMyColor() === RED ? "你执红" : "你执黑") + " · " + (state.turn === RED ? "红方行棋" : "黑方行棋") + (XNET.busy ? " · 已发送，等待确认…" : "");
   }
   color.textContent = XNET.hasGame ? (xMyColor() === RED ? "红方" : "黑方") : "—";
+  var idEl = document.getElementById("xIdentity");
+  if (idEl) idEl.textContent = XNET.connected ? (XNET.role === "host" ? X_HOST_LABEL : X_GUEST_LABEL) : "—";
   sub.textContent = sub.textContent || "";
-  if (XNET.opponentGone) { var og = document.createElement("div"); og.style.marginTop = "6px"; og.textContent = XNET.role === "guest" ? "房主已离开，房间关闭。" : "对手已离开，等待重连…"; sub.appendChild(og); }
+  if (XNET.opponentGone) { var og = document.createElement("div"); og.style.marginTop = "6px"; og.textContent = XNET.role === "guest" ? X_HOST_LABEL + "已离开，房间关闭。" : X_GUEST_LABEL + "已离开，等待重连…"; sub.appendChild(og); }
   if (XNET.hasGame && XNET.swapRequest) {
     var sr = XNET.swapRequest;
     var wrap = document.createElement("div"); wrap.style.marginTop = "6px";
-    if (sr.from === XNET.role) { wrap.textContent = "已申请换方，等待对方回应…"; sub.appendChild(wrap); }
+    if (sr.from === XNET.role) { wrap.textContent = "已申请换方，等待" + (XNET.role === "host" ? X_GUEST_LABEL : X_HOST_LABEL) + "回应…"; sub.appendChild(wrap); }
     else {
-      wrap.textContent = "对方申请换方";
+      wrap.textContent = (sr.from === "host" ? X_HOST_LABEL : X_GUEST_LABEL) + "申请换方";
       var row = document.createElement("div"); row.style.display = "flex"; row.style.gap = "6px"; row.style.marginTop = "6px";
       var y = document.createElement("button"); y.className = "btn"; y.textContent = "同意换方"; y.onclick = function(){ xUserSwapResponse(true); };
       var n = document.createElement("button"); n.className = "btn"; n.textContent = "拒绝"; n.onclick = function(){ xUserSwapResponse(false); };
@@ -1621,7 +1627,7 @@ function xRender(){
     }
   } else if (XNET.hasGame && state.over) {
     var tip = document.createElement("div"); tip.style.marginTop = "6px";
-    tip.textContent = "再来一局：" + (XNET.rematch.host ? "房主已准备" : "房主未准备") + " · " + (XNET.rematch.guest ? "对手已准备" : "对手未准备");
+    tip.textContent = "再来一局：" + (XNET.rematch.host ? X_HOST_LABEL + "已准备" : X_HOST_LABEL + "未准备") + " · " + (XNET.rematch.guest ? X_GUEST_LABEL + "已准备" : X_GUEST_LABEL + "未准备");
     sub.appendChild(tip);
   }
 
@@ -1673,7 +1679,7 @@ function xInit(){
     if (state.mode === "online") {
       document.getElementById("undoBtn").disabled = true;
       if (!state.over) {
-        document.getElementById("turnName").textContent = xMyTurn() ? "轮到你行棋" : "等待对方行棋";
+        document.getElementById("turnName").textContent = xMyTurn() ? "轮到你行棋" : (XNET.role === "host" ? "等待" + X_GUEST_LABEL + "行棋" : "等待" + X_HOST_LABEL + "行棋");
         document.getElementById("turnSub").textContent = "你执" + xColorName(xMyColor()) + " · " + (state.turn === RED ? "红方行棋" : "黑方行棋") + (XNET.busy ? " · 已发送，等待确认…" : "");
       }
       xRender();

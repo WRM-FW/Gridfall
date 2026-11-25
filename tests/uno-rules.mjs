@@ -226,6 +226,28 @@ await t('uno.setup.3p', async () => {
   return { pass: true, detail: ids.join(',') };
 });
 
+await t('uno.identity.names', async () => {
+  const names = await host.evaluate(`UNO_API.state.players.map((p) => p.name)`);
+  const lobby = await host.evaluate(`UNO_NET.lobby.map((p) => p.name)`);
+  const own = [];
+  for (const c of [host, ...clients.filter((x) => x !== host)]) {
+    own.push(await c.evaluate(`UNO_API.state.players[0].name`));
+  }
+  const want = ['房主（玩家A）', '玩家B', '玩家C'];
+  if (JSON.stringify(names) !== JSON.stringify(want)) return 'player names ' + JSON.stringify(names);
+  if (JSON.stringify(lobby) !== JSON.stringify(want)) return 'lobby names ' + JSON.stringify(lobby);
+  if (own[0] !== '房主（玩家A）' || own[1] !== '玩家B' || own[2] !== '玩家C') return 'own names ' + JSON.stringify(own);
+  const seats = await host.evaluate(`[...document.querySelectorAll('#opponents-top .seat-name')].map((x) => x.textContent.trim())`);
+  if (JSON.stringify(seats) !== JSON.stringify(['玩家B', '玩家C'])) return 'seat names ' + JSON.stringify(seats);
+  await host.evaluate(`document.getElementById('btn-online').click()`);
+  await sleep(250);
+  const rows = await host.evaluate(`[...document.querySelectorAll('#online-players .online-player span')].map((x) => x.textContent.trim())`);
+  await host.evaluate(`document.getElementById('online-close').click()`);
+  if (JSON.stringify(rows) !== JSON.stringify(want)) return 'lobby rows ' + JSON.stringify(rows);
+  if (names.some((n) => /玩家\s*[2-4]/.test(n))) return 'numeric label remains';
+  return true;
+});
+
 await t('uno.rules.match', async () => {
   await scenario(host, clients, {
     top: card(700001, 'red', '5'),
@@ -687,7 +709,7 @@ await t('uno.leave.takeover-reconnect', async () => {
 });
 
 await t('uno.join.started-denied', async () => {
-  const fourth = await launch(APP, { port: 9741 });
+  const fourth = await launch(APP, { port: PORT + 40 });
   try {
     await fourth.evaluate(`document.getElementById('btn-online').click()`);
     await sleep(200);
@@ -714,6 +736,8 @@ await t('uno.4p.order', async () => {
   c1 = byId.get(ids[1]);
   c2 = byId.get(ids[2]);
   const c3 = byId.get(ids[3]);
+  const names4 = await host.evaluate(`UNO_API.state.players.map((p) => p.name)`);
+  if (JSON.stringify(names4) !== JSON.stringify(['房主（玩家A）', '玩家B', '玩家C', '玩家D'])) return '4p names ' + JSON.stringify(names4);
 
   let sig = await scenario(host, clients, {
     top: card(800001, 'red', '5'),

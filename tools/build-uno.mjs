@@ -21,7 +21,7 @@ const onlineModal = `    <!-- Online Lobby Modal -->
       <div class="modal-card online-card">
         <div>
           <h2 class="modal-title">UNO 联机</h2>
-          <p class="modal-subtitle" id="online-sub">3 或 4 人房 · 房主权威同步 · 满员后由房主开局</p>
+          <p class="modal-subtitle" id="online-sub">3 或 4 人房 · 房主权威同步 · 满员后由房主（玩家A）开局</p>
         </div>
         <div id="online-setup">
           <div class="mode-pill online-count" role="group" aria-label="联机人数">

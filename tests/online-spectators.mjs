@@ -80,7 +80,7 @@ try {
       return { rows, hidden: document.getElementById('nRoster').classList.contains('hidden') };
     })()`);
     if (r.hidden || r.rows.length !== 3) return JSON.stringify(r);
-    if (!r.rows.some(x => x.includes('房主')) || !r.rows.some(x => x.includes('玩家 2')) || !r.rows.some(x => x.includes('观战 1'))) {
+    if (!r.rows.some(x => x.includes('房主（玩家A）')) || !r.rows.some(x => x.includes('玩家B')) || !r.rows.some(x => x.includes('观战 1'))) {
       return 'roles missing ' + JSON.stringify(r.rows);
     }
     const s = await watcher.evaluate(`(() => {
@@ -116,7 +116,7 @@ try {
     await watcher.evaluate('netBroadcastBye()');
     await sleep(500);
     const bye = await host.evaluate(`({ gone: NET.opponentGone, status: document.getElementById('nStatus').textContent })`);
-    if (bye.gone || bye.status.includes('玩家 2 已离开')) return 'spectator bye marked player 2 offline: ' + JSON.stringify(bye);
+    if (bye.gone || bye.status.includes('玩家B已离开')) return 'spectator bye marked player B offline: ' + JSON.stringify(bye);
     return true;
   });
 
@@ -201,7 +201,7 @@ try {
     const b = await watcher.evaluate(`({ spec: NET.spectator, color: netMyColor() })`);
     if (r.guest !== p2Id) return 'seat 2 was reassigned: ' + JSON.stringify(r);
     if (r.specs.length !== 1) return 'spectator list changed: ' + JSON.stringify(r);
-    if (!r.status.includes('玩家 2') || !r.status.includes('离开')) return 'status missing: ' + r.status;
+    if (!r.status.includes('玩家B') || !r.status.includes('离开')) return 'status missing: ' + r.status;
     if (b.spec !== true || b.color !== 0) return 'spectator was promoted: ' + JSON.stringify(b);
     return true;
   });

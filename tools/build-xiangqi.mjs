@@ -49,6 +49,7 @@ const onlineCard = `      <div class="card hidden" id="onlineCard">
         <div class="x-online-status" id="xStatus">未连接</div>
         <div class="x-online-sub" id="xSub">创建房间，或输入房间码加入。</div>
         <div class="x-color">你执 <b id="xColor">—</b></div>
+        <div class="x-color">身份 <b id="xIdentity">—</b></div>
         <div class="actions x-actions">
           <button class="btn" id="xSwap" disabled>申请换方</button>
           <button class="btn" id="xResign" disabled>认输</button>

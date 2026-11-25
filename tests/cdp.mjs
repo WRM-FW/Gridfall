@@ -28,8 +28,9 @@ export async function launch(url, opts = {}) {
     } catch { /* retry */ }
     await new Promise(r => setTimeout(r, 250));
   }
+  if (!targets) throw new Error('no CDP targets on port ' + port);
   const page = targets.find(t => t.type === 'page');
-  if (!page) throw new Error('no page target');
+  if (!page) throw new Error('no page target on port ' + port);
 
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
