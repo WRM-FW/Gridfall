@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { pwaHead, ensureViewportCover } from './src/pwa-head.mjs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -13,7 +14,7 @@ function must(old, neu) {
 must('<title>UNO — 三人/四人人机对战</title>', '<title>UNO · Gridfall</title>\n  <link rel="canonical" href="../../uno" />');
 
 must('      <div class="topbar-actions">', `      <div class="topbar-actions">
-        <a class="icon-btn hall-btn" href="../../index.html" title="返回 Gridfall 游戏大厅" aria-label="返回 Gridfall 游戏大厅"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span class="btn-text">大厅</span></a>
+        <a class="icon-btn hall-btn" href="../../index.html" title="返回 Gridfall 首页" aria-label="返回 Gridfall 首页"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span class="btn-text">首页</span></a>
         <button class="icon-btn" id="btn-online" title="联机对战"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg><span class="btn-text">联机</span></button>`);
 
 const onlineModal = `    <!-- Online Lobby Modal -->
@@ -90,11 +91,7 @@ must('</head>', '<style>' + css + '</style>\n</head>');
 
 must('    })();\n  </script>', online + '\n    })();\n  </script>');
 
-const pwaHead = `<link rel="manifest" href="../../manifest.webmanifest" />
-<link rel="apple-touch-icon" sizes="180x180" href="../../assets/icons/apple-touch-icon.png" />
-<script src="../../pwa.js" defer></script>`;
-
-html = html.replace('</head>', pwaHead + '</head>');
+html = ensureViewportCover(html).replace('</head>', pwaHead('../../', 'uno') + '</head>');
 
 fs.mkdirSync(path.join(ROOT, 'games', 'uno'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'games', 'uno', 'index.html'), html, 'utf8');

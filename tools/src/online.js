@@ -910,7 +910,7 @@ function netRenderRoster(){
     rows.push(row(NET_GUEST_LABEL, NET.roster.guest, "player" + (formalOnline ? "" : " offline"), formalOnline ? "正式玩家" : "等待重连"));
   } else rows.push('<div class="rr waiting"><b>' + NET_GUEST_LABEL + '</b><span class="tag">等待加入</span></div>');
   (NET.roster.spectators || []).forEach(function(id, i){
-    rows.push(row("观战 " + (i + 1), id, "spectator", "观战"));
+    rows.push(row("观战" + String.fromCharCode(65 + 2 + i), id, "spectator", "观战"));
   });
   box.innerHTML = rows.join("");
 }

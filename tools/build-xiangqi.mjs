@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { pwaHead, ensureViewportCover } from './src/pwa-head.mjs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -10,7 +11,7 @@ function must(old, neu) {
   html = html.split(old).join(neu);
 }
 
-must('<title>中国象棋 · Xiangqi</title>', '<title>中国象棋 · Xiangqi | Gridfall</title>\n<link rel="canonical" href="../../chinese-chess" />');
+must('<title>中国象棋 · Xiangqi</title>', '<title>中国象棋 · Gridfall</title>\n<link rel="canonical" href="../../chinese-chess" />');
 
 must(`  <header class="head">
     <div class="brand"><h1>中国象棋</h1><span class="tag">xiangqi</span></div>
@@ -19,7 +20,7 @@ must(`  <header class="head">
 `  <header class="head">
     <div class="brand"><h1>中国象棋</h1><span class="tag">xiangqi</span></div>
     <div class="head-actions">
-      <a class="hall-link" href="../../index.html" title="返回 Gridfall 游戏大厅">← 游戏大厅</a>
+      <a class="hall-link" href="../../index.html" title="返回 Gridfall 首页">← 首页</a>
     </div>
   </header>`);
 
@@ -134,11 +135,7 @@ must(`  state.flip = (state.mode === 'ai' && state.humanSide === BLACK);`,
 
 must('</body>', `<script>\n${online}\n</script>\n</body>`);
 
-const pwaHead = `<link rel="manifest" href="../../manifest.webmanifest" />
-<link rel="apple-touch-icon" sizes="180x180" href="../../assets/icons/apple-touch-icon.png" />
-<script src="../../pwa.js" defer></script>`;
-
-html = html.replace('</head>', pwaHead + '</head>');
+html = ensureViewportCover(html).replace('</head>', pwaHead('../../', 'chinese-chess') + '</head>');
 
 fs.mkdirSync(path.join(ROOT, 'games', 'chinese-chess'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'games', 'chinese-chess', 'index.html'), html, 'utf8');

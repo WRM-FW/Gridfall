@@ -38,7 +38,7 @@ try {
       soon: document.querySelectorAll('.game-card[data-status="soon"]').length,
       err: window.__qaErrors || []
     })`);
-    if (!r.title.includes('游戏大厅')) return 'title ' + r.title;
+    if (r.title !== 'Gridfall') return 'title ' + r.title;
     if (r.cards !== 12 || r.live !== 12 || r.soon !== 0) return 'cards ' + JSON.stringify(r);
     if (r.err.length) return 'errors ' + JSON.stringify(r.err);
     return true;
@@ -95,6 +95,36 @@ try {
     const i = r.links.indexOf('扫雷');
     if (i < 0 || r.links[i + 1] !== '跳一跳') return 'jump not after minesweeper ' + JSON.stringify(r.links);
     if (r.ghHref !== 'https://github.com/WRM-FW/Gridfall' || r.ghTarget !== '_blank' || r.ghRel.indexOf('noopener') < 0 || !r.ghIcon) return 'github ' + JSON.stringify(r);
+    return true;
+  });
+
+  await t('home.footer', async () => {
+    const r = await b.evaluate(`(() => {
+      const f = document.querySelector('footer');
+      if (!f) return { ok: false };
+      const nav = [...f.querySelectorAll('.fcol[aria-label="站内导航"] a')].map(a => ({ text: a.textContent.trim(), href: a.getAttribute('href') }));
+      const online = [...f.querySelectorAll('.fcol[aria-label="联机游戏"] a')].map(a => ({ text: a.textContent.trim(), href: a.getAttribute('href') }));
+      const external = [...f.querySelectorAll('.fcol a')].filter(a => /^(Poki|4399游戏)/.test(a.textContent.trim())).map(a => ({ text: a.textContent.trim(), href: a.getAttribute('href'), target: a.getAttribute('target'), rel: a.getAttribute('rel') }));
+      const cats = [...f.querySelectorAll('.fcats li')].map(li => li.textContent.trim());
+      return {
+        brand: f.querySelector('.fbrand')?.textContent.trim() || '',
+        tag: f.querySelector('.ftag')?.textContent.trim() || '',
+        intro: f.querySelector('.fintro')?.textContent.trim() || '',
+        nav, online, external, cats,
+        fnote: !!f.querySelector('.fnote'),
+        text: f.innerText
+      };
+    })()`);
+    if (r.brand !== 'Gridfall') return 'brand ' + r.brand;
+    if (!r.tag || !r.intro) return 'brand copy missing';
+    if (JSON.stringify(r.nav.map(x => x.text)) !== JSON.stringify(['首页', '全部游戏', '玩法一览', '下一批游戏'])) return 'site nav ' + JSON.stringify(r.nav);
+    if (JSON.stringify(r.online.map(x => x.text)) !== JSON.stringify(['黑白棋社', '中国象棋', 'UNO'])) return 'online nav ' + JSON.stringify(r.online);
+    if (r.external.length !== 2) return 'external ' + JSON.stringify(r.external);
+    if (r.external[0].href !== 'https://poki.com/' || r.external[1].href !== 'https://www.4399.com/') return 'external hrefs ' + JSON.stringify(r.external);
+    if (r.external.some(x => x.target !== '_blank' || !x.rel || x.rel.indexOf('noopener') < 0)) return 'external target ' + JSON.stringify(r.external);
+    if (r.cats.length !== 4 || !r.cats.some(x => x.includes('棋类')) || !r.cats.some(x => x.includes('联机'))) return 'categories ' + JSON.stringify(r.cats);
+    if (r.fnote) return 'old dense footer note remains';
+    if (r.text.includes('游戏大厅')) return 'footer still says 游戏大厅';
     return true;
   });
 
@@ -160,7 +190,7 @@ try {
     await b.clickSel('.hall-link');
     await sleep(900);
     const r = await b.evaluate(`({title:document.title, hall:!!document.querySelector('.game-card')})`);
-    return r.title.includes('游戏大厅') && r.hall ? true : 'back failed ' + JSON.stringify(r);
+    return r.title === 'Gridfall' && r.hall ? true : 'back failed ' + JSON.stringify(r);
   });
 
   await t('home.xiangqiLink', async () => {
@@ -171,20 +201,20 @@ try {
     if (r.mode !== 'ai' || !r.canvas || !r.hall || !r.online) return JSON.stringify(r);
     await b.clickSel('.hall-link');
     await sleep(900);
-    return (await b.evaluate('document.title')).includes('游戏大厅') ? true : 'back failed';
+    return (await b.evaluate('document.title')) === 'Gridfall' ? true : 'back failed';
   });
 
   await t('home.minigameLinks', async () => {
     const games = [
-      ['./games/2048/index.html', '2048 · 游戏'],
-      ['./games/minesweeper/index.html', '扫雷'],
-      ['./games/chinese-checkers/index.html', '跳棋'],
-      ['./games/army-chess/index.html', '军棋 · 陆战棋'],
+      ['./games/2048/index.html', '2048 · Gridfall'],
+      ['./games/minesweeper/index.html', '扫雷 · Gridfall'],
+      ['./games/chinese-checkers/index.html', '跳棋 · Gridfall'],
+      ['./games/army-chess/index.html', '军棋 · Gridfall'],
       ['./games/snake/index.html', '贪吃蛇 · Gridfall'],
       ['./games/sokoban/index.html', '推箱子 · Gridfall'],
       ['./games/tetris/index.html', '俄罗斯方块 · Gridfall'],
       ['./games/tic-tac-toe/index.html', '井字棋 · Gridfall'],
-      ['./games/jump/index.html', '跳一跳 · HOP STUDIO'],
+      ['./games/jump/index.html', '跳一跳 · Gridfall'],
       ['./games/uno/index.html', 'UNO · Gridfall']
     ];
     for (const [local, title] of games) {
@@ -193,9 +223,9 @@ try {
       const clicked = await b.evaluate(`(() => { const a = document.querySelector('.game-card a[data-local="${local}"]'); if (!a) return false; a.click(); return true; })()`);
       if (!clicked) return 'card missing ' + local;
       if (!await waitFor(`document.title.includes(${JSON.stringify(title)})`, 8000)) return 'did not open ' + local;
-      if (!await waitFor(`!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]')`, 5000)) return 'no hall pill ' + local;
-      await b.clickSel('a[title="返回 Gridfall 游戏大厅"]');
-      if (!await waitFor(`document.title.includes('游戏大厅')`, 8000)) return 'back failed ' + local;
+      if (!await waitFor(`!!document.querySelector('a[title="返回 Gridfall 首页"]')`, 5000)) return 'no hall pill ' + local;
+      await b.clickSel('a[title="返回 Gridfall 首页"]');
+      if (!await waitFor(`document.title === 'Gridfall'`, 8000)) return 'back failed ' + local;
     }
     return true;
   });

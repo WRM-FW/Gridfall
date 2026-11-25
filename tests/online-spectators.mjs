@@ -80,7 +80,7 @@ try {
       return { rows, hidden: document.getElementById('nRoster').classList.contains('hidden') };
     })()`);
     if (r.hidden || r.rows.length !== 3) return JSON.stringify(r);
-    if (!r.rows.some(x => x.includes('房主（玩家A）')) || !r.rows.some(x => x.includes('玩家B')) || !r.rows.some(x => x.includes('观战 1'))) {
+    if (!r.rows.some(x => x.includes('房主（玩家A）')) || !r.rows.some(x => x.includes('玩家B')) || !r.rows.some(x => x.includes('观战C'))) {
       return 'roles missing ' + JSON.stringify(r.rows);
     }
     const s = await watcher.evaluate(`(() => {

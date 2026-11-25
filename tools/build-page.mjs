@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { pwaHead, ensureViewportCover } from './src/pwa-head.mjs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -154,11 +155,7 @@ ${d2}</script>
 </html>
 `;
 
-const pwaHead = `<link rel="manifest" href="../../manifest.webmanifest" />
-<link rel="apple-touch-icon" sizes="180x180" href="../../assets/icons/apple-touch-icon.png" />
-<script src="../../pwa.js" defer></script>`;
-
-const output = html.replace('</head>', pwaHead + '</head>');
+const output = ensureViewportCover(html).replace('</head>', pwaHead('../../', 'board-club') + '</head>');
 
 fs.mkdirSync(path.join(REPO, 'games', 'board-club'), { recursive: true });
 fs.writeFileSync(path.join(REPO, 'games', 'board-club', 'index.html'), output, 'utf8');

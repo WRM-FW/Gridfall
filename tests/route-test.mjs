@@ -68,11 +68,11 @@ try {
 
   await t('route.home_to_entry_back_forward', async () => {
     await b.evaluate(`location.href = ${JSON.stringify(HOME)}`);
-    await waitFor(`document.title.includes('游戏大厅')`, 10000);
+    await waitFor(`document.title === 'Gridfall'`, 10000);
     await b.clickSel('.game-card[data-status="live"] .play-link');
     if (!await waitFor(`typeof G !== "undefined" && location.pathname === '/board-club'`, 12000)) return 'card did not enter /board-club';
     await b.evaluate('history.back()');
-    if (!await waitFor(`document.title.includes('游戏大厅')`, 10000)) return 'back failed';
+    if (!await waitFor(`document.title === 'Gridfall'`, 10000)) return 'back failed';
     await b.evaluate('history.forward()');
     if (!await waitFor(`typeof G !== "undefined" && location.pathname === '/board-club'`, 12000)) return 'forward failed';
     return true;

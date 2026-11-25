@@ -4,16 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
-<link rel="manifest" href="./manifest.webmanifest" />
-<meta name="theme-color" content="#1e5bf0" />
-<meta name="application-name" content="Gridfall" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Gridfall" />
-<link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon.png" />
-<title>Gridfall 游戏大厅 · 十二个入口，十四种玩法</title>
-<meta name="description" content="Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷，共 12 个入口、14 种玩法；棋社、中国象棋与 UNO 支持联机开房，免下载、免注册。" />
+
+<title>Gridfall</title>
+<meta name="description" content="Gridfall：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷等 12 个入口；棋社、中国象棋与 UNO 支持联机开房，免下载、免注册。" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b1220'/%3E%3Crect x='5' y='5' width='10' height='10' fill='%23fff'/%3E%3Crect x='17' y='5' width='10' height='10' fill='%2363e63a'/%3E%3Crect x='5' y='17' width='10' height='10' fill='%2363e63a'/%3E%3Crect x='17' y='17' width='10' height='10' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -306,14 +299,24 @@
   .final{padding:72px 0 60px;text-align:left}
   .final h2{margin:0;font-size:clamp(34px,4.4vw,52px);font-weight:900;line-height:1.15;max-width:14em}
   .final p{color:var(--paper-dim);font-size:16px;line-height:1.7;max-width:38em}
-  footer{background:var(--ink);padding:30px 0 38px;margin-top:10px}
-  .foot-inner{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:16px 34px;align-items:flex-start;justify-content:space-between}
-  footer .fbrand{font-weight:900;font-size:17px}
-  footer .fbrand small{display:block;font-weight:500;font-size:12.5px;color:#8fa0c4;margin-top:4px}
-  .flinks{display:flex;flex-wrap:wrap;gap:6px 20px}
-  .flinks a{color:#c9d4f2;text-decoration:none;font-size:14px;font-weight:700;padding:8px 2px;display:inline-flex;align-items:center;min-height:2.25rem}
-  .flinks a:hover{color:#fff;text-decoration:underline}
-  .fnote{width:100%;font-size:12.5px;color:#7285ab;line-height:1.7;border-top:1px solid #263354;padding-top:16px}
+  footer{background:var(--ink);padding:42px 0 28px;margin-top:10px}
+  .foot-inner{max-width:1180px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:1.25fr .75fr .8fr .95fr;gap:34px 42px;align-items:start}
+  .foot-brand .fbrand{font-weight:900;font-size:24px;letter-spacing:-.01em;color:#fff}
+  .foot-brand .ftag{margin:8px 0 0;color:var(--yellow);font-weight:800;font-size:14px}
+  .foot-brand .fintro{margin:10px 0 0;max-width:30em;font-size:13px;line-height:1.75;color:#9fb0d4}
+  .fcol{display:flex;flex-direction:column;gap:2px}
+  .ftitle{margin:0 0 8px;font-size:12px;letter-spacing:.12em;font-weight:800;color:#7f92ba;text-transform:uppercase}
+  .fcol a{color:#c9d4f2;text-decoration:none;font-size:14px;font-weight:700;padding:7px 0;display:inline-flex;align-items:center;gap:6px;min-height:2.25rem}
+  .fcol a:hover{color:#fff;text-decoration:underline}
+  .fcol a .ext{font-size:11px;color:#7f92ba}
+  .fabout{grid-column:1 / -1;border-top:1px solid #263354;padding-top:22px;display:grid;grid-template-columns:200px 1fr;gap:18px 30px;align-items:start}
+  .fabout .ftitle{margin:2px 0 0}
+  .fcats{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px 28px}
+  .fcats li{font-size:12.5px;line-height:1.7;color:#8fa0c4}
+  .fcats b{display:inline-block;min-width:76px;color:#dbe5ff;font-weight:800}
+  .fcopy{grid-column:1/-1;margin:6px 0 0;padding-top:14px;border-top:1px solid #263354;font-size:12px;color:#61739a}
+  @media (max-width:860px){.foot-inner{grid-template-columns:1fr 1fr}.foot-brand{grid-column:1/-1}.fabout{grid-template-columns:1fr}.fcats{grid-template-columns:1fr}}
+  @media (max-width:560px){footer{padding:30px 0 24px}.foot-inner{grid-template-columns:1fr;gap:24px}.fcopy{font-size:11.5px}}
 
   .hall-inline-link{ color:var(--yellow); font-weight:900; text-decoration:none; }
   .hall-inline-link:hover{ text-decoration:underline; }
@@ -390,6 +393,26 @@
     .board-zone{padding-bottom:4px}
   }
 </style>
+<meta name="theme-color" content="#1e5bf0" />
+<meta name="application-name" content="Gridfall" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Gridfall" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon.png" />
+<style id="ios-safe-area">
+html.ios-standalone{--safe-top:env(safe-area-inset-top,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px);}
+html.ios-standalone .topnav{top:var(--safe-top);}
+html.ios-standalone .side{top:calc(20px + var(--safe-top));}
+html.ios-standalone .gf-hall-fixed{top:calc(16px + var(--safe-top));right:calc(16px + var(--safe-right));}
+@media (max-width:560px){html.ios-standalone .gf-hall-fixed{top:calc(8px + var(--safe-top));right:calc(8px + var(--safe-right));}}
+html.ios-standalone .hud{padding-top:calc(clamp(14px,3vw,28px) + var(--safe-top));padding-left:calc(clamp(14px,3vw,28px) + var(--safe-left));padding-right:calc(clamp(14px,3vw,28px) + var(--safe-right));}
+html.ios-standalone .settings-popover{top:calc(clamp(62px,8vw,76px) + var(--safe-top));}
+html.ios-standalone .app-shell{padding-top:var(--safe-top);padding-left:var(--safe-left);padding-right:var(--safe-right);}
+html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
+html.ios-standalone body{padding-top:var(--safe-top);padding-left:var(--safe-left);padding-right:var(--safe-right);}</style>
+<script>(function(){try{var ua=navigator.userAgent||"";var ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);var standalone=navigator.standalone===true||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);if(ios&&standalone)document.documentElement.classList.add("ios-standalone");}catch(e){}})();</script>
 <script src="./pwa.js" defer></script></head>
 <body>
 
@@ -397,7 +420,7 @@
   <div class="topnav-inner">
     <a class="brand" href="#top" aria-label="Gridfall 首页">
       <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-      <span>Gridfall<small>游 戏 大 厅</small></span>
+      <span>Gridfall<small>棋牌 · 休闲 · 联机</small></span>
     </a>
     <nav class="navlinks" aria-label="主导航">
       <a href="#games">全部游戏</a>
@@ -422,16 +445,16 @@
   <div class="hero">
     <div class="wrap hero-grid">
       <div>
-        <span class="hero-eyebrow"><span class="dot"></span>网页游戏大厅 · 打开就能玩</span>
+        <span class="hero-eyebrow"><span class="dot"></span>浏览器棋牌与休闲游戏 · 打开就能玩</span>
         <h1 class="hero-title">
-          <span class="en">GRIDFALL — EVERY GAME, ONE HALL.</span>
+          <span class="en">GRIDFALL — ALL GAMES, ONE PLACE.</span>
           想玩就来，<br />坐下就开。
         </h1>
         <p class="hero-sub">名字叫 Gridfall，装的却不只是棋盘。十二个入口、十四种玩法：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO。棋社、中国象棋与 UNO 可以开房联机，其余随时坐下就玩——不用下载、不用注册。</p>
         <div class="hero-ctas">
           <a class="btn btn-green" href="./board-club" data-local="./games/board-club/index.html">进入黑白棋社 →</a>
           <a class="btn btn-ghost" href="./board-club?online=1&amp;game=gomoku" data-local="./games/board-club/index.html?online=1&amp;game=gomoku">联机开房 →</a>
-          <a class="btn btn-ghost" href="#games">先逛逛大厅</a>
+          <a class="btn btn-ghost" href="#games">先看看全部游戏</a>
         </div>
         <p class="hero-note">12 个入口 · 14 种玩法 · 3 款支持联机 · 全部免费、免注册</p>
 
@@ -459,7 +482,7 @@
           </div>
         </div>
         <div class="float-chip">
-          <b>这只是大厅门口。</b>
+          <b>这只是开始。</b>
           <span>黑白棋社有禁手判定、26 种连珠开局、棋谱回放和联机房间；中国象棋与 UNO 也能开房。跳棋、军棋、2048、扫雷坐下就能玩。</span>
         </div>
       </div>
@@ -702,7 +725,7 @@
   <!-- FEATURES / CONTENTS -->
   <section class="block" id="features">
     <div class="wrap">
-      <h2 class="big"><span class="en">EVERYTHING IN THE HALL</span>从棋盘开始，不止于棋盘。</h2>
+      <h2 class="big"><span class="en">MORE THAN A BOARD.</span>从棋盘开始，不止于棋盘。</h2>
       <p class="sec-sub">下面只写现在真实可用的功能；没有上线的玩法不往这里放。新游戏进场后，这张清单再跟着加。</p>
 
       <div class="contents">
@@ -735,7 +758,7 @@
   <section class="block" id="soon">
     <div class="wrap">
       <h2 class="big"><span class="en">ON THE BENCH</span>下一批桌子。</h2>
-      <p class="sec-sub">大厅现在有十二个入口。下面三款还在候选清单里，没有开发排期；想先玩哪一款，可以直接点单，也可以自己写好代码后提交 PR。</p>
+      <p class="sec-sub">现在有十二个入口。下面三款还在候选清单里，没有开发排期；想先玩哪一款，可以直接点单，也可以自己写好代码后提交 PR。</p>
       <div class="roadmap-row">
         <article class="roadmap-card">
           <div class="roadmap-cover"><img src="./assets/covers/chess.png" alt="国际象棋规划封面" width="1200" height="600" decoding="async"><span class="st">规划中</span></div>
@@ -767,7 +790,7 @@
         <div class="co-build-copy">
           <span class="co-kicker">OPEN SOURCE · 社区共建</span>
           <h3>下一款游戏，由你点单，也可以由你来做。</h3>
-          <p class="co-note">写一封信告诉我们想玩什么；也可以按开发说明自己做一个单文件小游戏，自己写或借助 AI 工具辅助都行，再提交 PR。通过后会补上路由、封面和首页卡片，正式摆进大厅。</p>
+          <p class="co-note">写一封信告诉我们想玩什么；也可以按开发说明自己做一个单文件小游戏，自己写或借助 AI 工具辅助都行，再提交 PR。通过后会补上路由、封面和首页卡片，正式上线。</p>
           <div class="co-actions">
             <a class="btn btn-green" href="mailto:3391792088@qq.com">3391792088@qq.com</a>
             <a class="btn btn-ghost" href="https://github.com/WRM-FW/Gridfall/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">查看共建说明 →</a>
@@ -786,7 +809,7 @@
       <div class="hero-ctas">
         <a class="btn btn-green" href="./board-club" data-local="./games/board-club/index.html">进入黑白棋社 →</a>
         <a class="btn btn-ghost" href="./board-club?online=1&amp;game=gomoku" data-local="./games/board-club/index.html?online=1&amp;game=gomoku">联机开房 →</a>
-        <a class="btn btn-ghost" href="#games">回大厅挑游戏</a>
+        <a class="btn btn-ghost" href="#games">挑一款开玩</a>
       </div>
     </div>
   </div>
@@ -794,15 +817,39 @@
 
 <footer>
   <div class="foot-inner">
-    <div class="fbrand">Gridfall · 游戏大厅<small>想玩就来，坐下就开。</small></div>
-    <nav class="flinks" aria-label="页脚导航">
+    <div class="foot-brand">
+      <div class="fbrand">Gridfall</div>
+      <p class="ftag">想玩就来，坐下就开。</p>
+      <p class="fintro">浏览器里的棋牌与休闲游戏合集：打开就能玩，无需下载与注册。</p>
+    </div>
+    <nav class="fcol" aria-label="站内导航">
+      <h2 class="ftitle">站内</h2>
+      <a href="#top">首页</a>
       <a href="#games">全部游戏</a>
-      <a href="./board-club" data-local="./games/board-club/index.html">黑白棋社</a>
-      <a href="./board-club?online=1&amp;game=gomoku" data-local="./games/board-club/index.html?online=1&amp;game=gomoku">联机开房</a>
       <a href="#features">玩法一览</a>
       <a href="#soon">下一批游戏</a>
     </nav>
-    <p class="fnote">Gridfall 游戏大厅：黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO 已上线；棋社、中国象棋与 UNO 支持联机，其余为本地 / 单人。国际象棋、四子棋、卡牌为候选规划，尚未开放。</p>
+    <nav class="fcol" aria-label="联机游戏">
+      <h2 class="ftitle">联机对局</h2>
+      <a href="./board-club" data-local="./games/board-club/index.html">黑白棋社</a>
+      <a href="./chinese-chess" data-local="./games/chinese-chess/index.html">中国象棋</a>
+      <a href="./uno" data-local="./games/uno/index.html">UNO</a>
+    </nav>
+    <div class="fcol">
+      <h2 class="ftitle">去其他站点游玩</h2>
+      <a href="https://poki.com/" target="_blank" rel="noopener noreferrer">Poki <span class="ext">↗</span></a>
+      <a href="https://www.4399.com/" target="_blank" rel="noopener noreferrer">4399游戏 <span class="ext">↗</span></a>
+    </div>
+    <div class="fabout">
+      <h2 class="ftitle">项目说明</h2>
+      <ul class="fcats">
+        <li><b>定位</b>浏览器里的棋牌与休闲游戏合集，免费、免注册。</li>
+        <li><b>棋类</b>黑白棋社（五子棋 / 连珠 / 围棋）、中国象棋、跳棋、军棋、井字棋。</li>
+        <li><b>益智 / 街机</b>2048、扫雷、推箱子、贪吃蛇、俄罗斯方块、跳一跳。</li>
+        <li><b>卡牌 / 联机</b>UNO（3–4 人）；黑白棋社、中国象棋、UNO 支持开房联机。</li>
+      </ul>
+    </div>
+    <p class="fcopy">Gridfall · 所有游戏免费游玩，无需注册。</p>
   </div>
 </footer>
 

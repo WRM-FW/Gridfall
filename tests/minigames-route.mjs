@@ -6,16 +6,16 @@ const SHOTS = path.join(import.meta.dirname, 'shots');
 mkdirSync(SHOTS, { recursive: true });
 const BASE = 'https://play-gridfall.pages.dev';
 const games = [
-  { route: '/chinese-checkers', title: '跳棋', name: 'chinese-checkers' },
-  { route: '/2048', title: '2048 · 游戏', name: '2048' },
-  { route: '/army-chess', title: '军棋 · 陆战棋', name: 'army-chess' },
-  { route: '/minesweeper', title: '扫雷', name: 'minesweeper' },
-  { route: '/snake', title: '贪吃蛇', name: 'snake' },
-  { route: '/sokoban', title: '推箱子', name: 'sokoban' },
-  { route: '/tetris', title: '俄罗斯方块', name: 'tetris' },
-  { route: '/tic-tac-toe', title: '井字棋', name: 'tic-tac-toe' },
-  { route: '/jump', title: '跳一跳', name: 'jump' },
-  { route: '/uno', title: 'UNO', name: 'uno' }
+  { route: '/chinese-checkers', title: '跳棋 · Gridfall', name: 'chinese-checkers' },
+  { route: '/2048', title: '2048 · Gridfall', name: '2048' },
+  { route: '/army-chess', title: '军棋 · Gridfall', name: 'army-chess' },
+  { route: '/minesweeper', title: '扫雷 · Gridfall', name: 'minesweeper' },
+  { route: '/snake', title: '贪吃蛇 · Gridfall', name: 'snake' },
+  { route: '/sokoban', title: '推箱子 · Gridfall', name: 'sokoban' },
+  { route: '/tetris', title: '俄罗斯方块 · Gridfall', name: 'tetris' },
+  { route: '/tic-tac-toe', title: '井字棋 · Gridfall', name: 'tic-tac-toe' },
+  { route: '/jump', title: '跳一跳 · Gridfall', name: 'jump' },
+  { route: '/uno', title: 'UNO · Gridfall', name: 'uno' }
 ];
 const b = await launch(BASE + '/', { port: 9611 });
 const R = [];
@@ -41,8 +41,8 @@ try {
       await b.send('Page.navigate', { url: BASE + g.route });
       const ok = await waitFor(`document.title.includes(${JSON.stringify(g.title)}) && location.pathname === ${JSON.stringify(g.route)}`, 12000);
       if (!ok) return 'entry ' + await b.evaluate('location.href + " | " + document.title');
-      if (!await waitFor(`!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]')`, 10000)) return 'no hall pill';
-      const r = await b.evaluate(`({ pill: !!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), download: !!document.getElementById('btnDownload') })`);
+      if (!await waitFor(`!!document.querySelector('a[title="返回 Gridfall 首页"]')`, 10000)) return 'no hall pill';
+      const r = await b.evaluate(`({ pill: !!document.querySelector('a[title="返回 Gridfall 首页"]'), download: !!document.getElementById('btnDownload') })`);
       if (!r.pill) return 'no hall pill';
       if (r.download) return 'download button present';
       await b.send('Page.reload'); await sleep(1000);
@@ -64,7 +64,7 @@ try {
     await b.evaluate(`document.querySelector('.game-card a[href="./2048"]').click()`);
     if (!await waitFor(`document.title.includes('2048') && location.pathname === '/2048'`, 12000)) return '2048 card failed';
     await b.evaluate('history.back()');
-    if (!await waitFor(`document.title.includes('游戏大厅')`, 10000)) return 'back failed';
+    if (!await waitFor(`document.title === 'Gridfall'`, 10000)) return 'back failed';
     return true;
   });
   const fail = R.filter(r => !r.pass);

@@ -21,7 +21,7 @@
 
 ## 源文件与生成文件
 
-- `index.html`（游戏大厅）和 `games/<英文名>/index.html`（各游戏入口）是生成文件，同时是部署产物，必须提交。
+- `index.html`（Gridfall 首页）和 `games/<英文名>/index.html`（各游戏入口）是生成文件，同时是部署产物，必须提交。
 - 大厅封面在 `assets/covers/`（1200×600 PNG/SVG）；共享的 Supabase 文件在 `shared/`；新增或替换后重新构建 `dist/`。
 - 源在 `tools/`：
   - `tools/design/home-reference.html`：大厅视觉参考

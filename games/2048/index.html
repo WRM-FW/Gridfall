@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
 <link rel="icon" href="data:," />
-<title>2048 · 游戏</title>
-<link rel="canonical" href="../../2048" />
+<title>2048 · Gridfall</title><link rel="canonical" href="../../2048" />
 <style>
   :root{
     --bg:#faf6ef; --bg2:#f3ecdd; --ink:#2b2620; --ink-soft:#6f6455; --line:#ddd2bf;
@@ -122,12 +121,24 @@
 </style>
 <link rel="manifest" href="../../manifest.webmanifest" />
 <link rel="apple-touch-icon" sizes="180x180" href="../../assets/icons/apple-touch-icon.png" />
+<style id="ios-safe-area">
+html.ios-standalone{--safe-top:env(safe-area-inset-top,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px);}
+html.ios-standalone .topnav{top:var(--safe-top);}
+html.ios-standalone .side{top:calc(20px + var(--safe-top));}
+html.ios-standalone .gf-hall-fixed{top:calc(16px + var(--safe-top));right:calc(16px + var(--safe-right));}
+@media (max-width:560px){html.ios-standalone .gf-hall-fixed{top:calc(8px + var(--safe-top));right:calc(8px + var(--safe-right));}}
+html.ios-standalone .hud{padding-top:calc(clamp(14px,3vw,28px) + var(--safe-top));padding-left:calc(clamp(14px,3vw,28px) + var(--safe-left));padding-right:calc(clamp(14px,3vw,28px) + var(--safe-right));}
+html.ios-standalone .settings-popover{top:calc(clamp(62px,8vw,76px) + var(--safe-top));}
+html.ios-standalone .app-shell{padding-top:var(--safe-top);padding-left:var(--safe-left);padding-right:var(--safe-right);}
+html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
+html.ios-standalone body{padding-top:var(--safe-top);padding-left:var(--safe-left);padding-right:var(--safe-right);}</style>
+<script>(function(){try{var ua=navigator.userAgent||"";var ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);var standalone=navigator.standalone===true||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);if(ios&&standalone)document.documentElement.classList.add("ios-standalone");}catch(e){}})();</script>
 <script src="../../pwa.js" defer></script></head>
 <body>
-<a class="gf-hall gf-hall-fixed" href="../../index.html" title="返回 Gridfall 游戏大厅" style="background:var(--card);color:var(--ink);border:1px solid var(--card-line);border-radius:10px;padding:8px 13px;box-shadow:0 3px 0 rgba(0,0,0,.18);">← 游戏大厅</a>
+<a class="gf-hall gf-hall-fixed" href="../../index.html" title="返回 Gridfall 首页" style="background:var(--card);color:var(--ink);border:1px solid var(--card-line);border-radius:10px;padding:8px 13px;box-shadow:0 3px 0 rgba(0,0,0,.18);">← 首页</a>
 <div class="wrap">
   <div class="brand">
-    <span class="plat">GRIDFALL · 游戏大厅</span>
+    <span class="plat">GRIDFALL</span>
     <span class="plat-sub">益智数字 · 单人 · 无需联机</span>
   </div>
   <h1>20<span class="thin">48</span></h1>
@@ -174,7 +185,7 @@
   </section>
 
   <footer>
-    <span>GRIDFALL 游戏大厅 · 2048</span>
+    <span>GRIDFALL · 2048</span>
     <span>最高分只记在本局打开期间</span>
   </footer>
 </div>

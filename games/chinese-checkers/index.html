@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
-    <title>跳棋</title>
-<link rel="canonical" href="../../chinese-checkers" />
+    <title>跳棋 · Gridfall</title><link rel="canonical" href="../../chinese-checkers" />
     <style>
       button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.25rem; }
       * { box-sizing: border-box; }
@@ -99,6 +98,18 @@
 </style>
 <link rel="manifest" href="../../manifest.webmanifest" />
 <link rel="apple-touch-icon" sizes="180x180" href="../../assets/icons/apple-touch-icon.png" />
+<style id="ios-safe-area">
+html.ios-standalone{--safe-top:env(safe-area-inset-top,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px);}
+html.ios-standalone .topnav{top:var(--safe-top);}
+html.ios-standalone .side{top:calc(20px + var(--safe-top));}
+html.ios-standalone .gf-hall-fixed{top:calc(16px + var(--safe-top));right:calc(16px + var(--safe-right));}
+@media (max-width:560px){html.ios-standalone .gf-hall-fixed{top:calc(8px + var(--safe-top));right:calc(8px + var(--safe-right));}}
+html.ios-standalone .hud{padding-top:calc(clamp(14px,3vw,28px) + var(--safe-top));padding-left:calc(clamp(14px,3vw,28px) + var(--safe-left));padding-right:calc(clamp(14px,3vw,28px) + var(--safe-right));}
+html.ios-standalone .settings-popover{top:calc(clamp(62px,8vw,76px) + var(--safe-top));}
+html.ios-standalone .app-shell{padding-top:var(--safe-top);padding-left:var(--safe-left);padding-right:var(--safe-right);}
+html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
+html.ios-standalone body{padding-top:var(--safe-top);padding-left:var(--safe-left);padding-right:var(--safe-right);}</style>
+<script>(function(){try{var ua=navigator.userAgent||"";var ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);var standalone=navigator.standalone===true||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);if(ios&&standalone)document.documentElement.classList.add("ios-standalone");}catch(e){}})();</script>
 <script src="../../pwa.js" defer></script></head>
   <body>
     <div class="wrap">
@@ -106,7 +117,7 @@
         <h1>跳棋</h1>
         <span class="sub">六角星棋盘 · 先把 10 枚棋子全部跳进对面营地的一方获胜</span>
       
-        <a class="gf-hall" href="../../index.html" title="返回 Gridfall 游戏大厅" style="margin-left:auto;align-self:center;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:7px 14px;box-shadow:0 2px 6px rgba(0,0,0,.12);">← 游戏大厅</a>
+        <a class="gf-hall" href="../../index.html" title="返回 Gridfall 首页" style="margin-left:auto;align-self:center;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:7px 14px;box-shadow:0 2px 6px rgba(0,0,0,.12);">← 首页</a>
       </header>
 
       <div class="layout">

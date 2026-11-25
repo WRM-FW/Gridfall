@@ -33,7 +33,7 @@ try {
     const data = await res.json();
     if (!res.ok) return 'status ' + res.status;
     if (!/manifest\+json|application\/json/.test(ct)) return 'content-type ' + ct;
-    if (data.name !== 'Gridfall 游戏大厅' || data.short_name !== 'Gridfall') return 'name';
+    if (data.name !== 'Gridfall' || data.short_name !== 'Gridfall') return 'name';
     const start = new URL(data.start_url, new URL('manifest.webmanifest', base)).href;
     if (start !== base.href) return 'start_url ' + start + ' != ' + base.href;
     const scope = new URL(data.scope, new URL('manifest.webmanifest', base)).href;
@@ -99,7 +99,7 @@ try {
       await b.send('Page.reload', { ignoreCache: false });
       await sleep(2500);
       const r = await b.evaluate(`({ title: document.title, cards: document.querySelectorAll('.game-card').length })`);
-      if (!r.title.includes('游戏大厅') || r.cards !== 12) return 'offline reload ' + JSON.stringify(r);
+      if (r.title !== 'Gridfall' || r.cards !== 12) return 'offline reload ' + JSON.stringify(r);
       return true;
     } finally {
       await b.send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });

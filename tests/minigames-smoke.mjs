@@ -15,7 +15,7 @@ try {
   await goto(page('games/chinese-checkers/index.html'));
   console.log('tq', JSON.stringify(await b.evaluate(`({
     title: document.title,
-    pill: document.querySelector('a[title="返回 Gridfall 游戏大厅"]') ? 1 : 0,
+    pill: document.querySelector('a[title="返回 Gridfall 首页"]') ? 1 : 0,
     pieces: document.querySelectorAll('#board circle').length,
     mode: !!document.querySelector('#modeSeg button'),
     newBtn: !!document.getElementById('btnNew')
@@ -29,24 +29,24 @@ try {
     await b.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code: key, windowsVirtualKeyCode: { ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40 }[key] });
     await sleep(250);
   }
-  const after = await b.evaluate(`({tiles:document.querySelectorAll('#tiles .tile').length, moves:document.getElementById('moves').textContent, score:document.getElementById('score').textContent, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]')})`);
+  const after = await b.evaluate(`({tiles:document.querySelectorAll('#tiles .tile').length, moves:document.getElementById('moves').textContent, score:document.getElementById('score').textContent, pill:!!document.querySelector('a[title="返回 Gridfall 首页"]')})`);
   console.log('2048', JSON.stringify({ before, after }));
   await b.screenshot(path.join(SHOTS, '2048-page.png'));
 
   await goto(page('games/army-chess/index.html'));
-  console.log('jq', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), status:document.getElementById('statusText').textContent, confirm:document.getElementById('btnConfirm').textContent })`)));
+  console.log('jq', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 首页"]'), status:document.getElementById('statusText').textContent, confirm:document.getElementById('btnConfirm').textContent })`)));
   await b.clickSel('#btnConfirm'); await sleep(600);
   console.log('jq after', JSON.stringify(await b.evaluate(`({ status:document.getElementById('statusText').textContent, confirm:document.getElementById('btnConfirm').textContent, phase:window.state?state.phase:null })`)));
   await b.screenshot(path.join(SHOTS, 'junqi-page.png'));
 
   await goto(page('games/minesweeper/index.html'));
-  console.log('sl', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), cells:document.querySelectorAll('.cell').length, timer:document.getElementById('timer').textContent })`)));
+  console.log('sl', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 首页"]'), cells:document.querySelectorAll('.cell').length, timer:document.getElementById('timer').textContent })`)));
   await b.clickSel('.cell'); await sleep(800);
   console.log('sl after', JSON.stringify(await b.evaluate(`({ opened:document.querySelectorAll('.cell.open').length, timer:document.getElementById('timer').textContent, msg:document.getElementById('msg').textContent })`)));
   await b.screenshot(path.join(SHOTS, 'saolei-page.png'));
 
   await goto(page('games/snake/index.html'));
-  console.log('snake', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), canvas:!!document.getElementById('cv'), score:document.getElementById('score').textContent })`)));
+  console.log('snake', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 首页"]'), canvas:!!document.getElementById('cv'), score:document.getElementById('score').textContent })`)));
   await b.send('Input.dispatchKeyEvent', { type:'keyDown', key:'ArrowRight', code:'ArrowRight', windowsVirtualKeyCode:39 });
   await b.send('Input.dispatchKeyEvent', { type:'keyUp', key:'ArrowRight', code:'ArrowRight', windowsVirtualKeyCode:39 });
   await sleep(500);
@@ -54,7 +54,7 @@ try {
   await b.screenshot(path.join(SHOTS, 'snake-page.png'));
 
   await goto(page('games/sokoban/index.html'));
-  console.log('sokoban', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), canvas:!!document.getElementById('cv'), lv:document.getElementById('lv').textContent, steps:document.getElementById('steps').textContent })`)));
+  console.log('sokoban', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 首页"]'), canvas:!!document.getElementById('cv'), lv:document.getElementById('lv').textContent, steps:document.getElementById('steps').textContent })`)));
   await b.send('Input.dispatchKeyEvent', { type:'keyDown', key:'ArrowUp', code:'ArrowUp', windowsVirtualKeyCode:38 });
   await b.send('Input.dispatchKeyEvent', { type:'keyUp', key:'ArrowUp', code:'ArrowUp', windowsVirtualKeyCode:38 });
   await sleep(200);
@@ -66,7 +66,7 @@ try {
   await b.screenshot(path.join(SHOTS, 'sokoban-page.png'));
 
   await goto(page('games/tetris/index.html'));
-  console.log('tetris', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), canvas:!!document.getElementById('board'), score:document.getElementById('score').textContent })`)));
+  console.log('tetris', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 首页"]'), canvas:!!document.getElementById('board'), score:document.getElementById('score').textContent })`)));
   await b.evaluate(`document.getElementById('btnStart').click()`);
   await sleep(300);
   for (const [key, code, vk] of [['ArrowLeft','ArrowLeft',37],['ArrowUp','ArrowUp',38],[' ','Space',32]]) {
@@ -78,16 +78,16 @@ try {
   await b.screenshot(path.join(SHOTS, 'tetris-page.png'));
 
   await goto(page('games/tic-tac-toe/index.html'));
-  console.log('ttt', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), cells:document.querySelectorAll('.cell').length, mode:document.getElementById('mode').value })`)));
+  console.log('ttt', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 首页"]'), cells:document.querySelectorAll('.cell').length, mode:document.getElementById('mode').value })`)));
   await b.evaluate(`document.querySelectorAll('.cell')[4].click()`); await sleep(600);
   console.log('ttt after', JSON.stringify(await b.evaluate(`({ mark:board[4], over:gameOver, turn:current, sx:document.getElementById('sx').textContent })`)));
   await b.screenshot(path.join(SHOTS, 'tic-tac-toe-page.png'));
 
   await goto(page('games/jump/index.html'));
-  console.log('jump', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), canvas:document.querySelectorAll('canvas').length, three:typeof THREE !== 'undefined' })`)));
+  console.log('jump', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 首页"]'), canvas:document.querySelectorAll('canvas').length, three:typeof THREE !== 'undefined' })`)));
   await b.screenshot(path.join(SHOTS, 'jump-page.png'));
 
   await goto(page('games/uno/index.html'));
-  console.log('uno', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]'), online:!!document.getElementById('btn-online'), modal:!!document.getElementById('online-modal'), players:UNO_API.state.players.length })`)));
+  console.log('uno', JSON.stringify(await b.evaluate(`({ title:document.title, pill:!!document.querySelector('a[title="返回 Gridfall 首页"]'), online:!!document.getElementById('btn-online'), modal:!!document.getElementById('online-modal'), players:UNO_API.state.players.length })`)));
   await b.screenshot(path.join(SHOTS, 'uno-page.png'));
 } finally { await b.close(); }

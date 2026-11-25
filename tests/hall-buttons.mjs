@@ -35,17 +35,17 @@ const waitFor = async (expr, ms = 10000) => {
 try {
   for (const [name, rel] of pages) {
     await b.send('Page.navigate', { url: pathToFileURL(path.join(ROOT, rel)).href });
-    const ok = await waitFor(`!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]')`);
+    const ok = await waitFor(`!!document.querySelector('a[title="返回 Gridfall 首页"]')`);
     let detail = '';
     if (!ok) detail = 'no hall link';
     else {
-      const r = await b.evaluate(`(() => { const a=document.querySelector('a[title="返回 Gridfall 游戏大厅"]'); const x=a.getBoundingClientRect(); return { href:a.getAttribute('href'), x:x.x, y:x.y, w:x.width, h:x.height, sw:document.documentElement.scrollWidth, cw:document.documentElement.clientWidth }; })()`);
+      const r = await b.evaluate(`(() => { const a=document.querySelector('a[title="返回 Gridfall 首页"]'); const x=a.getBoundingClientRect(); return { href:a.getAttribute('href'), x:x.x, y:x.y, w:x.width, h:x.height, sw:document.documentElement.scrollWidth, cw:document.documentElement.clientWidth }; })()`);
       if (!/index\.html$/.test(r.href)) detail = 'href ' + r.href;
       else if (r.sw > r.cw + 2) detail = 'overflow ' + JSON.stringify(r);
       else if (r.x < 0 || r.y < 0 || r.x + r.w > 1281) detail = 'offscreen ' + JSON.stringify(r);
       else {
-        await b.evaluate(`document.querySelector('a[title="返回 Gridfall 游戏大厅"]').click()`);
-        if (!await waitFor(`document.title.includes('Game') || document.title.includes('游戏大厅')`)) detail = 'back failed';
+        await b.evaluate(`document.querySelector('a[title="返回 Gridfall 首页"]').click()`);
+        if (!await waitFor(`document.title.includes('Game') || document.title === 'Gridfall'`)) detail = 'back failed';
       }
     }
     R.push({ id: 'hall.' + name, pass: !detail, detail });
@@ -55,8 +55,8 @@ try {
   await b.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   for (const [name, rel] of pages) {
     await b.send('Page.navigate', { url: pathToFileURL(path.join(ROOT, rel)).href });
-    await waitFor(`!!document.querySelector('a[title="返回 Gridfall 游戏大厅"]')`, 10000);
-    const r = await b.evaluate(`(() => { const a=document.querySelector('a[title="返回 Gridfall 游戏大厅"]'); if(!a) return null; const x=a.getBoundingClientRect(); return { x:x.x, y:x.y, right:x.right, bottom:x.bottom, sw:document.documentElement.scrollWidth, cw:document.documentElement.clientWidth }; })()`);
+    await waitFor(`!!document.querySelector('a[title="返回 Gridfall 首页"]')`, 10000);
+    const r = await b.evaluate(`(() => { const a=document.querySelector('a[title="返回 Gridfall 首页"]'); if(!a) return null; const x=a.getBoundingClientRect(); return { x:x.x, y:x.y, right:x.right, bottom:x.bottom, sw:document.documentElement.scrollWidth, cw:document.documentElement.clientWidth }; })()`);
     const bad = !r || r.sw > r.cw + 2 || r.x < 0 || r.right > 391 || r.bottom > 845;
     R.push({ id: 'hall.mobile.' + name, pass: !bad, detail: bad ? JSON.stringify(r) : '' });
   }

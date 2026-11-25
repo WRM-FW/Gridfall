@@ -26,7 +26,7 @@ const waitFor = async (expr, ms = 12000) => {
 try {
   await t('livehome.loads', async () => {
     const r = await b.evaluate(`({ title: document.title, live: document.querySelectorAll('.game-card[data-status="live"]').length, cards: document.querySelectorAll('.game-card').length })`);
-    if (!r.title.includes('游戏大厅') || r.live !== 12 || r.cards !== 12) return JSON.stringify(r);
+    if (r.title !== 'Gridfall' || r.live !== 12 || r.cards !== 12) return JSON.stringify(r);
     return true;
   });
   await b.screenshot(path.join(SHOTS, 'live-home.png'));
@@ -74,20 +74,20 @@ try {
 
   await t('livehome.back', async () => {
     await b.clickSel('.hall-link');
-    const ok = await waitFor(`document.title.includes('游戏大厅')`, 10000);
+    const ok = await waitFor(`document.title === 'Gridfall'`, 10000);
     if (!ok) return 'no back';
     return true;
   });
 
   await t('livehome.xiangqi_card', async () => {
-    await waitFor(`document.title.includes('游戏大厅') && document.querySelectorAll('.game-card').length === 12`, 12000);
+    await waitFor(`document.title === 'Gridfall' && document.querySelectorAll('.game-card').length === 12`, 12000);
     await b.evaluate(`document.querySelectorAll('.game-card[data-status="live"] .play-link')[1].click()`);
     const ok = await waitFor(`document.title.includes('中国象棋') && location.pathname === '/chinese-chess' && typeof state !== 'undefined'`, 12000);
     if (!ok) return 'did not open /chinese-chess: ' + await b.evaluate('location.href');
     const r = await b.evaluate(`({ title: document.title, mode: state.mode, online: [...document.querySelectorAll('#modeSeg .seg-btn')].some(b=>b.dataset.mode==='online') })`);
     if (r.mode !== 'ai' || !r.online) return JSON.stringify(r);
     await b.clickSel('.hall-link');
-    await waitFor(`document.title.includes('游戏大厅')`, 10000);
+    await waitFor(`document.title === 'Gridfall'`, 10000);
     return true;
   });
 

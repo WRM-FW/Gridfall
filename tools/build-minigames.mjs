@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { pwaHead, ensureViewportCover } from './src/pwa-head.mjs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -26,13 +27,15 @@ const HALL_CSS = `<style>
 
 function hallLink(g, extra) {
   const st = extra || g.style;
-  return `<a class="gf-hall${g.hall === 'fixed' ? ' gf-hall-fixed' : ''}" href="../../index.html" title="返回 Gridfall 游戏大厅"${st ? ` style="${st}"` : ''}>← 游戏大厅</a>`;
+  return `<a class="gf-hall${g.hall === 'fixed' ? ' gf-hall-fixed' : ''}" href="../../index.html" title="返回 Gridfall 首页"${st ? ` style="${st}"` : ''}>← 首页</a>`;
 }
 
 for (const g of games) {
   let html = fs.readFileSync(path.join(ROOT, 'tools', 'design', g.ref), 'utf8');
   if (!html.includes('<title>')) throw new Error('no title in ' + g.ref);
-  html = html.replace(/<title>([\s\S]*?)<\/title>/, '<title>$1</title>\n<link rel="canonical" href="' + g.route + '" />');
+  html = html.replace(/<title>[\s\S]*?<\/title>/, '<title>' + g.label + ' · Gridfall</title><link rel="canonical" href="' + g.route + '" />');
+  html = html.replace(/GRIDFALL\s*[·|]\s*游戏大厅/g, 'GRIDFALL');
+  html = html.replace(/GRIDFALL\s+游戏大厅/g, 'GRIDFALL');
   html = html.replace('</head>', HALL_CSS + '\n</head>');
 
   if (g.hall === 'fixed') {
@@ -47,17 +50,13 @@ for (const g of games) {
     const bar = `<div class="gf-hallbar" style="margin:0 0 10px;">${hallLink(g, g.style)}</div>`;
     html = html.replace('<main class="wrap">', '<main class="wrap">\n      ' + bar);
   } else if (g.hall === 'toolbar') {
-    const link = `<a class="icon-btn hall-btn" href="../../index.html" title="返回 Gridfall 游戏大厅" aria-label="返回 Gridfall 游戏大厅"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span class="btn-text">大厅</span></a>`;
+    const link = `<a class="icon-btn hall-btn" href="../../index.html" title="返回 Gridfall 首页" aria-label="返回 Gridfall 首页"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span class="btn-text">首页</span></a>`;
     html = html.replace('<div class="toolbar">', '<div class="toolbar">\n        ' + link);
     html = html.replace('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', '../../shared/vendor/three.min.js');
     html = html.replace('</head>', '<style>.hud{z-index:60;}body:has(.overlay.visible) .score-panel,body:has(.overlay.visible) .hud-bottom{visibility:hidden;}</style>\n</head>');
   }
 
-const pwaHead = `<link rel="manifest" href="../../manifest.webmanifest" />
-<link rel="apple-touch-icon" sizes="180x180" href="../../assets/icons/apple-touch-icon.png" />
-<script src="../../pwa.js" defer></script>`;
-
-  html = html.replace('</head>', pwaHead + '</head>');
+  html = ensureViewportCover(html).replace('</head>', pwaHead('../../', g.dir) + '</head>');
   fs.mkdirSync(path.join(ROOT, 'games', g.dir), { recursive: true });
   fs.writeFileSync(path.join(ROOT, 'games', g.dir, 'index.html'), html, 'utf8');
   console.log('built', 'games/' + g.dir + '/index.html', Buffer.byteLength(html), 'bytes');

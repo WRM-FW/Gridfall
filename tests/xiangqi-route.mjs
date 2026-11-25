@@ -46,11 +46,11 @@ try {
   });
   await t('xqroute.home_card_back_forward', async () => {
     await b.evaluate(`location.href = ${JSON.stringify(HOME)}`);
-    await waitFor(`document.title.includes('游戏大厅') && document.querySelectorAll('.game-card').length === 9`, 12000);
+    await waitFor(`document.title === 'Gridfall' && document.querySelectorAll('.game-card').length === 9`, 12000);
     await b.evaluate(`document.querySelectorAll('.game-card[data-status="live"] .play-link')[1].click()`);
     if (!await waitFor(`document.title.includes('中国象棋') && location.pathname === '/chinese-chess'`, 12000)) return 'card enter failed';
     await b.evaluate('history.back()');
-    if (!await waitFor(`document.title.includes('游戏大厅') && document.querySelectorAll('.game-card').length === 9`, 12000)) return 'back failed';
+    if (!await waitFor(`document.title === 'Gridfall' && document.querySelectorAll('.game-card').length === 9`, 12000)) return 'back failed';
     await b.evaluate('history.forward()');
     if (!await waitFor(`document.title.includes('中国象棋') && location.pathname === '/chinese-chess'`, 12000)) return 'forward failed';
     return true;

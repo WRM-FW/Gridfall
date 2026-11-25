@@ -74,7 +74,7 @@ try {
     const data = await res.json();
     if (!res.ok) return 'status ' + res.status;
     if (!/manifest\+json|application\/json/.test(ct)) return 'content-type ' + ct;
-    if (data.name !== 'Gridfall 游戏大厅' || data.short_name !== 'Gridfall') return 'name ' + JSON.stringify(data);
+    if (data.name !== 'Gridfall' || data.short_name !== 'Gridfall') return 'name ' + JSON.stringify(data);
     if (data.display !== 'standalone' || data.start_url !== './' || data.scope !== './') return 'display/start/scope ' + JSON.stringify(data);
     if (!data.icons || data.icons.length < 4) return 'icons ' + JSON.stringify(data.icons);
     return true;
@@ -111,7 +111,7 @@ try {
     })()`);
     if (r.manifest !== '/manifest.webmanifest') return 'manifest link ' + JSON.stringify(r);
     if (!r.apple.includes('apple-touch-icon.png') || !r.theme) return 'meta ' + JSON.stringify(r);
-    if (!r.title.includes('游戏大厅')) return 'title ' + r.title;
+    if (r.title !== 'Gridfall') return 'title ' + r.title;
     return true;
   });
 
@@ -155,7 +155,7 @@ try {
       await b.send('Page.reload', { ignoreCache: false });
       await sleep(1800);
       const r = await b.evaluate(`({ title: document.title, cards: document.querySelectorAll('.game-card').length })`);
-      if (!r.title.includes('游戏大厅') || r.cards !== 12) return 'offline reload ' + JSON.stringify(r);
+      if (r.title !== 'Gridfall' || r.cards !== 12) return 'offline reload ' + JSON.stringify(r);
       return true;
     } finally {
       await b.send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });

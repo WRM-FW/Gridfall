@@ -43,6 +43,13 @@ await t('identity.uno_letters', async () => {
   return true;
 });
 
+await t('identity.spectator_letters', async () => {
+  const html = FILES['board-club'];
+  if (/观战\s*[0-9]/.test(html)) return 'numeric spectator label remains';
+  if (!html.includes('String.fromCharCode(65 + 2 + i)')) return 'spectator letter helper missing';
+  return true;
+});
+
 await t('identity.ui_hooks', async () => {
   if (!FILES['board-club'].includes('id="nRoster"')) return 'board roster missing';
   if (!FILES['board-club'].includes('NET_HOST_LABEL')) return 'board labels missing';

@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Gridfall 游戏大厅",
+  "name": "Gridfall",
   "short_name": "Gridfall",
-  "description": "Gridfall 棋牌游戏大厅：黑白棋社、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳、UNO。部分游戏支持联机开房。",
+  "description": "Gridfall：棋牌与休闲游戏合集，包含黑白棋社、中国象棋、跳棋、军棋、2048、扫雷、贪吃蛇、推箱子、俄罗斯方块、井字棋、跳一跳与 UNO；部分游戏支持联机开房。",
   "lang": "zh-CN",
   "dir": "ltr",
   "start_url": "./",
