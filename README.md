@@ -93,6 +93,7 @@ node live-home.mjs
 node live-online.mjs
 node route-test.mjs
 node online-colors.mjs
+node online-spectators.mjs
 node xiangqi-route.mjs
 node xiangqi-online.mjs
 node minigames-smoke.mjs
@@ -106,7 +107,7 @@ node uno-rules.mjs
 
 ## 已验证
 
-- 目录重构后：首页 15/15、线上首页 8/8、`/board-club` 路由 9/9（含旧入口 301）、`/chinese-chess` 路由 4/4、十款小游戏路由 21/21、返回大厅按钮 24/24（桌面 + 390px）、UNO 3/4 人房联机 2/2、UNO 规则与回合 21/21（3 人 + 4 人 + 初始牌）、线上联机整局 4/4、引擎 36/36、本地界面 6/6。
+- 目录重构后：首页 15/15、线上首页 8/8、`/board-club` 路由 9/9（含旧入口 301）、`/chinese-chess` 路由 4/4、十款小游戏路由 21/21、返回大厅按钮 24/24（桌面 + 390px）、UNO 3/4 人房联机 2/2、UNO 规则与回合 21/21（3 人 + 4 人 + 初始牌）、黑白棋社联机 28/28（核心 7 + 连珠围棋 5 + 换方 4 + 换色 6 + 观战 6）、线上联机整局 4/4、引擎 36/36、本地界面 6/6。
 - Cloudflare：九个新 URL 直接访问/刷新、尾斜杠 301、旧 URL 301 均已实测；`/board-club` 的查询参数与联机深链接保持。
 - GitHub Pages：首页 12 张卡片、`games/<dir>/` 目录访问、旧/新入口的 404 回退均已实测。
 - 贪吃蛇、推箱子、俄罗斯方块本地冒烟通过；三款游戏共用 `../../index.html` 回大厅。

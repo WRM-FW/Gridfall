@@ -299,9 +299,22 @@ canvas#gBoard.no-turn, canvas#wBoard.no-turn, canvas#nBoard.no-turn{ cursor:not-
 .modal .box h3{ font-size:15px; margin:16px 0 4px; color:var(--ink2); }
 .modal .box p{ margin:6px 0; }
 .modal .box code{ background:var(--tray); padding:1px 6px; border-radius:5px; }
-details.pages{ background:linear-gradient(180deg,#fffdf7,var(--porcelain)); border:1px solid var(--line); border-radius:12px; padding:12px 16px; box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(8,4,0,.22); }
-details.pages summary{ font-weight:600; cursor:pointer; min-height:32px; color:var(--ink2); letter-spacing:.04em; }
-details.pages ol{ line-height:1.9; font-size:13.5px; margin:8px 0; padding-left:20px; }
+/* 关于联机与部署：静态展开，不再提供折叠交互 */
+.pages{ background:linear-gradient(180deg,#fffdf7,var(--porcelain)); border:1px solid var(--line); border-radius:12px; padding:12px 16px; box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(8,4,0,.22); }
+.pages .pages-title{ margin:0; font-weight:600; font-size:15px; line-height:1.5; color:var(--ink2); letter-spacing:.04em; }
+.pages ol{ line-height:1.9; font-size:13.5px; margin:8px 0; padding-left:20px; }
+.room-roster{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+.room-roster .rr{
+  display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:8px;
+  border:1px solid var(--line); background:var(--tray); color:var(--ink2); font-size:13px;
+}
+.room-roster .rr b{ color:var(--ink); font-weight:700; }
+.room-roster .rr .you{ font-size:11px; font-weight:700; color:#8a5a14; background:#f2dfb4; border-radius:999px; padding:1px 7px; }
+.room-roster .rr .tag{ margin-left:auto; font-size:11px; font-weight:700; border-radius:999px; padding:2px 8px; background:rgba(90,60,23,.12); color:var(--ink2); }
+.room-roster .rr.player .tag{ background:#d9b46a; color:#2e1e0d; }
+.room-roster .rr.player.offline .tag{ background:#e7c8b8; color:#8e2a20; }
+.room-roster .rr.spectator .tag{ background:#e8dfca; color:#6a563d; }
+.room-roster .rr.me{ outline:1px solid #b98a3a; }
 .hidden{ display:none !important; }
 .side .card{ margin-bottom:0; }
 .side{ align-self:start; }
@@ -566,10 +579,11 @@ details.pages ol{ line-height:1.9; font-size:13.5px; margin:8px 0; padding-left:
           <input id="nCodeInput" maxlength="6" placeholder="输入 6 位房间码" autocomplete="off" spellcheck="false">
           <button id="nJoin" type="button">加入房间</button>
         </div>
-        <p class="hint" id="nLobbyHint" style="margin:9px 0 0">房间码即入场凭证，只发给你的对手。房主执黑先行。</p>
+        <p class="hint" id="nLobbyHint" style="margin:9px 0 0">第一个加入的成员成为玩家 2，之后加入的成员进入观战席；观战者不能落子。房主执黑先行。</p>
         <div class="room-code hidden" id="nRoomBox">
           <span>房间码</span><b id="nRoomCode">------</b><button id="nCopy" type="button">复制</button>
         </div>
+        <div class="room-roster hidden" id="nRoster"></div>
       </div>
 
       <div class="card">
@@ -588,14 +602,15 @@ details.pages ol{ line-height:1.9; font-size:13.5px; margin:8px 0; padding-left:
   </div>
 </section>
 
-<details class="pages" style="margin-top:18px">
-  <summary>关于联机与部署</summary>
+<section class="pages" style="margin-top:18px" aria-label="关于联机与部署">
+  <h2 class="pages-title">关于联机与部署</h2>
   <ol>
     <li>联机后端为 Supabase Realtime（Broadcast + Presence），不需要数据库表；房间码即频道名的一部分。</li>
     <li>房主是权威端：落子、禁手、胜负、劫争都由房主按本地规则判定后广播全量盘面，客户端只渲染快照。</li>
+    <li>房间固定两个正式席位：房主与第一个加入的成员；之后加入的成员只进入观战席，不能落子或参与对局。正式席位不会转给观战者，掉线后等待原玩家重连。</li>
     <li>单机功能离线可用；联机需要网络与 Supabase 配置，页面会按需加载客户端库。</li>
   </ol>
-</details>
+</section>
 
 <div class="modal" id="rulesModal" role="dialog" aria-modal="true">
   <div class="box">
@@ -609,7 +624,7 @@ details.pages ol{ line-height:1.9; font-size:13.5px; margin:8px 0; padding-left:
     <h3>围棋</h3>
     <p>黑先，可选 9/13/19 路。无气提子、禁着点（不可自杀）、劫争不可立即回提。双方连续停手终局，中国规则数子，黑贴 3.75 子（7.5 目）。</p>
     <h3>联机</h3>
-    <p>房主执黑先行；房间码只发给对手。所有规则由房主端按上面的本地规则判定，再把完整盘面广播给对手。未轮到的一方不能落子。对手掉线时房间保留，可等待重连；房主离开则房间关闭。对局结束后双方都点「再来一局」才会开始新局。</p>
+    <p>房主执黑先行；第一个加入的成员成为第二名正式玩家，之后加入的成员全部进入观战席。观战者可以看到盘面，但不能落子、认输、停手或参与再来一局；正式席位不会转给观战者，玩家 2 掉线后房间保留并等待其重连。所有规则由房主端按上面的本地规则判定，再把完整盘面广播给所有成员。未轮到的一方不能落子；房主离开则房间关闭。对局结束后两名正式玩家都点「再来一局」才会开始新局。</p>
     <h3>难度</h3>
     <p>简单 → 一般 → 普通 → 困难 → 极难。极难使用 Alpha-Beta 深搜 + VCF 连续冲四搜索，minimax 有 3.4 秒思考上限。</p>
     <p class="hint">说明：正式开局的 26 种形状按 RIF 官方图校正（直接开局第二手在天元正右，间接开局在右上斜邻）；对局与战绩只保存在当前页面内，刷新后清空。</p>
@@ -2335,9 +2350,19 @@ function drawBoard(cv, view){
       ctx.fillText(String(idx + 1), cxp, cyp + 1);
     });
   }
+  // Optimistic local stone for a guest move that is still waiting for the host.
+  // It is drawn fully opaque and above candidate markers so the click feels
+  // immediate; the authoritative snapshot replaces it (or rejection removes it).
+  if (view.pending) {
+    var py = view.pending[0], px = view.pending[1];
+    if (px >= 0 && py >= 0 && px < n && py < n && !board[py][px]) {
+      drawStone(ctx, BOARD_PAD + px * cell, BOARD_PAD + py * cell, r, view.pending[2], 1);
+    }
+  }
   if (view.hover) {
     var hx = view.hover[1], hy = view.hover[0];
-    if (hx >= 0 && hy >= 0 && hx < n && hy < n && !board[hy][hx]) {
+    var overPending = view.pending && view.pending[0] === hy && view.pending[1] === hx;
+    if (hx >= 0 && hy >= 0 && hx < n && hy < n && !board[hy][hx] && !overPending) {
       var bad = view.badHover;
       drawStone(ctx, BOARD_PAD + hx * cell, BOARD_PAD + hy * cell, r, view.turn, bad ? 0.25 : 0.55);
       if (bad) {
@@ -2560,12 +2585,14 @@ var NET = {
   inited: false, loading: null,
   client: null, channel: null, code: "", role: "", clientId: "",
   hostClientId: "", guestClientId: "",
-  connected: false, subscribed: false, hostPresent: false, guestPresent: false,
+  connected: false, subscribed: false, hostPresent: false, guestPresent: false, formalGuestPresent: false,
   settings: { game: "gomoku", rule: "free", openingMode: "free", size: 19 },
   state: null, lastSeq: -1, seq: 0, lastResultSeq: -1,
   rematch: { host: false, guest: false },
   record: { win: 0, lose: 0 }, hostColor: 1,
-  hover: null, busy: false, left: false, started: false, enterTimer: null, opponentGone: false, lastSeen: 0, hbTimer: null,
+  hover: null, pending: null, busy: false, left: false, started: false, enterTimer: null, opponentGone: false, lastSeen: 0, hbTimer: null,
+  spectator: false, seatKnown: false,
+  roster: { host: "", guest: "", spectators: [] },
   lastSaved: null
 };
 
@@ -2585,7 +2612,7 @@ function netCode(){
 }
 
 function netColorName(c){ return c === 1 ? "黑棋" : (c === 2 ? "白棋" : "—"); }
-function netMyColor(){ if (!NET.state) return 0; var h = NET.state.finalHostColor || 1; return NET.role === "host" ? h : (3 - h); }
+function netMyColor(){ if (!NET.state || NET.spectator) return 0; var h = NET.state.finalHostColor || 1; return NET.role === "host" ? h : (3 - h); }
 function netHostColor(){ return (NET.state && NET.state.finalHostColor) || 1; }
 function netColorOfSide(side){ return side === "host" ? netHostColor() : (3 - netHostColor()); }
 function netSideOfColor(c){ return c === netHostColor() ? "host" : "guest"; }
@@ -2602,7 +2629,7 @@ function netActorSide(){
   }
   return netSideOfColor(st.turn);
 }
-function netIsMyTurn(){ return !!NET.state && !NET.state.over && netActorSide() === NET.role; }
+function netIsMyTurn(){ return !!NET.state && !NET.spectator && !NET.state.over && netActorSide() === NET.role; }
 
 function netSetConn(text, cls){
   var el = document.getElementById("nConn");
@@ -2648,11 +2675,22 @@ function netClearSession(){
   try { sessionStorage.removeItem("gridfall_net"); } catch (e) {}
 }
 
+var NET_GAME_INTENTS = { move: 1, candidate: 1, choose5: 1, pass: 1, resign: 1, rematch: 1, swap: 1, swapReq: 1, swapResp: 1 };
 function netSendIntent(type, data){
   if (!NET.channel) return;
+  if (NET.spectator && NET_GAME_INTENTS[type]) return;
   var payload = { from: NET.clientId, fromSide: NET.role, type: type };
   if (data) Object.keys(data).forEach(function(k){ payload[k] = data[k]; });
   NET.channel.send({ type: "broadcast", event: "intent", payload: payload });
+}
+function netBroadcastSeats(){
+  if (!NET.channel || NET.role !== "host") return;
+  NET.channel.send({ type: "broadcast", event: "seats", payload: {
+    from: NET.clientId,
+    host: NET.clientId,
+    guest: NET.guestClientId || "",
+    spectators: (NET.roster && NET.roster.spectators) ? NET.roster.spectators.slice() : []
+  } });
 }
 function netBroadcastState(){
   if (!NET.channel || NET.role !== "host" || !NET.state) return;
@@ -2687,10 +2725,11 @@ function netConnect(){
 
   ch.on("broadcast", { event: "intent" }, function(p){ if (NET.role === "host") netHostIntent(p.payload); });
   ch.on("broadcast", { event: "state" }, function(p){ if (NET.role === "guest") netGuestState(p.payload); });
+  ch.on("broadcast", { event: "seats" }, function(p){ if (NET.role === "guest") netGuestSeats(p.payload); });
   ch.on("broadcast", { event: "ping" }, function(p){ NET.lastSeen = Date.now(); if (NET.role === "guest" && NET.channel) NET.channel.send({ type: "broadcast", event: "pong", payload: { from: NET.clientId } }); });
   ch.on("broadcast", { event: "pong" }, function(p){ NET.lastSeen = Date.now(); });
   ch.on("broadcast", { event: "reject" }, function(p){
-    if (p && p.payload && p.payload.from !== NET.clientId) { NET.busy = false; netToast(p.payload.msg || "落子被拒绝"); netRender(); }
+    if (p && p.payload && p.payload.from !== NET.clientId) { NET.busy = false; NET.pending = null; netToast(p.payload.msg || "落子被拒绝"); netRender(); }
   });
   ch.on("broadcast", { event: "bye" }, function(p){
     if (p && p.payload && p.payload.from !== NET.clientId) netOpponentLeft(p.payload.fromSide === "host" ? "房主已离开，房间关闭。" : "对方已离开，等待重连…");
@@ -2733,13 +2772,13 @@ function netConnect(){
 }
 
 function netHeartbeat(){
-  if (!NET.connected || !NET.state) return;
+  if (!NET.connected || !NET.state || NET.spectator) return;
   var now = Date.now();
   if (NET.role === "host" && NET.channel && NET.guestPresent) {
     NET.channel.send({ type: "broadcast", event: "ping", payload: { from: NET.clientId, at: now } });
   }
   if (!NET.opponentGone && now - NET.lastSeen > 18000) {
-    netOpponentLeft(NET.role === "host" ? "对手已离开，等待重连…" : "房主已离开，房间关闭。");
+    netOpponentLeft(NET.role === "host" ? "玩家 2 已离开，等待重连…" : "房主已离开，房间关闭。");
   }
 }
 
@@ -2753,32 +2792,53 @@ function netSyncPresence(){
       if (m.role === "guest") guests.push(m);
     });
   });
+  guests.sort(function(a, b){ return (a.at || 0) - (b.at || 0); });
   NET.hostPresent = (NET.role === "host") || hosts.length > 0;
-  NET.guestPresent = (NET.role === "guest") || guests.length > 0;
-  if ((NET.role === "host" && guests.length) || (NET.role === "guest" && hosts.length)) NET.opponentGone = false;
 
   if (NET.role === "guest") {
+    NET.guestPresent = !NET.spectator;
     if (hosts.length) {
       NET.hostClientId = hosts[0].clientId;
       NET.lastSeen = Date.now();
+      NET.opponentGone = false;
       if (!NET.state) netSendIntent("sync");
       netSetConn("已连接");
-    } else if (NET.state) {
-      netOpponentLeft("房主已离开，房间关闭。");
+      if (NET.spectator && !NET.state) netSetStatus("观战中，等待房主开局…", "你是观战成员，不能落子或参与对局。");
+    } else if (NET.state || NET.started) {
+      if (NET.spectator) {
+        netSetStatus("房主已离开，房间关闭。", "观战结束。");
+        netSetConn("房主离线", "warn");
+      } else {
+        netOpponentLeft("房主已离开，房间关闭。");
+      }
     }
   } else {
-    if (guests.length) {
-      var gids = guests.map(function(g){ return g.clientId; });
-      if (!NET.guestClientId || gids.indexOf(NET.guestClientId) < 0) NET.guestClientId = gids[0];
+    // The first guest to join owns seat 2. Later joiners are spectators and
+    // never inherit the seat, even if the formal guest disconnects.
+    if (!NET.guestClientId && guests.length) NET.guestClientId = guests[0].clientId;
+    var formal = null;
+    guests.forEach(function(g){ if (g.clientId === NET.guestClientId) formal = g; });
+    NET.formalGuestPresent = !!formal;
+    NET.guestPresent = !!formal;
+    NET.roster = {
+      host: NET.clientId,
+      guest: NET.guestClientId || "",
+      spectators: guests.filter(function(g){ return g.clientId !== NET.guestClientId; }).map(function(g){ return g.clientId; })
+    };
+    netBroadcastSeats();
+    if (formal) {
+      NET.opponentGone = false;
       NET.lastSeen = Date.now();
-      if (!NET.started) {
-        netHostStart();
-      } else if (NET.state) {
-        netBroadcastState(); // 重连/补发快照
-      }
+      if (!NET.started) netHostStart();
+      else if (NET.state) netBroadcastState(); // 重连/补发快照
+    } else if (NET.started) {
+      netOpponentLeft("玩家 2 已离开，等待重连…");
+      netSetStatus("玩家 2 已离开，等待重连…", NET.roster.spectators.length ? ("观战 " + NET.roster.spectators.length + " 人；房间保留，正式席位不会转给观战者。") : "房间保留；把房间码再次发给玩家 2 即可继续。");
+    } else if (NET.guestClientId) {
+      netSetStatus("玩家 2 已离开，等待重连…", "正式席位保留，观战成员不会占用。");
+      netSetConn("玩家 2 离线", "warn");
     } else {
-      NET.guestClientId = "";
-      if (NET.started) netSetStatus("对手已离开，等待重连…", "房间保留；把房间码再次发给对手即可继续。");
+      netSetStatus("等待对手加入…", "第一个加入的成员成为玩家 2；之后加入的成员进入观战席。");
     }
   }
   netUpdateLobby(); netRender();
@@ -2795,7 +2855,9 @@ function netCreateRoom(){
   if (NET.connected) return;
   netEnsureLibs().then(function(){
     NET.role = "host"; NET.code = netCode(); NET.clientId = NET.clientId || netId(); NET.hostColor = 1;
-    netSetStatus("等待对手加入…", "把房间码发给对手，对手加入后自动开局。");
+    NET.spectator = false; NET.seatKnown = true;
+    NET.roster = { host: NET.clientId, guest: "", spectators: [] };
+    netSetStatus("等待对手加入…", "第一个加入的成员成为玩家 2；之后加入的成员进入观战席。");
     netUpdateLobby();
     netConnect();
   }).catch(function(){ netSetStatus("联机组件加载失败", "需要网络与 shared/supabase.js / shared/supabase-config.js。单机功能不受影响。"); });
@@ -2808,6 +2870,8 @@ function netJoinRoom(){
   if (!/^[A-Z0-9]{4,8}$/.test(code)) { netToast("请输入 4-8 位房间码"); return; }
   netEnsureLibs().then(function(){
     NET.role = "guest"; NET.code = code; NET.clientId = NET.clientId || netId();
+    NET.spectator = true; NET.seatKnown = false;
+    NET.roster = { host: "", guest: "", spectators: [] };
     input.value = code;
     netSetStatus("正在加入房间 " + code + "…", "");
     netUpdateLobby();
@@ -2827,6 +2891,8 @@ function netLeave(){
   NET.connected = false; NET.subscribed = false; NET.left = true; NET.started = false;
   NET.state = null; NET.code = ""; NET.role = ""; NET.lastSeq = -1;
   NET.hostClientId = ""; NET.guestClientId = "";
+  NET.spectator = false; NET.seatKnown = false; NET.pending = null; NET.busy = false;
+  NET.roster = { host: "", guest: "", spectators: [] };
   NET.record = { win: 0, lose: 0 }; NET.hostColor = 1;
   netClearSession();
   document.getElementById("nRoomBox").classList.add("hidden");
@@ -2862,6 +2928,8 @@ function netHostStart(){
   NET.rematch = { host: false, guest: false };
   NET.lastResultSeq = -1;
   NET.busy = false;
+  NET.pending = null;
+  netBroadcastSeats();
   netBroadcastState();
 }
 
@@ -2879,7 +2947,7 @@ function netReject(side, msg){
 
 function netCanSwap(){
   var st = NET.state;
-  if (!st || !NET.connected || st.over) return false;
+  if (!st || !NET.connected || st.over || NET.spectator) return false;
   if (st.history.length > 0) return false;
   if (st.game === "gomoku" && st.rule === "renju" && st.openingMode === "formal") return false;
   return true;
@@ -2914,7 +2982,7 @@ function netUserSwapRequest(){
 }
 function netUserSwapResponse(accept){
   var st = NET.state;
-  if (!st || !st.swapRequest || st.swapRequest.from === NET.role) return;
+  if (!st || NET.spectator || !st.swapRequest || st.swapRequest.from === NET.role) return;
   if (NET.role === "host") netHostRespondSwap("host", !!accept);
   else { netSendIntent("swapResp", { accept: !!accept }); NET.busy = true; netRender(); }
 }
@@ -3051,12 +3119,14 @@ function netHostRematch(side){
 function netHostIntent(p){
   if (!p || p.fromSide !== "guest") return;
   NET.lastSeen = Date.now();
-  if (NET.guestClientId && p.from !== NET.guestClientId) return;
-  if (!NET.guestClientId) NET.guestClientId = p.from;
+  // Spectators may request the current snapshot, but never a game action.
+  if (p.type === "hello" || p.type === "sync") {
+    netSyncPresence();
+    return;
+  }
+  if (!NET.guestClientId) netSyncPresence();
+  if (!NET.guestClientId || p.from !== NET.guestClientId) return;
   switch (p.type) {
-    case "hello":
-    case "sync":
-      if (NET.state) netBroadcastState(); break;
     case "move":
     case "candidate":
     case "choose5":
@@ -3076,6 +3146,21 @@ function netHostIntent(p){
   }
 }
 
+function netGuestSeats(p){
+  if (!p) return;
+  var host = p.host || NET.hostClientId || "";
+  var guest = p.guest || "";
+  var specs = Array.isArray(p.spectators) ? p.spectators.slice() : [];
+  NET.hostClientId = host;
+  NET.guestClientId = guest;
+  NET.roster = { host: host, guest: guest, spectators: specs };
+  NET.spectator = NET.clientId !== host && NET.clientId !== guest;
+  NET.seatKnown = true;
+  NET.guestPresent = (NET.clientId === guest);
+  netRenderRoster();
+  netRender();
+}
+
 function netGuestState(p){
   if (!p || p.fromSide !== "host" || !p.state) return;
   var st = p.state;
@@ -3086,6 +3171,7 @@ function netGuestState(p){
   NET.hostClientId = p.from || NET.hostClientId;
   NET.lastSeen = Date.now();
   NET.busy = false;
+  if (NET.pending && (st.over || st.history.length > NET.pending.history)) NET.pending = null;
   if (first && st.over) NET.lastResultSeq = st.seq;
   netSetConn("已连接");
   netNoteResult();
@@ -3097,20 +3183,42 @@ function netGuestState(p){
 function netUserMove(r, c){
   var st = NET.state;
   if (!st || st.over) return;
+  if (NET.spectator) { netToast("观战中，不能落子"); return; }
   if (!netIsMyTurn()) { netToast("还没轮到你"); return; }
   if (NET.role === "host") {
     netHostMove("host", r, c);
-  } else {
-    var type = st.phase === "offer5" ? "candidate" : (st.phase === "choose5" ? "choose5" : "move");
-    netSendIntent(type, { r: r, c: c });
-    NET.busy = true;
-    netRender();
-    setTimeout(function(){ if (NET.busy) { NET.busy = false; netRender(); } }, 4000);
+    return;
   }
+  if (!NET.connected || !NET.channel) { netToast("连接已断开"); return; }
+  if (NET.pending) { netToast("上一步还在确认中"); return; }
+  if (r < 0 || c < 0 || r >= st.size || c >= st.size || st.board[r][c] !== 0) return;
+  var type = st.phase === "offer5" ? "candidate" : (st.phase === "choose5" ? "choose5" : "move");
+  if (type === "choose5" && !st.candidates.some(function(q){ return q[0] === r && q[1] === c; })) return;
+  if (st.game === "gomoku" && st.rule === "renju" && st.turn === 1 && st.phase !== "choose5" && forbiddenAt(st.board, r, c, 1)) {
+    netToast("禁手，不能落在此处");
+    return;
+  }
+  if (st.game === "go" && !wTryPlay(st.board, st.size, r, c, st.turn, st.goPrev || null)) {
+    netToast("这里不能落子");
+    return;
+  }
+  // Show the guest's stone immediately at full opacity. This is a purely
+  // local overlay; the host still decides whether the move is accepted.
+  if (type === "move" || type === "choose5") {
+    NET.pending = { r: r, c: c, color: type === "choose5" ? 1 : st.turn, history: st.history.length };
+    NET.hover = null;
+  }
+  netSendIntent(type, { r: r, c: c });
+  NET.busy = true;
+  netRender();
+  setTimeout(function(){
+    if (NET.busy) { NET.busy = false; NET.pending = null; netRender(); }
+  }, 4000);
 }
 function netUserPass(){
   var st = NET.state;
   if (!st || st.game !== "go" || st.over) return;
+  if (NET.spectator) { netToast("观战中，不能参与对局"); return; }
   if (!netIsMyTurn()) { netToast("还没轮到你"); return; }
   if (NET.role === "host") netHostPass("host"); else netSendIntent("pass");
   NET.busy = NET.role === "guest";
@@ -3118,17 +3226,20 @@ function netUserPass(){
 function netUserResign(){
   var st = NET.state;
   if (!st || st.over) return;
+  if (NET.spectator) { netToast("观战中，不能参与对局"); return; }
   if (NET.role === "host") netHostResign("host"); else netSendIntent("resign");
 }
 function netUserRematch(){
   var st = NET.state;
   if (!st || !st.over) return;
+  if (NET.spectator) { netToast("观战中，不能参与对局"); return; }
   if (NET.role === "host") netHostRematch("host"); else netSendIntent("rematch");
   NET.busy = NET.role === "guest";
 }
 function netUserSwap(yes){
   var st = NET.state;
   if (!st || st.phase !== "swap") return;
+  if (NET.spectator) { netToast("观战中，不能参与对局"); return; }
   if (NET.role === "host") netHostSwap(yes); else netSendIntent("swap", { yes: !!yes });
 }
 
@@ -3178,7 +3289,7 @@ function netRender(){
       if (board[r][c] === 0 && forbiddenAt(board, r, c, 0)) forbidden.push([r, c]);
     }
   }
-  var myTurn = netIsMyTurn();
+  var myTurn = !NET.spectator && netIsMyTurn();
   var badHover = false;
   if (NET.hover && st && game === "gomoku" && st.rule === "renju" && st.turn === 1) {
     badHover = !!forbiddenAt(board, NET.hover[0], NET.hover[1], 0);
@@ -3190,7 +3301,8 @@ function netRender(){
     forbidden: forbidden,
     candidates: (st && st.candidates) ? st.candidates : [],
     ko: (st && st.ko) ? st.ko : null,
-    hover: myTurn ? NET.hover : null,
+    pending: NET.pending ? [NET.pending.r, NET.pending.c, NET.pending.color] : null,
+    hover: (myTurn && !NET.pending) ? NET.hover : null,
     badHover: badHover,
     turn: st ? st.turn : 1,
     over: st ? st.over : false
@@ -3204,35 +3316,46 @@ function netRender(){
   if (!NET.connected) {
     status.textContent = NET.state ? "连接已断开" : "联机未连接";
     status.className = "status";
-    sub.textContent = "创建房间，或输入房间码加入。";
+    sub.textContent = NET.spectator ? "观战连接已断开。" : "创建房间，或输入房间码加入。";
   } else if (!st) {
-    status.textContent = NET.role === "host" ? "等待对手加入…" : "已加入房间，等待房主开局…";
+    status.textContent = NET.spectator ? "观战中，等待房主开局…" : (NET.role === "host" ? "等待对手加入…" : "已加入房间，等待房主开局…");
     status.className = "status";
-    sub.textContent = NET.role === "host" ? "把房间码发给对手，对手加入后自动开局。" : "";
+    sub.textContent = NET.spectator ? "你是观战成员，不能落子或参与对局。" : (NET.role === "host" ? "把房间码发给对手，对手加入后自动开局。" : "");
   } else {
     var actor = netActorSide();
     var phaseTxt = netPhaseText(st);
     if (st.over) {
-      status.textContent = "对局结束";
+      status.textContent = NET.spectator ? "观战中 · 对局结束" : "对局结束";
     } else if (st.phase === "select") {
-      status.textContent = NET.role === "host" ? "请选择开局形状" : "等待房主选择开局…";
+      status.textContent = NET.spectator ? "观战中 · 等待房主选择开局…" : (NET.role === "host" ? "请选择开局形状" : "等待房主选择开局…");
     } else if (st.phase === "swap") {
-      status.textContent = NET.role === "guest" ? "请决定是否交换黑白" : "等待白方决定是否交换…";
+      status.textContent = NET.spectator ? "观战中 · 等待双方决定换方…" : (NET.role === "guest" ? "请决定是否交换黑白" : "等待白方决定是否交换…");
+    } else if (NET.spectator) {
+      status.textContent = "观战中 · 等待" + (actor === "host" ? "房主" : "玩家 2") + "落子…";
     } else {
       status.textContent = myTurn ? "轮到你落子" : ("等待" + (NET.role === "host" ? "对手" : "房主") + "落子…");
     }
     status.className = "status";
-    var extra = phaseTxt;
+    var extra = (NET.spectator ? "观战 · " : "") + phaseTxt;
     if (st.game === "go") extra += " · 提子 黑 " + st.caps.b + " / 白 " + st.caps.w;
     if (st.msg) extra += " · " + st.msg;
-    if (NET.busy && NET.role === "guest") extra += " · 已发送，等待房主确认…";
+    if (NET.busy && NET.role === "guest" && !NET.spectator) extra += " · 已落子，等待房主确认…";
     sub.textContent = extra;
+  }
+  if (NET.opponentGone && !NET.spectator) {
+    status.textContent = NET.role === "host" ? "玩家 2 已离开，等待重连…" : "房主已离开，房间关闭。";
+  }
+  if (NET.spectator && NET.seatKnown && NET.connected && !NET.hostPresent) {
+    status.textContent = "房主已离开，房间关闭。";
   }
 
   if (st && st.over) {
     result.classList.add("show");
     if (st.draw) { result.className = "result show draw"; result.textContent = "和棋。"; }
-    else {
+    else if (NET.spectator) {
+      result.className = "result show draw";
+      result.textContent = "观战结束 — " + netColorName(st.winner) + "胜。" + (st.score ? (" 黑 " + st.score.black + " · 白 " + st.score.white.toFixed(1)) : "");
+    } else {
       var me = netMyColor();
       var win = st.winner === me;
       result.className = "result show " + (win ? "win" : "lose");
@@ -3240,11 +3363,11 @@ function netRender(){
     }
   } else { result.className = "result"; result.textContent = ""; }
 
-  document.getElementById("nColor").textContent = st ? netColorName(netMyColor()) : "—";
-  document.getElementById("nTurnText").textContent = st ? (netColorName(st.turn) + (st.over ? "" : (st.turn === netMyColor() ? "（你）" : "（对方）"))) : "—";
+  document.getElementById("nColor").textContent = NET.spectator ? "观战" : (st ? netColorName(netMyColor()) : "—");
+  document.getElementById("nTurnText").textContent = st ? (netColorName(st.turn) + (st.over ? "" : (NET.spectator ? "" : (st.turn === netMyColor() ? "（你）" : "（对方）")))) : "—";
   document.getElementById("nMoveCount").textContent = st ? st.history.length : 0;
   document.getElementById("nConn").textContent = NET.connected ? (NET.hostPresent || NET.guestPresent ? "已连接" : "等待对手") : "未连接";
-  document.getElementById("nRecord").textContent = NET.record.win + " 胜 " + NET.record.lose + " 负";
+  document.getElementById("nRecord").textContent = NET.spectator ? "—" : (NET.record.win + " 胜 " + NET.record.lose + " 负");
   document.getElementById("nRuleText").textContent = st ? (st.game === "go" ? st.size + " 路围棋" : (st.rule === "renju" ? (st.openingMode === "formal" ? "连珠 · RIF 正式开局" : "连珠 · 自由开局") : "普通五子棋")) : (NET.settings.game === "go" ? NET.settings.size + " 路围棋" : (NET.settings.rule === "renju" ? "国际连珠" : "普通五子棋"));
 
   var mv = document.getElementById("nMoves");
@@ -3260,19 +3383,19 @@ function netRender(){
     mv.scrollTop = mv.scrollHeight;
   }
 
-  document.getElementById("nResign").disabled = !(st && !st.over);
+  document.getElementById("nResign").disabled = !(st && !st.over) || NET.spectator;
   var swBtn = document.getElementById("nSwap");
   if (swBtn) {
-    swBtn.classList.toggle("hidden", !(st && !st.over));
-    swBtn.disabled = !(st && netCanSwap() && !st.swapRequest);
+    swBtn.classList.toggle("hidden", !(st && !st.over) || NET.spectator);
+    swBtn.disabled = !(st && netCanSwap() && !st.swapRequest) || NET.spectator;
     swBtn.textContent = (st && st.swapRequest && st.swapRequest.from === NET.role) ? "已申请换方" : "申请换方";
   }
   var nPass = document.getElementById("nPass");
   if (nPass) {
     nPass.classList.toggle("hidden", !(st && st.game === "go"));
-    nPass.disabled = !(st && st.game === "go" && !st.over && netIsMyTurn());
+    nPass.disabled = !(st && st.game === "go" && !st.over && netIsMyTurn()) || NET.spectator;
   }
-  document.getElementById("nRematch").disabled = !(st && st.over);
+  document.getElementById("nRematch").disabled = !(st && st.over) || NET.spectator;
   document.getElementById("nLeave").disabled = !NET.connected;
   document.getElementById("nCreate").disabled = NET.connected;
   document.getElementById("nJoin").disabled = NET.connected;
@@ -3289,7 +3412,7 @@ function netRender(){
 
   /* 动态区域：开局选择 / 交换 / 再来一局状态 */
   sub.textContent = sub.textContent || "";
-  if (st && !st.over && st.swapRequest) {
+  if (!NET.spectator && st && !st.over && st.swapRequest) {
     var sr = st.swapRequest;
     var srWrap = document.createElement("div"); srWrap.style.marginTop = "8px";
     if (sr.from === NET.role) {
@@ -3302,9 +3425,9 @@ function netRender(){
       var n = document.createElement("button"); n.type = "button"; n.textContent = "拒绝"; n.onclick = function(){ netUserSwapResponse(false); };
       srRow.appendChild(y); srRow.appendChild(n); srWrap.appendChild(srRow); sub.appendChild(srWrap);
     }
-  } else if (st && !st.over && st.phase === "select" && NET.role === "host") {
+  } else if (!NET.spectator && st && !st.over && st.phase === "select" && NET.role === "host") {
     netShowOpeningPicker(sub);
-  } else if (st && !st.over && st.phase === "swap" && NET.role === "guest") {
+  } else if (!NET.spectator && st && !st.over && st.phase === "swap" && NET.role === "guest") {
     var row = document.createElement("div"); row.className = "row"; row.style.marginTop = "8px";
     var y = document.createElement("button"); y.type = "button"; y.textContent = "交换黑白"; y.onclick = function(){ netUserSwap(true); };
     var n = document.createElement("button"); n.type = "button"; n.textContent = "不交换"; n.onclick = function(){ netUserSwap(false); };
@@ -3333,6 +3456,32 @@ function netShowOpeningPicker(sub){
   sub.appendChild(note); sub.appendChild(grid);
 }
 
+function netRenderRoster(){
+  var box = document.getElementById("nRoster");
+  if (!box) return;
+  if (!NET.connected || !NET.code || (!NET.roster.host && NET.role !== "host")) {
+    box.classList.add("hidden");
+    box.innerHTML = "";
+    return;
+  }
+  box.classList.remove("hidden");
+  var my = NET.clientId;
+  function row(label, id, kind, tag){
+    var me = !!id && id === my;
+    return '<div class="rr ' + kind + (me ? ' me' : '') + '"><b>' + label + '</b>' + (me ? '<span class="you">你</span>' : '') + '<span class="tag">' + tag + '</span></div>';
+  }
+  var rows = [];
+  rows.push(row("房主", NET.roster.host || (NET.role === "host" ? my : ""), "player", "正式玩家"));
+  if (NET.roster.guest) {
+    var formalOnline = NET.role === "host" ? !!NET.formalGuestPresent : true;
+    rows.push(row("玩家 2", NET.roster.guest, "player" + (formalOnline ? "" : " offline"), formalOnline ? "正式玩家" : "等待重连"));
+  } else rows.push('<div class="rr waiting"><b>玩家 2</b><span class="tag">等待加入</span></div>');
+  (NET.roster.spectators || []).forEach(function(id, i){
+    rows.push(row("观战 " + (i + 1), id, "spectator", "观战"));
+  });
+  box.innerHTML = rows.join("");
+}
+
 function netUpdateLobby(){
   var connected = NET.connected;
   var game = NET.settings.game;
@@ -3351,6 +3500,7 @@ function netUpdateLobby(){
     segSet("nOpeningSeg", NET.settings.openingMode);
     segSet("nSizeSeg", String(NET.settings.size));
   }
+  netRenderRoster();
 }
 
 /* ---------------- 初始化与事件 ---------------- */
@@ -3406,7 +3556,7 @@ function onlineInit(){
     if (cell) netUserMove(cell[0], cell[1]);
   });
   nCanvas.addEventListener("mousemove", function(e){
-    if (!NET.state || !netIsMyTurn()) { if (NET.hover) { NET.hover = null; netRender(); } return; }
+    if (!NET.state || !netIsMyTurn() || NET.pending) { if (NET.hover) { NET.hover = null; netRender(); } return; }
     var cell = cellAt(e, nCanvas, NET.state.size);
     var empty = cell && NET.state.board[cell[0]][cell[1]] === 0;
     var next = empty ? cell : null;

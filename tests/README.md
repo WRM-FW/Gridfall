@@ -13,6 +13,7 @@ node online-core.mjs       # 双浏览器联机核心，7 项
 node online-extra.mjs      # 正式连珠/围棋/重连，5 项
 node online-swap.mjs       # 正式开局交换分支，4 项
 node online-colors.mjs     # 房主/客端申请换方与同意/拒绝，6 项
+node online-spectators.mjs # 黑白棋社观战席、乐观落子、关于模块，6 项
 node home-test.mjs         # 大厅首页、顶栏、封面与深链接，15 项
 node live-home.mjs         # 线上首页、封面与「可联机」筛选，8 项
 node live-online.mjs       # 线上整局，4 项

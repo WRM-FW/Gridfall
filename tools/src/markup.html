@@ -223,10 +223,11 @@
           <input id="nCodeInput" maxlength="6" placeholder="输入 6 位房间码" autocomplete="off" spellcheck="false">
           <button id="nJoin" type="button">加入房间</button>
         </div>
-        <p class="hint" id="nLobbyHint" style="margin:9px 0 0">房间码即入场凭证，只发给你的对手。房主执黑先行。</p>
+        <p class="hint" id="nLobbyHint" style="margin:9px 0 0">第一个加入的成员成为玩家 2，之后加入的成员进入观战席；观战者不能落子。房主执黑先行。</p>
         <div class="room-code hidden" id="nRoomBox">
           <span>房间码</span><b id="nRoomCode">------</b><button id="nCopy" type="button">复制</button>
         </div>
+        <div class="room-roster hidden" id="nRoster"></div>
       </div>
 
       <div class="card">
@@ -245,14 +246,15 @@
   </div>
 </section>
 
-<details class="pages" style="margin-top:18px">
-  <summary>关于联机与部署</summary>
+<section class="pages" style="margin-top:18px" aria-label="关于联机与部署">
+  <h2 class="pages-title">关于联机与部署</h2>
   <ol>
     <li>联机后端为 Supabase Realtime（Broadcast + Presence），不需要数据库表；房间码即频道名的一部分。</li>
     <li>房主是权威端：落子、禁手、胜负、劫争都由房主按本地规则判定后广播全量盘面，客户端只渲染快照。</li>
+    <li>房间固定两个正式席位：房主与第一个加入的成员；之后加入的成员只进入观战席，不能落子或参与对局。正式席位不会转给观战者，掉线后等待原玩家重连。</li>
     <li>单机功能离线可用；联机需要网络与 Supabase 配置，页面会按需加载客户端库。</li>
   </ol>
-</details>
+</section>
 
 <div class="modal" id="rulesModal" role="dialog" aria-modal="true">
   <div class="box">
@@ -266,7 +268,7 @@
     <h3>围棋</h3>
     <p>黑先，可选 9/13/19 路。无气提子、禁着点（不可自杀）、劫争不可立即回提。双方连续停手终局，中国规则数子，黑贴 3.75 子（7.5 目）。</p>
     <h3>联机</h3>
-    <p>房主执黑先行；房间码只发给对手。所有规则由房主端按上面的本地规则判定，再把完整盘面广播给对手。未轮到的一方不能落子。对手掉线时房间保留，可等待重连；房主离开则房间关闭。对局结束后双方都点「再来一局」才会开始新局。</p>
+    <p>房主执黑先行；第一个加入的成员成为第二名正式玩家，之后加入的成员全部进入观战席。观战者可以看到盘面，但不能落子、认输、停手或参与再来一局；正式席位不会转给观战者，玩家 2 掉线后房间保留并等待其重连。所有规则由房主端按上面的本地规则判定，再把完整盘面广播给所有成员。未轮到的一方不能落子；房主离开则房间关闭。对局结束后两名正式玩家都点「再来一局」才会开始新局。</p>
     <h3>难度</h3>
     <p>简单 → 一般 → 普通 → 困难 → 极难。极难使用 Alpha-Beta 深搜 + VCF 连续冲四搜索，minimax 有 3.4 秒思考上限。</p>
     <p class="hint">说明：正式开局的 26 种形状按 RIF 官方图校正（直接开局第二手在天元正右，间接开局在右上斜邻）；对局与战绩只保存在当前页面内，刷新后清空。</p>

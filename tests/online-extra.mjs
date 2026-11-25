@@ -92,6 +92,7 @@ try {
     const pick = await B.evaluate('NET.state.candidates[0].slice()');
     await clickNet(B, pick[0], pick[1]); // 白选第五手
     if (!await waitFor(A, 'NET.state.phase === "move6" && NET.state.history.length === 5', 8000)) return 'choose5 not synced';
+    if (!await waitFor(B, 'NET.state.phase === "move6" && !NET.busy', 8000)) return 'guest did not reach move6';
     await clickNet(B, 3, 3); // 白第 6 手
     const ok = await waitFor(A, 'NET.state.phase === "play" && NET.state.history.length === 6', 8000);
     const okB2 = await waitFor(B, 'NET.state.phase === "play" && NET.state.history.length === 6', 8000);
@@ -139,10 +140,14 @@ try {
 
   /* ---------------- 掉线重连 ---------------- */
   await t('online.rejoin_same_room', async () => {
+    const oldCid = await B.evaluate('NET.clientId');
     await B.close();
     const gone = await waitFor(A, 'NET.opponentGone', 30000);
     if (!gone) return 'host did not notice guest gone';
     B = await launch(url, { port: 9432 });
+    // Same tab/session reconnects to the reserved seat 2; a brand-new client
+    // id would be a spectator by design.
+    await B.evaluate(`sessionStorage.setItem('gridfall_cid', ${JSON.stringify(oldCid)}); NET.clientId = ${JSON.stringify(oldCid)};`);
     await B.clickSel('#tabOnline');
     await B.evaluate(`document.getElementById('nCodeInput').value=${JSON.stringify(codeG)}`);
     await B.clickSel('#nJoin');

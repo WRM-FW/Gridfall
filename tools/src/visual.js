@@ -164,9 +164,19 @@ function drawBoard(cv, view){
       ctx.fillText(String(idx + 1), cxp, cyp + 1);
     });
   }
+  // Optimistic local stone for a guest move that is still waiting for the host.
+  // It is drawn fully opaque and above candidate markers so the click feels
+  // immediate; the authoritative snapshot replaces it (or rejection removes it).
+  if (view.pending) {
+    var py = view.pending[0], px = view.pending[1];
+    if (px >= 0 && py >= 0 && px < n && py < n && !board[py][px]) {
+      drawStone(ctx, BOARD_PAD + px * cell, BOARD_PAD + py * cell, r, view.pending[2], 1);
+    }
+  }
   if (view.hover) {
     var hx = view.hover[1], hy = view.hover[0];
-    if (hx >= 0 && hy >= 0 && hx < n && hy < n && !board[hy][hx]) {
+    var overPending = view.pending && view.pending[0] === hy && view.pending[1] === hx;
+    if (hx >= 0 && hy >= 0 && hx < n && hy < n && !board[hy][hx] && !overPending) {
       var bad = view.badHover;
       drawStone(ctx, BOARD_PAD + hx * cell, BOARD_PAD + hy * cell, r, view.turn, bad ? 0.25 : 0.55);
       if (bad) {
