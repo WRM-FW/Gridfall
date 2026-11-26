@@ -638,6 +638,36 @@ await t('uno.uno.rescue-and-catch', async () => {
   return true;
 });
 
+await t('uno.log.online-sync', async () => {
+  await scenario(host, clients, {
+    top: card(810001, 'red', '5'),
+    hands: [
+      [card(810011, 'red', 'reverse'), card(810012, 'blue', '9')],
+      [card(810013, 'green', '2'), card(810014, 'green', '3')],
+      [card(810015, 'yellow', '1'), card(810016, 'yellow', '2')]
+    ],
+    turn: 0
+  }, 'log-online-setup');
+  await doAction(host, `UNO_API.handClick(810011)`, 'log-online-play');
+  for (const c of clients) {
+    if (!await wait(c, `UNO_API.state.events.some(e => e.text.includes('反转'))`, 8000)) {
+      throw new Error('guest event log did not receive the reverse play');
+    }
+  }
+  const logs = await Promise.all(clients.map((c) => c.evaluate(`UNO_API.state.events.slice(-4).map(e => e.text)`)));
+  const canon = JSON.stringify(logs[0]);
+  if (!logs.every((l) => JSON.stringify(l) === canon)) {
+    throw new Error('host/guest event logs differ: ' + JSON.stringify(logs));
+  }
+  if (!logs[0].some((x) => x.includes('打出了') && x.includes('反转'))) {
+    throw new Error('played event missing from synced log: ' + JSON.stringify(logs[0]));
+  }
+  if (!logs[0].some((x) => x.includes('出牌方向已反转'))) {
+    throw new Error('reverse event missing from synced log: ' + JSON.stringify(logs[0]));
+  }
+  return { pass: true, detail: logs[0].slice(-2).join(' / ') };
+});
+
 await t('uno.gameover.rematch', async () => {
   let sig = await scenario(host, clients, {
     top: card(780001, 'red', '5'),

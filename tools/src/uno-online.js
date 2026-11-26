@@ -216,7 +216,9 @@ function unoNetSnapshot(version) {
     drawnPlayableCardId: state.drawnPlayableCardId,
     gameOver: state.gameOver,
     allowStacking: state.allowStacking,
-    winner: winner
+    winner: winner,
+    events: state.events,
+    eventSeq: state.eventSeq
   }));
 }
 function unoNetBroadcastState() {
@@ -268,6 +270,12 @@ function unoNetApply(snapshot) {
   state.gameOver = snapshot.gameOver;
   state.awaitingWildColor = false;
   state.pendingWildCardId = null;
+  if (Array.isArray(snapshot.events)) {
+    state.events = snapshot.events.slice(-40);
+    state.eventSeq = Number.isFinite(snapshot.eventSeq)
+      ? snapshot.eventSeq
+      : state.events.reduce((max, ev) => Math.max(max, Number(ev.id) || 0), 0);
+  }
 
   let maxCardId = state.cardIdSeq;
   state.players.forEach((p) => p.hand.forEach((c) => { if (c.id >= maxCardId) maxCardId = c.id + 1; }));
@@ -332,20 +340,20 @@ function unoNetMarkGone(id) {
     if (!bot || bot.connected) return;
     bot.auto = true;
     bot.isHuman = false;
-    renderAll();
-    unoNetBroadcastState();
     showToast(unoNetText(
       `${bot.name} 已进入托管，由系统代打`,
       `${bot.name} is now auto-playing`
     ));
+    renderAll();
+    unoNetBroadcastState();
     if (state.currentTurn === state.players.indexOf(bot)) maybeTriggerAiTurn();
   }, delay);
-  renderAll();
-  unoNetBroadcastState();
   showToast(unoNetText(
     `${p.name} 已离开，${Math.round(delay / 1000)} 秒后自动托管`,
     `${p.name} left — auto-play in ${Math.round(delay / 1000)}s`
   ));
+  renderAll();
+  unoNetBroadcastState();
 }
 function unoNetSendDeny(targetId, reason) {
   if (!UNO_NET.isHost || !UNO_NET.channel) return;
@@ -403,11 +411,11 @@ async function unoNetConnect(code, host) {
         if (!UNO_NET.lobby.some((x) => x.id === key)) {
           UNO_NET.lobby.push({ id: key, name: p.name });
         }
+        showToast(unoNetText(`${p.name} 已重新连接`, `${p.name} reconnected`));
         renderAll();
         unoNetBroadcastState();
         unoNetBroadcastLobby();
         unoNetRenderLobby();
-        showToast(unoNetText(`${p.name} 已重新连接`, `${p.name} reconnected`));
         return;
       }
       unoNetRebuildLobby();

@@ -605,18 +605,6 @@
       transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
     }
 
-    .status-pill.event {
-      background: var(--text-primary);
-      color: var(--bg-surface);
-      border-color: transparent;
-      box-shadow: var(--shadow-md);
-    }
-
-    .status-pill.event #status-text {
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
     .status-dot {
       width: 8px;
       height: 8px;
@@ -768,6 +756,111 @@
       padding-bottom: 10px;
       width: 100%;
       min-width: 0;
+      position: relative;
+    }
+
+    /* Chat-style event feed: fixed size, messages scroll inside. */
+    .game-log {
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 8px);
+      z-index: 90;
+      width: min(420px, 100%);
+      height: 104px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      pointer-events: auto;
+    }
+
+    .game-log.hidden {
+      display: none;
+    }
+
+    .game-log-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 24px;
+      padding: 4px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-surface-muted);
+      color: var(--text-secondary);
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .game-log-head .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--uno-green);
+      box-shadow: 0 0 0 3px rgba(99, 230, 58, 0.16);
+    }
+
+    .game-log-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 4px 6px 6px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(120, 120, 120, 0.3) transparent;
+    }
+
+    .game-log-list::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .game-log-list::-webkit-scrollbar-thumb {
+      background: rgba(120, 120, 120, 0.3);
+      border-radius: 999px;
+    }
+
+    .game-log-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 3px 4px;
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 11.5px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .game-log-item:nth-child(odd) {
+      background: rgba(120, 120, 120, 0.06);
+    }
+
+    .game-log-dot {
+      width: 5px;
+      height: 5px;
+      margin-top: 6px;
+      border-radius: 50%;
+      background: var(--uno-blue);
+      flex-shrink: 0;
+    }
+
+    .game-log-item:last-child .game-log-dot {
+      background: var(--uno-green);
+    }
+
+    .game-log-text {
+      min-width: 0;
+    }
+
+    .game-log-empty {
+      padding: 10px 8px;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      text-align: center;
     }
 
     .player-controls {
@@ -1205,6 +1298,19 @@
       transform: translateX(18px);
     }
 
+    /* Short desktop/laptop: give the event feed room above the hand. */
+    @media (max-height: 780px) and (min-width: 721px) {
+      .hand-row { min-height: 132px; }
+      .hand-scroll { height: 164px; padding: 20px 24px 10px; }
+    }
+
+    @media (max-height: 760px) and (min-width: 721px) {
+      .game-log-head { min-height: 20px; padding: 2px 8px; font-size: 10px; }
+      .game-log-list { padding: 2px 6px 4px; }
+      .game-log-item { padding: 1px 4px; font-size: 10.5px; line-height: 1.35; }
+      .game-log-dot { margin-top: 5px; }
+    }
+
     /* Responsive adjustments */
     @media (max-width: 720px) {
       .topbar { padding: 0 10px; gap: 6px; }
@@ -1221,7 +1327,6 @@
       }
       .seat-avatar { width: 20px; height: 20px; font-size: 10px; }
       .seat-name { font-size: 11px; }
-      .status-pill.event #status-text { font-size: 11.5px; }
       .direction-ring { gap: 16px; padding: 18px 20px; }
       .uno-card, .draw-pile-btn, .discard-slot { width: 72px; height: 106px; }
       .card-center { font-size: 27px; }
@@ -1284,7 +1389,6 @@
       .pile-label { font-size: 9px; }
       .status-banner { min-height: 20px; }
       .status-pill { padding: 3px 8px; min-height: 22px; font-size: 10px; gap: 4px; }
-      .status-pill.event #status-text { font-size: 10px; }
       .status-dot { width: 6px; height: 6px; }
       .player-dock { gap: 3px; padding-bottom: 3px; }
       .player-meta { gap: 5px; }
@@ -1298,6 +1402,17 @@
       .hand-card-btn.drawn-focus { transform: translateY(-5px); }
       .hand-card-btn.drawn-focus.playable:hover,
       .hand-card-btn.drawn-focus.playable:focus-visible { transform: translateY(-8px); }
+      .game-log {
+        position: fixed;
+        top: 90px;
+        left: 8px;
+        bottom: auto;
+        width: min(260px, 34vw);
+        height: 54px;
+      }
+      .game-log-head { min-height: 20px; padding: 2px 8px; font-size: 9.5px; }
+      .game-log-item { padding: 2px 4px; font-size: 10px; line-height: 1.3; }
+      .game-log-dot { margin-top: 5px; }
     }
   </style>
 <style>
@@ -1445,6 +1560,10 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
 
       <!-- Player Hand Dock -->
       <section class="player-dock">
+        <section class="game-log" id="game-log" aria-label="对局消息">
+          <div class="game-log-head"><span><span class="live-dot"></span> <span id="game-log-title">对局消息</span></span><span id="game-log-count"></span></div>
+          <div class="game-log-list" id="game-log-list" aria-live="polite"></div>
+        </section>
         <div class="player-controls">
           <div class="player-meta">
             <span class="turn-chip" id="player-turn-chip">你的回合</span>
@@ -1599,6 +1718,9 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
           statusWaiting: (name) => `等待 ${name} 出牌…`,
           statusOffline: (name) => `${name} 已离开，等待重连…`,
           statusAuto: (name) => `${name} 托管出牌中…`,
+          logTitle: '对局消息',
+          logEmpty: '等待出牌…',
+          logStarted: '对局开始',
           offlineTag: '已离开',
           autoTag: '托管中',
           toastOnlineRuleLocked: '联机对局中不能修改叠加规则',
@@ -1675,6 +1797,9 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
           statusWaiting: (name) => `Waiting for ${name}…`,
           statusOffline: (name) => `${name} left — waiting to reconnect…`,
           statusAuto: (name) => `${name} is auto-playing…`,
+          logTitle: 'Match Log',
+          logEmpty: 'Waiting for a play…',
+          logStarted: 'Round started',
           offlineTag: 'Offline',
           autoTag: 'Auto',
           toastOnlineRuleLocked: 'Stacking cannot be changed during an online match',
@@ -1811,7 +1936,9 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         gameOver: false,
         timers: [],
         unoGraceTimer: null,
-        cardIdSeq: 1
+        cardIdSeq: 1,
+        events: [],
+        eventSeq: 0
       };
 
       /* ======================== DOM REFS ======================== */
@@ -1846,7 +1973,6 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         discardLabel: document.getElementById('discard-label'),
         pendingStackBadge: document.getElementById('pending-stack-badge'),
         statusDot: document.getElementById('status-dot'),
-        statusPill: document.getElementById('status-pill'),
         statusText: document.getElementById('status-text'),
 
         playerTurnChip: document.getElementById('player-turn-chip'),
@@ -1855,6 +1981,11 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         btnUno: document.getElementById('btn-uno'),
         handScroll: document.getElementById('hand-scroll'),
         playerHand: document.getElementById('player-hand'),
+        playerDock: document.querySelector('.player-dock'),
+        gameLog: document.getElementById('game-log'),
+        gameLogTitle: document.getElementById('game-log-title'),
+        gameLogCount: document.getElementById('game-log-count'),
+        gameLogList: document.getElementById('game-log-list'),
 
         wildModal: document.getElementById('wild-modal'),
         uiWildTitle: document.getElementById('ui-wild-title'),
@@ -1908,43 +2039,70 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         return id;
       }
 
-      let toastQueue = [];
-      let toastTimer = null;
-      let activeToast = '';
+      let eventLogSignature = null;
 
       function showToast(msg) {
         if (!msg) return;
-        toastQueue.push(msg);
-        if (toastQueue.length > 4) toastQueue.shift();
-        if (!activeToast) showNextToast();
+        state.eventSeq += 1;
+        state.events.push({ id: state.eventSeq, text: String(msg) });
+        if (state.events.length > 40) state.events.splice(0, state.events.length - 40);
+        renderEventLog();
       }
 
-      function showNextToast() {
-        if (toastTimer) {
-          clearTimeout(toastTimer);
-          toastTimer = null;
+      function renderEventLog(force = false) {
+        if (!els.gameLogList) return;
+        const events = state.events || [];
+        const signature = events.map((ev) => ev.id + ':' + ev.text).join('|');
+        if (!force && signature === eventLogSignature) return;
+        eventLogSignature = signature;
+
+        const dict = t();
+        els.gameLogTitle.textContent = dict.logTitle;
+        els.gameLogCount.textContent = events.length ? String(events.length) : '';
+        const frag = document.createDocumentFragment();
+        if (!events.length) {
+          const empty = document.createElement('div');
+          empty.className = 'game-log-empty';
+          empty.textContent = dict.logEmpty;
+          frag.appendChild(empty);
+        } else {
+          events.forEach((ev) => {
+            const item = document.createElement('div');
+            item.className = 'game-log-item';
+            item.dataset.eventId = ev.id;
+            const dot = document.createElement('span');
+            dot.className = 'game-log-dot';
+            const text = document.createElement('span');
+            text.className = 'game-log-text';
+            text.textContent = ev.text;
+            item.appendChild(dot);
+            item.appendChild(text);
+            frag.appendChild(item);
+          });
         }
-        activeToast = toastQueue.shift() || '';
-        if (!activeToast) {
-          renderCenter();
+        els.gameLogList.replaceChildren(frag);
+        requestAnimationFrame(() => {
+          els.gameLogList.scrollTop = els.gameLogList.scrollHeight;
+        });
+      }
+
+      function fitGameLog() {
+        if (!els.gameLog || !els.playerDock) return;
+        const landscape = innerHeight <= 560 && innerWidth > innerHeight;
+        if (landscape) {
+          els.gameLog.classList.remove('hidden');
+          els.gameLog.classList.add('landscape');
+          els.gameLog.style.height = '';
           return;
         }
-        renderCenter();
-        toastTimer = setTimeout(() => {
-          activeToast = '';
-          toastTimer = null;
-          if (toastQueue.length) showNextToast();
-          else renderCenter();
-        }, 1900);
-      }
-
-      function resetToasts() {
-        toastQueue = [];
-        activeToast = '';
-        if (toastTimer) {
-          clearTimeout(toastTimer);
-          toastTimer = null;
-        }
+        els.gameLog.classList.remove('landscape');
+        const center = document.querySelector('.center-stage');
+        const dockTop = els.playerDock.getBoundingClientRect().top;
+        const centerBottom = center ? center.getBoundingClientRect().bottom : dockTop;
+        const gap = dockTop - centerBottom - 12;
+        const visible = gap >= 40;
+        els.gameLog.classList.toggle('hidden', !visible);
+        if (visible) els.gameLog.style.height = Math.max(40, Math.min(120, gap)) + 'px';
       }
 
       function shuffle(arr) {
@@ -2130,6 +2288,8 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
       // Shared by offline rounds and host-authoritative online rounds.
       function resetRound(players) {
         clearAllTimers();
+        state.events = [];
+        state.eventSeq = 0;
         state.playerCount = players.length;
         state.deck = createDeck();
         state.discard = [];
@@ -2171,6 +2331,7 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         state.discard.push(first);
         state.activeColor = first.color;
         state.currentTurn = 0;
+        showToast(t().logStarted);
 
         // Apply the first card's effect instead of silently ignoring it.
         if (first.value === 'reverse') {
@@ -2196,7 +2357,6 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
 
       function startGame(playerCount = state.playerCount) {
         if (isOnlineMode()) return;
-        resetToasts();
         const aiNames = playerCount === 3 ? t().aiNames3 : t().aiNames4;
         const players = [
           { id: 0, name: t().you, isHuman: true, hand: [], saidUno: false, vulnerableUno: false }
@@ -2246,14 +2406,13 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         }
 
         // Active color
+        showToast(t().toastPlayed(player.name, formatCardName(card)));
         if (card.color === 'wild') {
           state.activeColor = chosenColor || pickBestAiColor(player.hand);
           showToast(t().toastWildColor(player.name, t().colors[state.activeColor]));
         } else {
           state.activeColor = card.color;
         }
-
-        showToast(t().toastPlayed(player.name, formatCardName(card)));
 
         // Check win
         if (player.hand.length === 0) {
@@ -2736,14 +2895,9 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         const hasPlayable = state.players[0].hand.some((c) => canPlayCard(c));
         els.drawPileBtn.classList.toggle('highlight-draw', canDraw && !hasPlayable);
 
-        // Status banner: event messages temporarily use the same pill, so
-        // they never cover opponent seats, cards or the hand dock.
+        // Status banner
         els.statusDot.style.background = hex;
-        const hasEvent = !!activeToast;
-        els.statusPill.classList.toggle('event', hasEvent);
-        if (hasEvent) {
-          els.statusText.textContent = activeToast;
-        } else if (state.gameOver) {
+        if (state.gameOver) {
           els.statusText.textContent = dict.gameOverWin;
         } else if (state.currentTurn === 0) {
           if (state.drawnPlayableCardId !== null) {
@@ -2925,6 +3079,8 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         renderOpponents();
         renderCenter();
         renderPlayerHand();
+        renderEventLog();
+        fitGameLog();
       }
 
       /* ======================== MODAL HELPERS ======================== */
@@ -3306,7 +3462,9 @@ function unoNetSnapshot(version) {
     drawnPlayableCardId: state.drawnPlayableCardId,
     gameOver: state.gameOver,
     allowStacking: state.allowStacking,
-    winner: winner
+    winner: winner,
+    events: state.events,
+    eventSeq: state.eventSeq
   }));
 }
 function unoNetBroadcastState() {
@@ -3358,6 +3516,12 @@ function unoNetApply(snapshot) {
   state.gameOver = snapshot.gameOver;
   state.awaitingWildColor = false;
   state.pendingWildCardId = null;
+  if (Array.isArray(snapshot.events)) {
+    state.events = snapshot.events.slice(-40);
+    state.eventSeq = Number.isFinite(snapshot.eventSeq)
+      ? snapshot.eventSeq
+      : state.events.reduce((max, ev) => Math.max(max, Number(ev.id) || 0), 0);
+  }
 
   let maxCardId = state.cardIdSeq;
   state.players.forEach((p) => p.hand.forEach((c) => { if (c.id >= maxCardId) maxCardId = c.id + 1; }));
@@ -3422,20 +3586,20 @@ function unoNetMarkGone(id) {
     if (!bot || bot.connected) return;
     bot.auto = true;
     bot.isHuman = false;
-    renderAll();
-    unoNetBroadcastState();
     showToast(unoNetText(
       `${bot.name} 已进入托管，由系统代打`,
       `${bot.name} is now auto-playing`
     ));
+    renderAll();
+    unoNetBroadcastState();
     if (state.currentTurn === state.players.indexOf(bot)) maybeTriggerAiTurn();
   }, delay);
-  renderAll();
-  unoNetBroadcastState();
   showToast(unoNetText(
     `${p.name} 已离开，${Math.round(delay / 1000)} 秒后自动托管`,
     `${p.name} left — auto-play in ${Math.round(delay / 1000)}s`
   ));
+  renderAll();
+  unoNetBroadcastState();
 }
 function unoNetSendDeny(targetId, reason) {
   if (!UNO_NET.isHost || !UNO_NET.channel) return;
@@ -3493,11 +3657,11 @@ async function unoNetConnect(code, host) {
         if (!UNO_NET.lobby.some((x) => x.id === key)) {
           UNO_NET.lobby.push({ id: key, name: p.name });
         }
+        showToast(unoNetText(`${p.name} 已重新连接`, `${p.name} reconnected`));
         renderAll();
         unoNetBroadcastState();
         unoNetBroadcastLobby();
         unoNetRenderLobby();
-        showToast(unoNetText(`${p.name} 已重新连接`, `${p.name} reconnected`));
         return;
       }
       unoNetRebuildLobby();
