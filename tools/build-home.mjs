@@ -858,8 +858,13 @@ must('  .nav-cta{flex:0 0 auto}',
   .nav-github:hover{background:rgba(255,255,255,.18);border-color:#fff}
   .nav-github svg{width:18px;height:18px;fill:currentColor;flex:0 0 auto}
   @media (max-width:560px){
-    .nav-github{padding:7px 9px}
+    .nav-github{padding:7px 9px;margin-left:auto}
     .nav-github span{display:none}
+    .topnav-inner{padding:8px 12px;gap:8px}
+  }
+  @media (max-width:340px){
+    .brand small{display:none}
+    .nav-cta{padding:7px 9px;font-size:13px}
   }`);
 
 /* PWA：manifest、主题色、iOS 图标、安全区域与 Service Worker 注册 */

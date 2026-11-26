@@ -286,6 +286,29 @@ try {
     return r.sw <= r.cw + 2 ? true : 'overflow ' + JSON.stringify(r);
   });
 
+  await t('home.mobile_nav_right', async () => {
+    for (const [w, h] of [[390, 844], [360, 640], [320, 568]]) {
+      await b.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: true });
+      await sleep(250);
+      const r = await b.evaluate(`(() => {
+        const q = (sel) => { const el=document.querySelector(sel); const x=el.getBoundingClientRect(); return {left:x.left,right:x.right,width:x.width}; };
+        return {
+          view: innerWidth,
+          brand: q('.brand'),
+          github: q('.nav-github'),
+          cta: q('.nav-cta'),
+          navDisplay: getComputedStyle(document.querySelector('.navlinks')).display
+        };
+      })()`);
+      if (r.navDisplay !== 'none') throw new Error('desktop nav visible at ' + w);
+      if (r.brand.left > 20) throw new Error('brand not left aligned at ' + w);
+      if (r.cta.right > w - 8 || r.cta.right < w - 24) throw new Error('CTA not right aligned at ' + w + ': ' + JSON.stringify(r.cta));
+      if (r.github.left - r.brand.right < 20) throw new Error('GitHub too close to brand at ' + w + ': ' + (r.github.left - r.brand.right));
+      if (r.github.right > r.cta.left + 0.75) throw new Error('GitHub/CTA order broken at ' + w);
+    }
+    return { pass: true, detail: '390/360/320 right aligned' };
+  });
+
   const fail = R.filter(r => !r.pass);
   console.log(`HOME TOTAL ${R.length} PASS ${R.length - fail.length} FAIL ${fail.length}`);
   R.forEach(r => console.log((r.pass ? 'PASS ' : 'FAIL ') + r.id + (r.detail ? ' :: ' + r.detail : '')));

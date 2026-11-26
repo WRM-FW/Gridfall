@@ -17,7 +17,7 @@ node online-spectators.mjs # 黑白棋社观战席、乐观落子、关于模块
 node identity.mjs          # 三款联机游戏的玩家A-D身份标识静态检查，5 项
 node naming.mjs            # 网站/应用名称与页脚结构静态检查，4 项
 node identity-live.mjs     # 线上 UNO 三人房大厅/席位/状态身份，3 项（APP_URL 可覆盖）
-node home-test.mjs         # 首页、顶栏、封面、页脚与深链接，16 项
+node home-test.mjs         # 首页、顶栏、封面、页脚、深链接与手机导航右侧对齐，17 项
 node live-home.mjs         # 线上首页、封面与「可联机」筛选，8 项
 node live-online.mjs       # 线上整局，4 项
 node route-test.mjs        # /board-club 路由、刷新、查询、尾斜杠、前进后退、旧入口，9 项
@@ -29,9 +29,9 @@ node uno-online.mjs        # UNO 3 人房 + 4 人房联机、动作同步、再�
 node safe-area.mjs         # iOS 独立应用安全区域（全页面/横竖屏/iPad/刘海模拟），47 项
 node pwa.mjs               # PWA manifest/图标/Service Worker/安装性/离线外壳，7 项
 node pwa-live.mjs          # 线上 PWA 安装性、游戏页注册与离线，5 项（APP_URL 可覆盖）
-node uno-rules.mjs         # UNO 出牌判定、回合顺序、叠加、UNO/抓 UNO、掉线托管与重连、4 人顺序、初始牌、玩家A-D，22 项
+node uno-rules.mjs         # UNO 出牌判定、回合顺序、叠加、UNO/抓 UNO、掉线托管与重连、4 人顺序、初始牌、玩家A-D、事件日志联机同步，23 项
 node uno-hand.mjs          # UNO 手牌不透明度、可出牌上浮、他人回合紧凑、回合过渡与 360/390/720/844 横竖屏布局，9 项
-node uno-ui.mjs            # UNO「保留并过牌」文字居中、出牌提示使用状态条且不遮挡玩家/手牌，5 项
+node uno-ui.mjs            # UNO「保留并过牌」文字居中、对局消息面板、事件即时显示与不遮挡玩家/手牌，6 项
 node hall-buttons.mjs      # 12 个游戏返回首页按钮（桌面 + 390px），24 项
 node go-bench.mjs --size=9 --low=4 --high=5 --games=20  # 围棋相邻档对抗
 node go-smoke.mjs          # 19 路五档 30 手冒烟与耗时
