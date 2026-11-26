@@ -30,7 +30,7 @@ node safe-area.mjs         # iOS 独立应用安全区域（全页面/横竖屏/
 node pwa.mjs               # PWA manifest/图标/Service Worker/安装性/离线外壳，7 项
 node pwa-live.mjs          # 线上 PWA 安装性、游戏页注册与离线，5 项（APP_URL 可覆盖）
 node uno-rules.mjs         # UNO 出牌判定、回合顺序、叠加、UNO/抓 UNO、掉线托管与重连、4 人顺序、初始牌、玩家A-D，22 项
-node uno-hand.mjs          # UNO 手牌不透明度、可出牌上浮、他人回合紧凑、回合过渡与 360/390/720/1280 布局，8 项
+node uno-hand.mjs          # UNO 手牌不透明度、可出牌上浮、他人回合紧凑、回合过渡与 360/390/720/844 横竖屏布局，9 项
 node hall-buttons.mjs      # 12 个游戏返回首页按钮（桌面 + 390px），24 项
 node go-bench.mjs --size=9 --low=4 --high=5 --games=20  # 围棋相邻档对抗
 node go-smoke.mjs          # 19 路五档 30 手冒烟与耗时

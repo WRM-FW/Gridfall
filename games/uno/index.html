@@ -1256,6 +1256,51 @@
         max-width: 116px;
       }
     }
+
+    /* Short landscape: keep the table, status and hand in one viewport. */
+    @media (max-height: 560px) and (orientation: landscape) {
+      .topbar { height: 42px; padding: 0 10px; }
+      .brand { gap: 6px; }
+      .brand-mark { width: 26px; height: 26px; font-size: 9px; }
+      .mode-btn { padding: 3px 7px; font-size: 10.5px; }
+      .topbar-actions { gap: 4px; }
+      .topbar-actions .icon-btn { height: 28px; padding: 0 6px; font-size: 10.5px; }
+      .arena { padding: 5px 8px 3px; }
+      .arena-middle { grid-template-columns: minmax(80px, 110px) 1fr minmax(80px, 110px); }
+      .opponents-top { min-height: 36px; gap: 10px; }
+      .seat-badge { min-width: 96px; max-width: 128px; padding: 4px 7px; gap: 3px; }
+      .seat-avatar { width: 18px; height: 18px; font-size: 9px; }
+      .seat-name { font-size: 10.5px; }
+      .seat-count { font-size: 10px; padding: 1px 5px; }
+      .seat-mini-hand { display: none; }
+      .center-stage { min-height: 0; gap: 4px; }
+      .direction-ring { padding: 7px 14px; gap: 14px; }
+      .dir-indicator { top: -9px; padding: 2px 7px; font-size: 9px; }
+      .uno-card, .draw-pile-btn, .discard-slot { width: 58px; height: 84px; }
+      .uno-card { padding: 3px; border-radius: 9px; }
+      .uno-card-inner { border-radius: 6px; }
+      .uno-card-oval { border-width: 2px; }
+      .card-center { font-size: 22px; }
+      .card-corner { font-size: 9px; }
+      .wild-quad { width: 26px; height: 26px; }
+      .wild-mini-tag { width: 10px; height: 10px; bottom: 4px; }
+      .pile-label { font-size: 9px; }
+      .status-banner { min-height: 20px; }
+      .status-pill { padding: 3px 8px; font-size: 10px; gap: 4px; }
+      .status-dot { width: 6px; height: 6px; }
+      .player-dock { gap: 3px; padding-bottom: 3px; }
+      .player-meta { gap: 5px; }
+      .turn-chip { padding: 2px 7px; font-size: 10px; }
+      .action-btn { height: 26px; padding: 0 9px; font-size: 10px; }
+      .hand-scroll { height: 108px; padding: 8px 10px 5px; }
+      .hand-row { min-height: 88px; padding: 0 6px; }
+      .hand-card-btn.playable { transform: translateY(-4px); }
+      .hand-card-btn.playable:hover,
+      .hand-card-btn.playable:focus-visible { transform: translateY(-8px); }
+      .hand-card-btn.drawn-focus { transform: translateY(-5px); }
+      .hand-card-btn.drawn-focus.playable:hover,
+      .hand-card-btn.drawn-focus.playable:focus-visible { transform: translateY(-8px); }
+    }
   </style>
 <style>
   .hall-btn{text-decoration:none;}
@@ -2757,7 +2802,8 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
 
         const count = human.hand.length;
         const small = window.innerWidth <= 720;
-        const cardWidth = small ? 72 : 88;
+        const firstCard = els.playerHand.querySelector('.hand-card-btn .uno-card');
+        const cardWidth = firstCard ? Math.round(firstCard.getBoundingClientRect().width) : (small ? 72 : 88);
         const ownMaxStep = cardWidth + (small ? 4 : 6);
         const ownMinStep = small ? 40 : 50;
         const otherMaxStep = small ? 38 : 46;

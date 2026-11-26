@@ -80,8 +80,10 @@ async function info() {
     const scroll = document.getElementById('hand-scroll');
     const row = document.getElementById('player-hand');
     const dock = document.querySelector('.player-dock');
+    const center = document.querySelector('.center-stage');
     const sr = scroll.getBoundingClientRect();
     const rr = row.getBoundingClientRect();
+    const cr = center.getBoundingClientRect();
     const cards = [...row.querySelectorAll('.hand-card-btn')].map((node) => {
       const r = node.getBoundingClientRect();
       const cardStyle = getComputedStyle(node.querySelector('.uno-card'));
@@ -123,6 +125,8 @@ async function info() {
       },
       dockTop: +dock.getBoundingClientRect().top.toFixed(2),
       dockBottom: +dock.getBoundingClientRect().bottom.toFixed(2),
+      center: { top: +cr.top.toFixed(2), bottom: +cr.bottom.toFixed(2) },
+      hand: { top: +sr.top.toFixed(2), bottom: +sr.bottom.toFixed(2) },
       cards
     };
   })()`);
@@ -285,6 +289,26 @@ await t('uno.hand.small-screen', async () => {
   assert(own.dockBottom <= own.viewport.h + 0.75, 'small-screen hand dock overflows');
   assert(other.dockBottom <= other.viewport.h + 0.75, 'small-screen hand dock overflows');
   return { pass: true, detail: '360px step ' + own.step + '/' + other.step };
+});
+
+await t('uno.hand.landscape', async () => {
+  for (const [w, h] of [[844, 390], [667, 375], [640, 360]]) {
+    await viewport(w, h, true);
+    await setHand(7, 0);
+    const own = await info();
+    await setHand(7, 1);
+    const other = await info();
+    assertOpaque(own);
+    assertOpaque(other);
+    assertInViewportStart(own);
+    assertInViewportStart(other);
+    assert(own.cards.length === 7 && other.cards.length === 7, 'landscape hand lost cards at ' + w + 'x' + h);
+    assert(own.step > other.step, 'landscape compact hand should be tighter at ' + w + 'x' + h);
+    assert(own.dockBottom <= h + 0.75 && other.dockBottom <= h + 0.75, 'landscape hand dock overflows at ' + w + 'x' + h);
+    assert(own.center.bottom <= own.hand.top + 0.75, 'center overlaps hand at ' + w + 'x' + h);
+    assert(other.center.bottom <= other.hand.top + 0.75, 'center overlaps hand at ' + w + 'x' + h);
+  }
+  return { pass: true, detail: '844x390, 667x375, 640x360' };
 });
 
 const fail = R.filter((r) => !r.pass);
