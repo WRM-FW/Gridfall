@@ -1,28 +1,26 @@
 # 共建 Gridfall
 
-大厅的「下一款游戏，由你点单」是长期入口：欢迎开发者自己实现一款单文件小游戏（也可以借助 AI 工具辅助），按下面的流程提交 Pull Request（PR）。
+欢迎提交单文件小游戏、规则修复或体验优化。
 
-## 联系
+## 联系与参考
 
 - 邮箱：3391792088@qq.com
-- 仓库：https://github.com/WRM-FW/Gridfall
-- 已有开发与构建说明：`docs/development.md`
+- 开发说明：`docs/development.md`
+- 测试清单：`tests/README.md`
 
-## 约定
+> `tools/` 迭代较快，源文件与构建入口请以 `tools/` 目录实际内容为准。
 
-- 单文件 HTML，优先零依赖、离线可玩；需要网络的功能要说明。
-- 页面加一个固定的「← 首页」入口，链接到 `../../index.html`（游戏页位于 `games/<slug>/`）。
-- 路径使用小写英文 + 连字符，例如跳棋 `/chinese-checkers`、军棋 `/army-chess`；2048 保留 `/2048`。游戏页放在 `games/<slug>/index.html`，不要放在仓库根目录。
-- 在 `index.html` 的游戏网格加一张上线卡，链接写对应路由；`_redirects` 加 200 代理与尾斜杠 301，`404.html` 加 GitHub Pages 回退映射。
-- 改动尽量小，不推翻现有单文件结构与视觉语言；新增游戏请附本地测试或截图证据。
+## 基本约定
+
+1. **单文件、零运行时依赖**：游戏放在 `games/<slug>/index.html`，目录名使用小写英文与连字符（如 `chinese-checkers`，`2048` 保持数字），勿放在仓库根目录。优先离线可玩，涉及联网功能需在 PR 中说明。
+2. **返回入口**：游戏页保留固定的「← 首页」入口，链接到 `../../index.html`。
+3. **构建与路由同步**：修改 `tools/` 后需运行对应 `node tools/build-*.mjs` 并提交生成的 HTML（不提交 `dist/`）。新增游戏需同步更新首页卡片、`_redirects` 和 `404.html`。
+4. **凭证规范**：客户端只保留公开的 Supabase `publishable/anon` key（`shared/supabase-config.js`），严禁提交 `.env*`、`.secrets/` 或私密密钥。
+5. **移动端边界**：以常规手机浏览器正常显示为准。
 
 ## PR 流程
 
-1. Fork `WRM-FW/Gridfall`，在分支里完成游戏页、首页卡片、路由和说明。
-2. 本地打开 `index.html` 与游戏页自测；有条件时跑 `tests/` 下相关测试。
-3. 提交 PR，写清游戏名、路由、玩法、测试方式和截图。
-4. 审核通过后合并到 `main`，Cloudflare Pages 与 GitHub Pages 会更新。
-
-## 自己开发或借助 AI 辅助
-
-可以完全自己写，也可以让 AI 工具读取本仓库的 `docs/development.md`、`tools/`、`tests/`，按既有模式生成单文件游戏、首页卡片和路由。无论用哪种方式，提交前都请自己检查规则、版权与视觉一致性；遇到问题先邮件沟通。
+1. Fork 本仓库并新建分支完成改动。
+2. 在本地 HTTP 服务（如 `python -m http.server 8080`）下自测，按需运行 `tests/` 下相关用例。
+3. 提交 PR，注明游戏名称、路由、玩法说明及自测截图或结果。
+4. 合并到 `main` 后，Cloudflare Pages 与 GitHub Pages 会自动更新。
