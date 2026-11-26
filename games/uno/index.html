@@ -593,6 +593,7 @@
       border: 1px solid var(--border-subtle);
       border-radius: 999px;
       padding: 6px 14px;
+      min-height: 31px;
       font-size: 13px;
       font-weight: 600;
       color: var(--text-primary);
@@ -600,6 +601,20 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      max-width: calc(100vw - 24px);
+      transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .status-pill.event {
+      background: var(--text-primary);
+      color: var(--bg-surface);
+      border-color: transparent;
+      box-shadow: var(--shadow-md);
+    }
+
+    .status-pill.event #status-text {
+      font-size: 12px;
+      white-space: nowrap;
     }
 
     .status-dot {
@@ -607,6 +622,7 @@
       height: 8px;
       border-radius: 50%;
       background: var(--uno-blue);
+      flex-shrink: 0;
     }
 
     /* UNO Card Component */
@@ -793,6 +809,9 @@
     }
 
     .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       height: 34px;
       padding: 0 14px;
       border-radius: 999px;
@@ -802,6 +821,8 @@
       font-family: inherit;
       font-size: 12.5px;
       font-weight: 700;
+      line-height: 1;
+      white-space: nowrap;
       cursor: pointer;
       box-shadow: var(--shadow-sm);
       transition: transform 0.12s ease, background 0.15s ease, opacity 0.15s ease;
@@ -1184,31 +1205,6 @@
       transform: translateX(18px);
     }
 
-    /* Toast */
-    .toast-stack {
-      position: fixed;
-      top: 66px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 90;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      pointer-events: none;
-    }
-
-    .toast-item {
-      background: var(--text-primary);
-      color: var(--bg-surface);
-      font-size: 12.5px;
-      font-weight: 600;
-      padding: 7px 14px;
-      border-radius: 999px;
-      box-shadow: var(--shadow-md);
-      animation: popIn 0.18s ease;
-    }
-
     /* Responsive adjustments */
     @media (max-width: 720px) {
       .topbar { padding: 0 10px; gap: 6px; }
@@ -1225,6 +1221,7 @@
       }
       .seat-avatar { width: 20px; height: 20px; font-size: 10px; }
       .seat-name { font-size: 11px; }
+      .status-pill.event #status-text { font-size: 11.5px; }
       .direction-ring { gap: 16px; padding: 18px 20px; }
       .uno-card, .draw-pile-btn, .discard-slot { width: 72px; height: 106px; }
       .card-center { font-size: 27px; }
@@ -1286,7 +1283,8 @@
       .wild-mini-tag { width: 10px; height: 10px; bottom: 4px; }
       .pile-label { font-size: 9px; }
       .status-banner { min-height: 20px; }
-      .status-pill { padding: 3px 8px; font-size: 10px; gap: 4px; }
+      .status-pill { padding: 3px 8px; min-height: 22px; font-size: 10px; gap: 4px; }
+      .status-pill.event #status-text { font-size: 10px; }
       .status-dot { width: 6px; height: 6px; }
       .player-dock { gap: 3px; padding-bottom: 3px; }
       .player-meta { gap: 5px; }
@@ -1462,9 +1460,6 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         </div>
       </section>
     </main>
-
-    <!-- Toast Container -->
-    <div class="toast-stack" id="toast-stack"></div>
 
     <!-- Wild Color Picker Modal -->
     <div class="modal-backdrop" id="wild-modal">
@@ -1851,6 +1846,7 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         discardLabel: document.getElementById('discard-label'),
         pendingStackBadge: document.getElementById('pending-stack-badge'),
         statusDot: document.getElementById('status-dot'),
+        statusPill: document.getElementById('status-pill'),
         statusText: document.getElementById('status-text'),
 
         playerTurnChip: document.getElementById('player-turn-chip'),
@@ -1860,7 +1856,6 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         handScroll: document.getElementById('hand-scroll'),
         playerHand: document.getElementById('player-hand'),
 
-        toastStack: document.getElementById('toast-stack'),
         wildModal: document.getElementById('wild-modal'),
         uiWildTitle: document.getElementById('ui-wild-title'),
         uiWildSub: document.getElementById('ui-wild-sub'),
@@ -1913,17 +1908,43 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         return id;
       }
 
+      let toastQueue = [];
+      let toastTimer = null;
+      let activeToast = '';
+
       function showToast(msg) {
-        const div = document.createElement('div');
-        div.className = 'toast-item';
-        div.textContent = msg;
-        els.toastStack.appendChild(div);
-        if (els.toastStack.children.length > 3) {
-          els.toastStack.removeChild(els.toastStack.firstChild);
+        if (!msg) return;
+        toastQueue.push(msg);
+        if (toastQueue.length > 4) toastQueue.shift();
+        if (!activeToast) showNextToast();
+      }
+
+      function showNextToast() {
+        if (toastTimer) {
+          clearTimeout(toastTimer);
+          toastTimer = null;
         }
-        setTimeout(() => {
-          if (div.parentNode) div.parentNode.removeChild(div);
-        }, 2300);
+        activeToast = toastQueue.shift() || '';
+        if (!activeToast) {
+          renderCenter();
+          return;
+        }
+        renderCenter();
+        toastTimer = setTimeout(() => {
+          activeToast = '';
+          toastTimer = null;
+          if (toastQueue.length) showNextToast();
+          else renderCenter();
+        }, 1900);
+      }
+
+      function resetToasts() {
+        toastQueue = [];
+        activeToast = '';
+        if (toastTimer) {
+          clearTimeout(toastTimer);
+          toastTimer = null;
+        }
       }
 
       function shuffle(arr) {
@@ -2175,6 +2196,7 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
 
       function startGame(playerCount = state.playerCount) {
         if (isOnlineMode()) return;
+        resetToasts();
         const aiNames = playerCount === 3 ? t().aiNames3 : t().aiNames4;
         const players = [
           { id: 0, name: t().you, isHuman: true, hand: [], saidUno: false, vulnerableUno: false }
@@ -2714,9 +2736,14 @@ html.ios-standalone .modal{padding-top:calc(28px + var(--safe-top));}
         const hasPlayable = state.players[0].hand.some((c) => canPlayCard(c));
         els.drawPileBtn.classList.toggle('highlight-draw', canDraw && !hasPlayable);
 
-        // Status banner
+        // Status banner: event messages temporarily use the same pill, so
+        // they never cover opponent seats, cards or the hand dock.
         els.statusDot.style.background = hex;
-        if (state.gameOver) {
+        const hasEvent = !!activeToast;
+        els.statusPill.classList.toggle('event', hasEvent);
+        if (hasEvent) {
+          els.statusText.textContent = activeToast;
+        } else if (state.gameOver) {
           els.statusText.textContent = dict.gameOverWin;
         } else if (state.currentTurn === 0) {
           if (state.drawnPlayableCardId !== null) {
