@@ -749,6 +749,8 @@
       gap: 6px;
       z-index: 20;
       padding-bottom: 10px;
+      width: 100%;
+      min-width: 0;
     }
 
     .player-controls {
@@ -838,61 +840,93 @@
     .hand-scroll {
       width: 100%;
       max-width: 920px;
+      min-width: 0;
+      height: 194px;
       overflow-x: auto;
-      overflow-y: visible;
-      padding: 16px 24px 12px;
+      overflow-y: hidden;
+      padding: 24px 24px 14px;
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       scrollbar-width: thin;
+      scrollbar-color: rgba(120, 120, 120, 0.35) transparent;
+      overscroll-behavior-x: contain;
+    }
+
+    .hand-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .hand-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .hand-scroll::-webkit-scrollbar-thumb {
+      background: rgba(120, 120, 120, 0.35);
+      border-radius: 999px;
     }
 
     .hand-row {
       display: inline-flex;
+      flex: 0 0 auto;
       align-items: flex-end;
-      min-height: 132px;
+      min-height: 142px;
       padding: 0 10px;
+      margin: 0 auto;
+      isolation: isolate;
     }
 
     .hand-card-btn {
       border: none;
       background: transparent;
       padding: 0;
-      cursor: pointer;
+      cursor: default;
       position: relative;
-      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), margin 0.18s ease, z-index 0.01s;
+      flex: 0 0 auto;
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), margin-left 0.26s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
       outline: none;
+      will-change: transform, margin-left;
+    }
+
+    .hand-row.is-initializing .hand-card-btn {
+      transition: none;
+    }
+
+    .hand-card-btn.playable {
+      cursor: pointer;
+      transform: translateY(-10px);
+    }
+
+    .hand-card-btn.playable .uno-card {
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95), 0 12px 24px rgba(0, 0, 0, 0.28), var(--shadow-card);
     }
 
     .hand-card-btn.playable:hover,
     .hand-card-btn.playable:focus-visible {
-      transform: translateY(-20px) scale(1.05);
-      z-index: 40 !important;
+      transform: translateY(-18px);
+      z-index: 80 !important;
     }
 
-    .hand-card-btn.playable .uno-card {
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2), 0 0 0 2px rgba(255, 255, 255, 0.85);
-    }
-
-    .hand-card-btn.playable:hover .uno-card {
-      box-shadow: var(--shadow-card-hover);
+    .hand-card-btn.playable:hover .uno-card,
+    .hand-card-btn.playable:focus-visible .uno-card {
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.98), var(--shadow-card-hover);
     }
 
     .hand-card-btn.unplayable {
-      cursor: not-allowed;
-    }
-
-    .hand-card-btn.unplayable .uno-card {
-      opacity: 0.56;
-      filter: saturate(0.65);
+      cursor: default;
     }
 
     .hand-card-btn.drawn-focus {
-      transform: translateY(-16px);
-      z-index: 35 !important;
+      transform: translateY(-12px);
+      z-index: 70 !important;
     }
 
     .hand-card-btn.drawn-focus .uno-card {
       box-shadow: 0 0 0 3px var(--uno-blue), var(--shadow-card-hover);
+    }
+
+    .hand-card-btn.drawn-focus.playable:hover,
+    .hand-card-btn.drawn-focus.playable:focus-visible {
+      transform: translateY(-18px);
     }
 
     /* Modals */
@@ -1194,8 +1228,14 @@
       .uno-card, .draw-pile-btn, .discard-slot { width: 72px; height: 106px; }
       .card-center { font-size: 27px; }
       .card-corner { font-size: 11px; }
-      .hand-row { min-height: 112px; }
-      .hand-scroll { padding: 18px 14px 6px; }
+      .hand-row { min-height: 122px; padding: 0 6px; }
+      .hand-scroll { height: 164px; padding: 20px 8px 8px; }
+      .hand-card-btn.playable { transform: translateY(-6px); }
+      .hand-card-btn.playable:hover,
+      .hand-card-btn.playable:focus-visible { transform: translateY(-11px); }
+      .hand-card-btn.drawn-focus { transform: translateY(-8px); }
+      .hand-card-btn.drawn-focus.playable:hover,
+      .hand-card-btn.drawn-focus.playable:focus-visible { transform: translateY(-11px); }
     }
 
     @media (max-width: 480px) {
@@ -1688,6 +1728,7 @@
         playerCardCount: document.getElementById('player-card-count'),
         btnPass: document.getElementById('btn-pass'),
         btnUno: document.getElementById('btn-uno'),
+        handScroll: document.getElementById('hand-scroll'),
         playerHand: document.getElementById('player-hand'),
 
         toastStack: document.getElementById('toast-stack'),
@@ -2568,6 +2609,44 @@
         }
       }
 
+      let handSignature = null;
+      let handInitialized = false;
+
+      function buildHandCard(card) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'hand-card-btn';
+        btn.dataset.cardId = String(card.id);
+        btn.innerHTML = renderCardHtml(card, false);
+        return btn;
+      }
+
+      function syncHandCards(hand) {
+        const signature = hand.map((card) => card.id).join('|');
+        if (signature === handSignature) return;
+
+        const existing = new Map(
+          Array.from(els.playerHand.querySelectorAll('.hand-card-btn')).map((node) => [node.dataset.cardId, node])
+        );
+        hand.forEach((card) => {
+          const key = String(card.id);
+          let node = existing.get(key);
+          if (node) existing.delete(key);
+          else node = buildHandCard(card);
+          els.playerHand.appendChild(node);
+        });
+        existing.forEach((node) => node.remove());
+        handSignature = signature;
+
+        if (!handInitialized) {
+          handInitialized = true;
+          els.playerHand.classList.add('is-initializing');
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => els.playerHand.classList.remove('is-initializing'));
+          });
+        }
+      }
+
       function renderPlayerHand() {
         const dict = t();
         const human = state.players[0];
@@ -2589,33 +2668,58 @@
         els.btnUno.classList.toggle('armed', human.saidUno && human.hand.length <= 2);
         els.btnUno.textContent = human.saidUno && human.hand.length <= 2 ? dict.unoArmed : dict.shoutUno;
 
-        // Dynamic overlap based on hand size
+        // Keep the same card nodes between renders so turn changes can animate.
+        syncHandCards(human.hand);
+
         const count = human.hand.length;
-        const isSmall = window.innerWidth <= 720;
-        let overlap = isSmall ? -16 : -14;
-        if (count > 10) overlap = isSmall ? -26 : -26;
-        if (count > 14) overlap = isSmall ? -34 : -36;
+        const small = window.innerWidth <= 720;
+        const cardWidth = small ? 72 : 88;
+        const ownMaxStep = cardWidth + (small ? 4 : 6);
+        const ownMinStep = small ? 40 : 50;
+        const otherMaxStep = small ? 38 : 46;
+        const otherMinStep = small ? 28 : 36;
 
-        els.playerHand.innerHTML = human.hand.map((card, i) => {
-          const playableBase = isMyTurn && canPlayCard(card);
-          const playable = state.drawnPlayableCardId !== null
-            ? (card.id === state.drawnPlayableCardId)
-            : playableBase;
-          const cls = playable ? 'playable' : (isMyTurn ? 'unplayable' : '');
-          const focusCls = card.id === state.drawnPlayableCardId ? 'drawn-focus' : '';
-          const marginStyle = i === 0 ? '' : `margin-left:${overlap}px;`;
+        const scrollStyle = getComputedStyle(els.handScroll);
+        const rowStyle = getComputedStyle(els.playerHand);
+        const available = Math.max(
+          cardWidth,
+          els.handScroll.clientWidth
+            - parseFloat(scrollStyle.paddingLeft)
+            - parseFloat(scrollStyle.paddingRight)
+            - parseFloat(rowStyle.paddingLeft)
+            - parseFloat(rowStyle.paddingRight)
+        );
 
-          return `
-            <button
-              class="hand-card-btn ${cls} ${focusCls}"
-              data-card-id="${card.id}"
-              style="${marginStyle}z-index:${i + 1};"
-              ${playable ? '' : 'aria-disabled="true"'}
-            >
-              ${renderCardHtml(card, false)}
-            </button>
-          `;
-        }).join('');
+        let step;
+        if (count <= 1) {
+          step = isMyTurn ? ownMaxStep : otherMaxStep;
+        } else {
+          const fitStep = (available - cardWidth) / (count - 1);
+          step = isMyTurn
+            ? Math.min(ownMaxStep, Math.max(ownMinStep, fitStep))
+            : Math.min(otherMaxStep, Math.max(otherMinStep, fitStep));
+        }
+        step = Math.max(1, Math.floor(step));
+        const overlap = step - cardWidth;
+
+        els.playerHand.dataset.turn = isMyTurn ? 'own' : 'other';
+        els.playerHand.dataset.step = String(step);
+        els.playerHand.dataset.count = String(count);
+
+        Array.from(els.playerHand.children).forEach((btn, i) => {
+          const card = human.hand[i];
+          if (!card) return;
+          const playable = isMyTurn && (state.drawnPlayableCardId !== null
+            ? card.id === state.drawnPlayableCardId
+            : canPlayCard(card));
+          const focusCls = isMyTurn && card.id === state.drawnPlayableCardId ? 'drawn-focus' : '';
+          const stateCls = playable ? 'playable' : (isMyTurn ? 'unplayable' : '');
+          btn.className = ('hand-card-btn ' + stateCls + ' ' + focusCls).trim();
+          btn.style.marginLeft = i === 0 ? '0px' : overlap + 'px';
+          btn.style.zIndex = String(playable ? 40 + i : i + 1);
+          if (playable) btn.removeAttribute('aria-disabled');
+          else btn.setAttribute('aria-disabled', 'true');
+        });
       }
 
       function renderStaticText() {
