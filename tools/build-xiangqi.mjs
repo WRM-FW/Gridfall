@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import { pwaHead, ensureViewportCover } from './src/pwa-head.mjs';
+import { readTemplate } from './src/read-template.mjs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-let html = fs.readFileSync(path.join(ROOT, 'tools', 'design', 'xiangqi-reference.html'), 'utf8');
-const online = fs.readFileSync(path.join(ROOT, 'tools', 'src', 'xiangqi-online.js'), 'utf8');
+let html = readTemplate(path.join(ROOT, 'tools', 'design', 'xiangqi-reference.html'));
+const online = readTemplate(path.join(ROOT, 'tools', 'src', 'xiangqi-online.js'));
 
 function must(old, neu) {
   if (!html.includes(old)) throw new Error('xiangqi pattern missing: ' + old.slice(0, 80));

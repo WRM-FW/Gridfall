@@ -1,0 +1,3 @@
+# Source and generated text files must keep LF on every checkout.
+# This prevents CRLF worktrees from breaking build-template matching.
+* text=auto eol=lf

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import { pwaHead, ensureViewportCover } from './src/pwa-head.mjs';
+import { readTemplate } from './src/read-template.mjs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -9,7 +10,7 @@ const B = path.join(ROOT, 'tools', 'src');
 // 旧版单页作为引擎提取来源（随仓库提供，避免依赖工作区临时文件）
 const legacyPath = path.join(B, 'legacy.html');
 if (!fs.existsSync(legacyPath)) throw new Error('missing tools/src/legacy.html');
-const old = fs.readFileSync(legacyPath, 'utf8').split(String.fromCharCode(13)).join('');
+const old = readTemplate(legacyPath);
 function between(start, end, from) {
   const i = old.indexOf(start, from || 0);
   if (i < 0) throw new Error('marker missing: ' + start);
@@ -71,13 +72,13 @@ if (!d2.includes(oldKo)) throw new Error('ko block not found');
 d2 = d2.replace(oldKo, newKo);
 
 // ---- CSS ----
-const design = fs.readFileSync(path.join(ROOT, 'tools', 'design', 'board-reference.html'), 'utf8');
+const design = readTemplate(path.join(ROOT, 'tools', 'design', 'board-reference.html'));
 const designCss = design.match(/<style>([\s\S]*?)<\/style>/)[1];
-const extraCss = fs.readFileSync(path.join(B, 'extra.css'), 'utf8');
-const markup = fs.readFileSync(path.join(B, 'markup.html'), 'utf8');
-const visual = fs.readFileSync(path.join(B, 'visual.js'), 'utf8');
-const online = fs.readFileSync(path.join(B, 'online.js'), 'utf8');
-const deeplink = fs.readFileSync(path.join(B, 'deeplink.js'), 'utf8');
+const extraCss = readTemplate(path.join(B, 'extra.css'));
+const markup = readTemplate(path.join(B, 'markup.html'));
+const visual = readTemplate(path.join(B, 'visual.js'));
+const online = readTemplate(path.join(B, 'online.js'));
+const deeplink = readTemplate(path.join(B, 'deeplink.js'));
 
 const common = `
 "use strict";

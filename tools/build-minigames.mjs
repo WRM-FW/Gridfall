@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import { pwaHead, ensureViewportCover } from './src/pwa-head.mjs';
+import { readTemplate } from './src/read-template.mjs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -31,7 +32,7 @@ function hallLink(g, extra) {
 }
 
 for (const g of games) {
-  let html = fs.readFileSync(path.join(ROOT, 'tools', 'design', g.ref), 'utf8');
+  let html = readTemplate(path.join(ROOT, 'tools', 'design', g.ref));
   if (!html.includes('<title>')) throw new Error('no title in ' + g.ref);
   html = html.replace(/<title>[\s\S]*?<\/title>/, '<title>' + g.label + ' · Gridfall</title><link rel="canonical" href="' + g.route + '" />');
   html = html.replace(/GRIDFALL\s*[·|]\s*游戏大厅/g, 'GRIDFALL');

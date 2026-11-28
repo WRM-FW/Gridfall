@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import { pwaHead, ensureViewportCover } from './src/pwa-head.mjs';
+import { readTemplate } from './src/read-template.mjs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SRC = path.join(ROOT, 'tools', 'design', 'home-reference.html');
-let html = fs.readFileSync(SRC, 'utf8');
+let html = readTemplate(SRC);
 
 function must(old, neu) {
   if (!html.includes(old)) throw new Error('homepage pattern missing: ' + old.slice(0, 90));

@@ -8,6 +8,7 @@
 cd tests
 
 node run-engine.mjs        # 规则/引擎（含围棋 AI），36 项
+node build-eol.mjs         # Windows CRLF 模板下 5 个构建脚本的冒烟测试（全部成功且输出为 LF）
 node local-visual.mjs      # 本地界面与视觉，6 项
 node online-core.mjs       # 双浏览器联机核心，7 项
 node online-extra.mjs      # 正式连珠/围棋/重连，5 项

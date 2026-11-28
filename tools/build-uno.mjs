@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import { pwaHead, ensureViewportCover } from './src/pwa-head.mjs';
+import { readTemplate } from './src/read-template.mjs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-let html = fs.readFileSync(path.join(ROOT, 'tools', 'design', 'uno-reference.html'), 'utf8');
-const online = fs.readFileSync(path.join(ROOT, 'tools', 'src', 'uno-online.js'), 'utf8');
+let html = readTemplate(path.join(ROOT, 'tools', 'design', 'uno-reference.html'));
+const online = readTemplate(path.join(ROOT, 'tools', 'src', 'uno-online.js'));
 
 function must(old, neu) {
   if (!html.includes(old)) throw new Error('UNO pattern missing: ' + old.slice(0, 90));
